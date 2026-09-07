@@ -20,7 +20,13 @@ const PORT = process.env.PORT || 5001;
 // Middleware
 app.use(express.json());
 app.use(cors({
-  origin: "http://127.0.0.1:5501"
+  origin: [
+    "http://127.0.0.1:5501",
+    "http://localhost:5501",
+    "https://medichain-1-obe8.onrender.com"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 app.use("/api/drugs", drugRoutes);
 app.use("/api/movements", stockMovementRoutes);
