@@ -1,4 +1,119 @@
+
+const API_BASE_URL = "https://medichain-xizk.onrender.com/api";
+
 const navItems = document.querySelectorAll(".nav-item[data-page]");
+
+// =========================
+// MediChain API
+// =========================
+
+
+const authOverlay = document.getElementById("authOverlay");
+const loginForm = document.getElementById("loginForm");
+const loginEmail = document.getElementById("loginEmail");
+const loginPassword = document.getElementById("loginPassword");
+const loginButton = document.getElementById("loginButton");
+const loginError = document.getElementById("loginError");
+
+function getToken() {
+  return localStorage.getItem("token");
+}
+
+function getStoredUser() {
+  try {
+    return JSON.parse(localStorage.getItem("user") || "null");
+  } catch {
+    return null;
+  }
+}
+
+function showLogin() {
+  authOverlay?.classList.remove("hidden");
+}
+
+function hideLogin() {
+  authOverlay?.classList.add("hidden");
+}
+
+function setLoginError(message) {
+  if (!loginError) return;
+
+  loginError.textContent = message;
+  loginError.classList.toggle("hidden", !message);
+}
+
+async function login(email, password) {
+  const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      email,
+      password
+    })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Login failed");
+  }
+
+  localStorage.setItem("token", data.token);
+  localStorage.setItem("user", JSON.stringify(data.user));
+
+  return data;
+}
+
+loginForm?.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const email = loginEmail?.value.trim();
+  const password = loginPassword?.value;
+
+  if (!email || !password) {
+    setLoginError("Please enter your email and password.");
+    return;
+  }
+
+  setLoginError("");
+
+  if (loginButton) {
+    loginButton.disabled = true;
+    loginButton.textContent = "Signing in...";
+  }
+
+  try {
+    const data = await login(email, password);
+
+    console.log("MediChain login successful:", data.user);
+
+    hideLogin();
+
+    // Reload the page so the authenticated dashboard initializes cleanly.
+    window.location.reload();
+  } catch (error) {
+    console.error("Login error:", error);
+
+    setLoginError(
+      error.message || "Unable to sign in. Please try again."
+    );
+  } finally {
+    if (loginButton) {
+      loginButton.disabled = false;
+      loginButton.textContent = "Sign in";
+    }
+  }
+});
+
+// Require authentication before showing the dashboard.
+if (getToken()) {
+  hideLogin();
+} else {
+  showLogin();
+}
+
 const pages = document.querySelectorAll(".page");
 const breadcrumb = document.getElementById("breadcrumb");
 
@@ -71,6 +186,79 @@ document.querySelectorAll(".settings-nav button").forEach(btn => {
 
 
 // ================= INVENTORY V2 =================
+
+async function loadInventoryFromAPI() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/drugs`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch inventory");
+    }
+
+    const data = await response.json();
+
+    const drugs = data.drugs || data;
+
+const tableBody = document.querySelector("#inventoryTable tbody");
+
+if (!tableBody) {
+    console.error("Inventory table body not found");
+    return;
+}
+
+tableBody.innerHTML = "";
+
+drugs.forEach(drug => {
+    const row = document.createElement("tr");
+
+    row.className = "inventory-row";
+
+    row.innerHTML = `
+        <td>
+            <b>${drug.name}</b>
+        </td>
+
+        <td>${drug.batchNumber}</td>
+
+        <td>
+            <b>${drug.quantity}</b> units
+        </td>
+
+        <td>${drug.location}</td>
+
+        <td>
+            ${new Date(drug.expiryDate).toLocaleDateString("en-US", {
+                month: "short",
+                year: "numeric"
+            })}
+        </td>
+
+        <td>
+            <span class="status ${drug.status === "Available"
+                ? "healthy"
+                : drug.status === "Low Stock"
+                ? "warning"
+                : "critical"}">
+                ${drug.status}
+            </span>
+        </td>
+
+        <td>→</td>
+    `;
+
+    tableBody.appendChild(row);
+});
+
+  } catch (error) {
+    console.error("Inventory API error:", error);
+  }
+}
+
+loadInventoryFromAPI();
 
 const inventoryRows = document.querySelectorAll(".inventory-row");
 
@@ -606,21 +794,84 @@ document
     }
   );
 
+// ==================== ADD INVENTORY ====================
 
-// ================= ADD INVENTORY =================
+const addInventoryModal = document.getElementById("addInventoryModal");
+const addInventoryForm = document.getElementById("addInventoryForm");
 
+function openAddInventoryModal() {
+  addInventoryModal?.classList.remove("hidden");
+}
+
+function closeAddInventoryModal() {
+  addInventoryModal?.classList.add("hidden");
+}
+
+// Open modal from Inventory page
 document
   .getElementById("addInventoryBtn")
-  ?.addEventListener(
-    "click",
-    () => {
+  ?.addEventListener("click", openAddInventoryModal);
 
-      alert(
-        "Add inventory form is ready to connect to the backend."
-      );
+// Close buttons
+document
+  .getElementById("addInventoryClose")
+  ?.addEventListener("click", closeAddInventoryModal);
 
+document
+  .getElementById("addInventoryCancel")
+  ?.addEventListener("click", closeAddInventoryModal);
+
+// Submit inventory to backend
+addInventoryForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const inventoryData = {
+    name: document.getElementById("inventoryName").value.trim(),
+    batchNumber: document.getElementById("inventoryBatch").value.trim(),
+    manufacturer: document
+      .getElementById("inventoryManufacturer")
+      .value.trim(),
+    quantity: Number(document.getElementById("inventoryQuantity").value),
+    reorderLevel: Number(
+      document.getElementById("inventoryReorderLevel").value
+    ),
+    expiryDate: document.getElementById("inventoryExpiry").value,
+    location: document.getElementById("inventoryLocation").value,
+    status: document.getElementById("inventoryStatus").value
+  };
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/drugs`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      },
+      body: JSON.stringify(inventoryData)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to add inventory");
     }
-  );
+
+    console.log("Inventory added:", data);
+
+    alert("Inventory added successfully!");
+
+    addInventoryForm.reset();
+
+    closeAddInventoryModal();
+
+    // Refresh inventory from backend
+    loadInventoryFromAPI();
+
+  } catch (error) {
+    console.error("Add inventory API error:", error);
+    alert(`Failed to add inventory: ${error.message}`);
+  }
+});
 
 
 // ================= SHIPMENT TRACKING =================
@@ -1297,63 +1548,157 @@ createOrderModal?.addEventListener("click", (event) => {
 
 });
 
-confirmCreateOrder?.addEventListener("click", () => {
+async function loadOrders() {
 
-    const medicine = orderMedicine.value;
-    const facility = orderFacility.value;
-    const supplier = orderSupplier.value;
-    const quantity = orderQuantity.value;
-    const priority = orderPriority.value;
+    const token = localStorage.getItem("token");
 
-    if (!quantity || Number(quantity) < 1) {
-
-        alert("Please enter a valid quantity.");
-
+    if (!token) {
+        console.warn("No authentication token found.");
         return;
-
     }
 
-    const newOrderId =
-        `ORD-${Math.floor(10500 + Math.random() * 500)}`;
+    try {
 
-    const today = "Aug 29";
+        const response = await fetch("${API_BASE_URL}/orders", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
 
-    const newRow = document.createElement("tr");
+        const orders = await response.json();
 
-    newRow.className = "order-row";
+        if (!response.ok) {
+            throw new Error(orders.message || "Failed to load orders");
+        }
 
-    newRow.dataset.orderId = newOrderId;
-    newRow.dataset.facility = facility;
-    newRow.dataset.items = quantity;
-    newRow.dataset.supplier = supplier;
-    newRow.dataset.date = today;
-    newRow.dataset.status = "Pending";
+        const tableBody = document.getElementById("ordersTableBody");
 
-    newRow.innerHTML = `
-        <td><b>#${newOrderId}</b></td>
-        <td>${facility}</td>
-        <td>${quantity}</td>
-        <td>${supplier}</td>
-        <td>${today}</td>
-        <td>
-            <span class="status warning">
-                Pending
-            </span>
-        </td>
-    `;
+        if (!tableBody) return;
 
-    document
-        .getElementById("ordersTableBody")
-        .prepend(newRow);
+        tableBody.innerHTML = "";
 
-    newRow.addEventListener("click", () => {
+        orders.forEach(order => {
 
-        openOrderDrawer(newRow);
+            const row = document.createElement("tr");
 
-    });
+            row.className = "order-row";
 
-    closeCreateOrderModal();
+            row.dataset.orderId = order._id;
+            row.dataset.facility = order.facility || "";
+            row.dataset.items = order.quantity || 0;
+            row.dataset.supplier = order.supplier || "";
+            row.dataset.date = order.createdAt
+                ? new Date(order.createdAt).toLocaleDateString()
+                : "";
+            row.dataset.status = order.status || "Pending";
 
-    alert(`Order #${newOrderId} created successfully.`);
+            row.innerHTML = `
+                <td><b>#${order._id}</b></td>
+                <td>${order.facility || "-"}</td>
+                <td>${order.quantity || 0}</td>
+                <td>${order.supplier || "-"}</td>
+                <td>
+                    ${order.createdAt
+                        ? new Date(order.createdAt).toLocaleDateString()
+                        : "-"}
+                </td>
+                <td>
+                    <span class="status ${
+                        order.status === "Delivered"
+                            ? "success"
+                            : order.status === "Cancelled"
+                            ? "danger"
+                            : "warning"
+                    }">
+                        ${order.status || "Pending"}
+                    </span>
+                </td>
+            `;
+
+            row.addEventListener("click", () => {
+                openOrderDrawer(row);
+            });
+
+            tableBody.appendChild(row);
+
+        });
+
+    } catch (error) {
+
+        console.error("Load orders error:", error);
+
+    }
+}
+confirmCreateOrder?.addEventListener("click", async () => {
+
+    const drug = orderMedicine.value;
+    const destination = orderFacility.value;
+    const supplier = orderSupplier.value;
+    const quantity = Number(orderQuantity.value);
+    const priority = orderPriority.value;
+
+    // Validate form
+    if (!drug || !destination || !supplier || !quantity || quantity < 1) {
+        alert("Please fill all fields with a valid quantity.");
+        return;
+    }
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        alert("Please login first.");
+        return;
+    }
+
+    try {
+
+        const response = await fetch("${API_BASE_URL}/orders", {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+
+            body: JSON.stringify({
+                drug: drug,
+                supplier: supplier,
+                destination: destination,
+                quantity: quantity,
+                priority: priority
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                data.message || "Failed to create order"
+            );
+        }
+
+        console.log("Order created:", data);
+
+        closeCreateOrderModal();
+
+        alert("Order created successfully.");
+
+        // Refresh orders from MongoDB
+        await loadOrders();
+
+        // Reset form
+        orderMedicine.value = "";
+        orderFacility.value = "";
+        orderSupplier.value = "";
+        orderQuantity.value = "";
+        orderPriority.value = "Normal";
+
+    } catch (error) {
+
+        console.error("Create order error:", error);
+
+        alert(error.message);
+    }
 
 });

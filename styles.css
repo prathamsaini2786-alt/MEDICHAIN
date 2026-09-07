@@ -299,3 +299,128 @@
   transform: translateY(-2px);
   box-shadow: 0 10px 28px rgba(15, 35, 55, 0.1);
 }
+
+/* =========================
+   Authentication
+========================= */
+
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(8, 13, 22, 0.96);
+  backdrop-filter: blur(12px);
+}
+
+.auth-overlay.hidden {
+  display: none;
+}
+
+.auth-card {
+  width: min(440px, 100%);
+  padding: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  background: #111827;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+}
+
+.auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 34px;
+}
+
+.auth-logo {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #111827;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.auth-brand h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.auth-brand p {
+  margin: 3px 0 0;
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.auth-content h2 {
+  margin: 8px 0;
+  font-size: 30px;
+}
+
+.auth-subtitle {
+  margin: 0 0 26px;
+  opacity: 0.65;
+  line-height: 1.5;
+}
+
+.auth-content label {
+  display: block;
+  margin: 16px 0 7px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.auth-content input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  color: inherit;
+  font: inherit;
+  outline: none;
+}
+
+.auth-content input:focus {
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.auth-content .primary-btn {
+  width: 100%;
+  margin-top: 24px;
+  padding: 13px;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.login-error {
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+  color: #ff7b7b;
+}
+
+.login-error.hidden {
+  display: none;
+}
+
+.auth-footer {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+  font-size: 11px;
+  opacity: 0.45;
+}

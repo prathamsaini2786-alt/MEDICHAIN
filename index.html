@@ -149,7 +149,7 @@
             <select class="filter-select" id="inventoryFacility">
               <option value="all">All facilities</option><option>Delhi Warehouse</option><option>Mohali Store</option><option>Chandigarh DC</option><option>Jaipur Hub</option>
             </select>
-            <select class="filter-select" id="inventoryExpiry">
+            <select class="filter-select" id="inventoryExpiryFilter">
               <option value="all">All expiry</option><option value="soon">Within 30 days</option><option value="normal">Normal</option>
             </select>
           </div>
@@ -765,8 +765,120 @@
       <div class="movement"><span class="movement-dot out"></span><div><b>Order fulfillment</b><small>Aug 29 · -16 units</small></div><strong>-16</strong></div>
     </div>
     <div class="qr-card"><div class="fake-qr" id="drawerQr">▦</div><div><b>Traceable inventory ID</b><small id="drawerQrText">MC-—</small><button class="text-btn" id="generateQrBtn">Generate QR</button></div></div>
-    <div class="drawer-actions"><button class="ghost-btn" id="drawerTransferBtn">↗ Transfer stock</button><button class="primary-btn" id="drawerCloseAction">Done</button></div>
+    <div class="drawer-actions">
+  <button class="ghost-btn" id="drawerTransferBtn">Transfer stock</button>
+  <button class="ghost-btn" id="drawerEditBtn">Edit</button>
+  <button class="ghost-btn" id="drawerDeleteBtn">Delete</button>
+  <button class="primary-btn" id="drawerCloseAction">Done</button>
+</div>
   </aside>
+
+  <!-- ADD INVENTORY MODAL -->
+<div class="modal hidden" id="addInventoryModal">
+  <div class="modal-card">
+    <button class="modal-close" id="addInventoryClose">×</button>
+
+    <div class="eyebrow">INVENTORY</div>
+    <h2>Add Inventory</h2>
+    <p>Add a new medicine batch to the supply network.</p>
+
+    <form id="addInventoryForm">
+
+      <label>
+        Medicine name
+        <input
+          type="text"
+          id="inventoryName"
+          placeholder="e.g. Insulin Glargine"
+          required
+        >
+      </label>
+
+      <label>
+        Batch / SKU
+        <input
+          type="text"
+          id="inventoryBatch"
+          placeholder="e.g. INS-24031"
+          required
+        >
+      </label>
+
+      <label>
+        Manufacturer
+        <input
+          type="text"
+          id="inventoryManufacturer"
+          placeholder="e.g. Novo Nordisk"
+          required
+        >
+      </label>
+
+      <label>
+        Quantity
+        <input
+          type="number"
+          id="inventoryQuantity"
+          min="0"
+          placeholder="e.g. 240"
+          required
+        >
+      </label>
+
+      <label>
+        Reorder level
+        <input
+          type="number"
+          id="inventoryReorderLevel"
+          min="0"
+          value="10"
+          required
+        >
+      </label>
+
+      <label>
+        Expiry date
+        <input
+          type="date"
+          id="inventoryExpiry"
+          required
+        >
+      </label>
+
+      <label>
+        Facility
+        <select id="inventoryLocation" required>
+          <option value="">Select facility</option>
+          <option value="Delhi Warehouse">Delhi Warehouse</option>
+          <option value="Mohali Store">Mohali Store</option>
+          <option value="Chandigarh DC">Chandigarh DC</option>
+          <option value="Jaipur Hub">Jaipur Hub</option>
+        </select>
+      </label>
+
+      <label>
+        Status
+        <select id="inventoryStatus">
+          <option value="Available">Available</option>
+          <option value="Low Stock">Low Stock</option>
+          <option value="Out of Stock">Out of Stock</option>
+          <option value="Expired">Expired</option>
+        </select>
+      </label>
+
+      <div class="modal-actions">
+        <button type="button" class="ghost-btn" id="addInventoryCancel">
+          Cancel
+        </button>
+
+        <button type="submit" class="primary-btn">
+          Add inventory
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
 
   <div class="modal hidden" id="transferModal">
     <div class="modal-card transfer-card">
@@ -880,6 +992,57 @@
 
   </div>
 
+</div>
+
+<!-- Authentication Overlay -->
+<div id="authOverlay" class="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="auth-logo">M</div>
+      <div>
+        <h1>MediChain</h1>
+        <p>Pharmaceutical Supply Chain</p>
+      </div>
+    </div>
+
+    <div class="auth-content">
+      <span class="eyebrow">SECURE ACCESS</span>
+      <h2>Welcome back</h2>
+      <p class="auth-subtitle">
+        Sign in to access your MediChain control center.
+      </p>
+
+      <form id="loginForm">
+        <label for="loginEmail">Email</label>
+        <input
+          type="email"
+          id="loginEmail"
+          placeholder="Enter your email"
+          autocomplete="email"
+          required
+        />
+
+        <label for="loginPassword">Password</label>
+        <input
+          type="password"
+          id="loginPassword"
+          placeholder="Enter your password"
+          autocomplete="current-password"
+          required
+        />
+
+        <button type="submit" class="primary-btn" id="loginButton">
+          Sign in
+        </button>
+
+        <p id="loginError" class="login-error hidden"></p>
+      </form>
+    </div>
+
+    <div class="auth-footer">
+      MediChain • Secure pharmaceutical logistics
+    </div>
+  </div>
 </div>
   
   <script src="app.js"></script>
