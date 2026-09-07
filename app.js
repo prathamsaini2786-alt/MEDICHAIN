@@ -170,97 +170,1156 @@ modal?.addEventListener("click", e => {
   }
 });
 
+// ================= GLOBAL SEARCH =================
+
+const globalSearchModal = document.getElementById("globalSearchModal");
+const globalSearchInput = document.getElementById("globalSearchInput");
+const globalSearchResults = document.getElementById("globalSearchResults");
+const globalSearchClose = document.getElementById("globalSearchClose");
+
+const globalSearchButton = document.querySelector(
+  '.top-actions .icon-btn[title="Search"]'
+);
+
+function getAuthHeaders() {
+  const token = getToken();
+
+  return token
+    ? { Authorization: `Bearer ${token}` }
+    : {};
+}
+
+function openGlobalSearch() {
+  if (!globalSearchModal) return;
+
+  globalSearchModal.classList.remove("hidden");
+
+  setTimeout(() => {
+    globalSearchInput?.focus();
+  }, 50);
+}
+
+function closeGlobalSearch() {
+  globalSearchModal?.classList.add("hidden");
+
+  if (globalSearchInput) {
+    globalSearchInput.value = "";
+  }
+
+  if (globalSearchResults) {
+    globalSearchResults.innerHTML = `
+      <div class="search-empty">
+        Start typing to search MediChain.
+      </div>
+    `;
+  }
+}
+
+globalSearchButton?.addEventListener("click", openGlobalSearch);
+globalSearchClose?.addEventListener("click", closeGlobalSearch);
+
+globalSearchModal?.addEventListener("click", event => {
+  if (event.target === globalSearchModal) {
+    closeGlobalSearch();
+  }
+});
+
+async function performGlobalSearch(query) {
+  const search = query.trim().toLowerCase();
+
+  if (!search) {
+    globalSearchResults.innerHTML = `
+      <div class="search-empty">
+        Start typing to search MediChain.
+      </div>
+    `;
+    return;
+  }
+
+  globalSearchResults.innerHTML = `
+    <div class="search-empty">
+      Searching...
+    </div>
+  `;
+
+  try {
+    const headers = getAuthHeaders();
+
+    const [drugsResponse, ordersResponse, warehousesResponse] =
+      await Promise.all([
+        fetch(`${API_BASE_URL}/drugs`, { headers }),
+        fetch(`${API_BASE_URL}/orders`, { headers }),
+        fetch(`${API_BASE_URL}/warehouses`, { headers })
+      ]);
+
+    if (!drugsResponse.ok) {
+      throw new Error("Unable to search medicines");
+    }
+
+    if (!ordersResponse.ok) {
+      throw new Error("Unable to search orders");
+    }
+
+    if (!warehousesResponse.ok) {
+      throw new Error("Unable to search warehouses");
+    }
+
+    const drugsData = await drugsResponse.json();
+    const ordersData = await ordersResponse.json();
+    const warehousesData = await warehousesResponse.json();
+
+    const drugs = drugsData.drugs || drugsData || [];
+    const orders = ordersData.orders || ordersData || [];
+    const warehouses =
+      warehousesData.warehouses || warehousesData || [];
+
+    const matchingDrugs = drugs.filter(drug => {
+      const text = [
+        drug.name,
+        drug.medicine,
+        drug.category,
+        drug.batchNumber,
+        drug.batch,
+        drug.sku,
+        drug.manufacturer
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return text.includes(search);
+    });
+
+    const matchingOrders = orders.filter(order => {
+      const text = [
+        order._id,
+        order.drug,
+        order.medicine,
+        order.supplier,
+        order.destination,
+        order.facility,
+        order.status
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return text.includes(search);
+    });
+
+    const matchingWarehouses = warehouses.filter(warehouse => {
+      const text = [
+        warehouse.name,
+        warehouse.location,
+        warehouse.city,
+        warehouse.state,
+        warehouse.code
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return text.includes(search);
+    });
+
+    renderGlobalSearchResults(
+      matchingDrugs,
+      matchingOrders,
+      matchingWarehouses
+    );
+  } catch (error) {
+    console.error("Global search error:", error);
+
+    globalSearchResults.innerHTML = `
+      <div class="search-empty">
+        Unable to search right now. Please try again.
+      </div>
+    `;
+  }
+}
+
+function renderGlobalSearchResults(drugs, orders, warehouses) {
+  const total =
+    drugs.length +
+    orders.length +
+    warehouses.length;
+
+  if (!total) {
+    globalSearchResults.innerHTML = `
+      <div class="search-empty">
+        No results found.
+      </div>
+    `;
+    return;
+  }
+
+  let html = "";
+
+  if (drugs.length) {
+    html += `
+      <div class="search-group">
+        <div class="search-group-title">Medicines</div>
+        ${drugs.slice(0, 8).map(drug => `
+          <button
+            class="search-result"
+            data-search-page="inventory"
+          >
+            <span class="search-result-icon">💊</span>
+            <span class="search-result-info">
+              <b>${escapeSearchText(
+                drug.name || drug.medicine || "Medicine"
+              )}</b>
+              <small>
+                ${escapeSearchText(
+                  drug.batchNumber ||
+                  drug.batch ||
+                  drug.sku ||
+                  "Inventory"
+                )}
+              </small>
+            </span>
+            <span class="search-result-type">Medicine</span>
+          </button>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  if (orders.length) {
+    html += `
+      <div class="search-group">
+        <div class="search-group-title">Orders</div>
+        ${orders.slice(0, 8).map(order => `
+          <button
+            class="search-result"
+            data-search-page="orders"
+          >
+            <span class="search-result-icon">📦</span>
+            <span class="search-result-info">
+              <b>${escapeSearchText(
+                order.drug ||
+                order.medicine ||
+                "Order"
+              )}</b>
+              <small>
+                ${escapeSearchText(
+                  order.destination ||
+                  order.facility ||
+                  order.supplier ||
+                  "Order"
+                )}
+              </small>
+            </span>
+            <span class="search-result-type">Order</span>
+          </button>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  if (warehouses.length) {
+    html += `
+      <div class="search-group">
+        <div class="search-group-title">Warehouses</div>
+        ${warehouses.slice(0, 8).map(warehouse => `
+          <button
+            class="search-result"
+            data-search-page="inventory"
+          >
+            <span class="search-result-icon">🏭</span>
+            <span class="search-result-info">
+              <b>${escapeSearchText(
+                warehouse.name || "Warehouse"
+              )}</b>
+              <small>
+                ${escapeSearchText(
+                  warehouse.location ||
+                  warehouse.city ||
+                  warehouse.code ||
+                  "Warehouse"
+                )}
+              </small>
+            </span>
+            <span class="search-result-type">Warehouse</span>
+          </button>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  globalSearchResults.innerHTML = html;
+
+  document
+    .querySelectorAll(".search-result")
+    .forEach(result => {
+      result.addEventListener("click", () => {
+        const page = result.dataset.searchPage;
+
+        closeGlobalSearch();
+
+        if (page) {
+          showPage(page);
+        }
+      });
+    });
+}
+
+function escapeSearchText(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+let globalSearchTimeout;
+
+globalSearchInput?.addEventListener("input", event => {
+  clearTimeout(globalSearchTimeout);
+
+  globalSearchTimeout = setTimeout(() => {
+    performGlobalSearch(event.target.value);
+  }, 250);
+});
+
+globalSearchInput?.addEventListener("keydown", event => {
+  if (event.key === "Escape") {
+    closeGlobalSearch();
+  }
+});
+
 
 
 // ================= SETTINGS =================
 
-document.querySelectorAll(".settings-nav button").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document
-      .querySelectorAll(".settings-nav button")
-      .forEach(x => x.classList.remove("selected"));
+const settingsTabs = document.querySelectorAll(
+  "[data-settings-tab]"
+);
 
-    btn.classList.add("selected");
+const settingsPanels = document.querySelectorAll(
+  "[data-settings-panel]"
+);
+
+const settingsName =
+  document.getElementById("settingsName");
+
+const settingsRole =
+  document.getElementById("settingsRole");
+
+const settingsEmail =
+  document.getElementById("settingsEmail");
+
+const notifyLowStock =
+  document.getElementById("notifyLowStock");
+
+const notifyExpiry =
+  document.getElementById("notifyExpiry");
+
+const notifyOrders =
+  document.getElementById("notifyOrders");
+
+const notifyShipments =
+  document.getElementById("notifyShipments");
+
+const workspaceName =
+  document.getElementById("workspaceName");
+
+const workspaceRegion =
+  document.getElementById("workspaceRegion");
+
+
+function showSettingsMessage(
+  elementId,
+  message,
+  success = true
+) {
+  const element = document.getElementById(elementId);
+
+  if (!element) return;
+
+  element.textContent = message;
+  element.classList.remove("hidden");
+
+  element.classList.toggle(
+    "success",
+    success
+  );
+
+  element.classList.toggle(
+    "error",
+    !success
+  );
+
+  setTimeout(() => {
+    element.classList.add("hidden");
+  }, 3500);
+}
+
+
+function getSettingsHeaders() {
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${getToken()}`
+  };
+}
+
+
+// -------------------------
+// TAB SWITCHING
+// -------------------------
+
+settingsTabs.forEach(tab => {
+
+  tab.addEventListener("click", () => {
+
+    const target =
+      tab.dataset.settingsTab;
+
+    settingsTabs.forEach(item => {
+      item.classList.remove("selected");
+    });
+
+    tab.classList.add("selected");
+
+    settingsPanels.forEach(panel => {
+
+      panel.classList.toggle(
+        "active",
+        panel.dataset.settingsPanel === target
+      );
+
+    });
+
   });
+
 });
 
 
+// -------------------------
+// LOAD PROFILE
+// -------------------------
+
+async function loadSettingsProfile() {
+
+  if (!getToken()) return;
+
+  try {
+
+    const response = await fetch(
+      `${API_BASE_URL}/auth/profile`,
+      {
+        headers: getSettingsHeaders()
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Unable to load profile");
+    }
+
+    const data = await response.json();
+    const user = data.user;
+
+    if (!user) return;
+
+
+    if (settingsName) {
+      settingsName.value = user.name || "";
+    }
+
+    if (settingsRole) {
+      settingsRole.value = user.role || "";
+    }
+
+    if (settingsEmail) {
+      settingsEmail.value = user.email || "";
+    }
+
+
+    const notifications =
+      user.notifications || {};
+
+    if (notifyLowStock) {
+      notifyLowStock.checked =
+        notifications.lowStock !== false;
+    }
+
+    if (notifyExpiry) {
+      notifyExpiry.checked =
+        notifications.expiry !== false;
+    }
+
+    if (notifyOrders) {
+      notifyOrders.checked =
+        notifications.orderUpdates !== false;
+    }
+
+    if (notifyShipments) {
+      notifyShipments.checked =
+        notifications.shipmentUpdates !== false;
+    }
+
+
+    const workspace =
+      user.workspace || {};
+
+    if (workspaceName) {
+      workspaceName.value =
+        workspace.name || "North Region";
+    }
+
+    if (workspaceRegion) {
+      workspaceRegion.value =
+        workspace.region || "North Region";
+    }
+
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
+        id: user._id || user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      })
+    );
+
+    updateUserUI(user);
+
+  } catch (error) {
+
+    console.error(
+      "Settings profile error:",
+      error
+    );
+
+  }
+
+}
+
+
+// -------------------------
+// UPDATE USER UI
+// -------------------------
+
+function updateUserUI(user) {
+
+  if (!user) return;
+
+  const userCards =
+    document.querySelectorAll(".user-card");
+
+  userCards.forEach(card => {
+
+    const name =
+      card.querySelector("b");
+
+    if (name) {
+      name.textContent =
+        user.name || "User";
+    }
+
+    const role =
+      card.querySelector("small");
+
+    if (role) {
+      role.textContent =
+        user.role || "";
+    }
+
+  });
+
+  const topUser =
+    document.querySelector(".top-user span");
+
+  if (topUser) {
+
+    const firstName =
+      (user.name || "User")
+        .trim()
+        .split(/\s+/)[0];
+
+    topUser.textContent =
+      firstName;
+
+  }
+
+  const dashboardHeading =
+    document.querySelector("#page-dashboard h1");
+
+  if (dashboardHeading) {
+
+    dashboardHeading.textContent =
+      `Good morning, ${user.name || "there"}.`;
+
+  }
+
+}
+
+
+// -------------------------
+// SAVE PROFILE
+// -------------------------
+
+document
+  .getElementById("saveProfileBtn")
+  ?.addEventListener("click", async () => {
+
+    const name =
+      settingsName?.value.trim();
+
+    const email =
+      settingsEmail?.value.trim();
+
+    if (!name || !email) {
+
+      showSettingsMessage(
+        "profileMessage",
+        "Name and email are required.",
+        false
+      );
+
+      return;
+    }
+
+    const button =
+      document.getElementById(
+        "saveProfileBtn"
+      );
+
+    button.disabled = true;
+    button.textContent = "Saving...";
+
+    try {
+
+      const response = await fetch(
+        `${API_BASE_URL}/auth/profile`,
+        {
+          method: "PUT",
+          headers: getSettingsHeaders(),
+          body: JSON.stringify({
+            name,
+            email
+          })
+        }
+      );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+          "Failed to update profile"
+        );
+      }
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify(data.user)
+      );
+
+      updateUserUI(data.user);
+
+      showSettingsMessage(
+        "profileMessage",
+        "Profile saved successfully."
+      );
+
+    } catch (error) {
+
+      showSettingsMessage(
+        "profileMessage",
+        error.message,
+        false
+      );
+
+    } finally {
+
+      button.disabled = false;
+      button.textContent = "Save changes";
+
+    }
+
+  });
+
+
+// -------------------------
+// SAVE NOTIFICATIONS
+// -------------------------
+
+document
+  .getElementById("saveNotificationsBtn")
+  ?.addEventListener("click", async () => {
+
+    const button =
+      document.getElementById(
+        "saveNotificationsBtn"
+      );
+
+    button.disabled = true;
+    button.textContent = "Saving...";
+
+    try {
+
+      const response = await fetch(
+        `${API_BASE_URL}/auth/profile`,
+        {
+          method: "PUT",
+          headers: getSettingsHeaders(),
+          body: JSON.stringify({
+            notifications: {
+              lowStock:
+                notifyLowStock?.checked ?? true,
+
+              expiry:
+                notifyExpiry?.checked ?? true,
+
+              orderUpdates:
+                notifyOrders?.checked ?? true,
+
+              shipmentUpdates:
+                notifyShipments?.checked ?? true
+            }
+          })
+        }
+      );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+          "Failed to save preferences"
+        );
+      }
+
+      showSettingsMessage(
+        "notificationMessage",
+        "Notification preferences saved."
+      );
+
+    } catch (error) {
+
+      showSettingsMessage(
+        "notificationMessage",
+        error.message,
+        false
+      );
+
+    } finally {
+
+      button.disabled = false;
+      button.textContent = "Save preferences";
+
+    }
+
+  });
+
+
+// -------------------------
+// SAVE WORKSPACE
+// -------------------------
+
+document
+  .getElementById("saveWorkspaceBtn")
+  ?.addEventListener("click", async () => {
+
+    const button =
+      document.getElementById(
+        "saveWorkspaceBtn"
+      );
+
+    button.disabled = true;
+    button.textContent = "Saving...";
+
+    try {
+
+      const response = await fetch(
+        `${API_BASE_URL}/auth/profile`,
+        {
+          method: "PUT",
+          headers: getSettingsHeaders(),
+          body: JSON.stringify({
+            workspace: {
+              name:
+                workspaceName?.value.trim() ||
+                "North Region",
+
+              region:
+                workspaceRegion?.value.trim() ||
+                "North Region"
+            }
+          })
+        }
+      );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+          "Failed to save workspace"
+        );
+      }
+
+      showSettingsMessage(
+        "workspaceMessage",
+        "Workspace settings saved."
+      );
+
+    } catch (error) {
+
+      showSettingsMessage(
+        "workspaceMessage",
+        error.message,
+        false
+      );
+
+    } finally {
+
+      button.disabled = false;
+      button.textContent = "Save workspace";
+
+    }
+
+  });
+
+
+// -------------------------
+// CHANGE PASSWORD
+// -------------------------
+
+document
+  .getElementById("changePasswordBtn")
+  ?.addEventListener("click", async () => {
+
+    const currentPassword =
+      document.getElementById(
+        "currentPassword"
+      )?.value;
+
+    const newPassword =
+      document.getElementById(
+        "newPassword"
+      )?.value;
+
+    const confirmPassword =
+      document.getElementById(
+        "confirmPassword"
+      )?.value;
+
+
+    if (!currentPassword || !newPassword) {
+
+      showSettingsMessage(
+        "securityMessage",
+        "Please enter your current and new password.",
+        false
+      );
+
+      return;
+    }
+
+
+    if (newPassword !== confirmPassword) {
+
+      showSettingsMessage(
+        "securityMessage",
+        "New passwords do not match.",
+        false
+      );
+
+      return;
+    }
+
+
+    if (newPassword.length < 6) {
+
+      showSettingsMessage(
+        "securityMessage",
+        "New password must be at least 6 characters.",
+        false
+      );
+
+      return;
+    }
+
+
+    const button =
+      document.getElementById(
+        "changePasswordBtn"
+      );
+
+    button.disabled = true;
+    button.textContent = "Changing...";
+
+
+    try {
+
+      const response = await fetch(
+        `${API_BASE_URL}/auth/change-password`,
+        {
+          method: "POST",
+          headers: getSettingsHeaders(),
+          body: JSON.stringify({
+            currentPassword,
+            newPassword
+          })
+        }
+      );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+          "Failed to change password"
+        );
+      }
+
+
+      document.getElementById(
+        "currentPassword"
+      ).value = "";
+
+      document.getElementById(
+        "newPassword"
+      ).value = "";
+
+      document.getElementById(
+        "confirmPassword"
+      ).value = "";
+
+
+      showSettingsMessage(
+        "securityMessage",
+        "Password changed successfully."
+      );
+
+    } catch (error) {
+
+      showSettingsMessage(
+        "securityMessage",
+        error.message,
+        false
+      );
+
+    } finally {
+
+      button.disabled = false;
+      button.textContent = "Change password";
+
+    }
+
+  });
+
+
+// -------------------------
+// LOGOUT
+// -------------------------
+
+document
+  .getElementById("logoutBtn")
+  ?.addEventListener("click", () => {
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    window.location.href =
+      "login.html";
+
+  });
+
+
+// Load settings whenever the page starts.
+loadSettingsProfile();
+
 // ================= INVENTORY V2 =================
 
+let inventoryDrugs = [];
+
 async function loadInventoryFromAPI() {
+
   try {
-    const response = await fetch(`${API_BASE_URL}/drugs`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`
+
+    const response = await fetch(
+      `${API_BASE_URL}/drugs`,
+      {
+        headers: {
+          Authorization:
+            `Bearer ${localStorage.getItem("token")}`
+        }
       }
-    });
+    );
 
     if (!response.ok) {
       throw new Error("Failed to fetch inventory");
     }
 
-    const data = await response.json();
+    const data =
+      await response.json();
 
-    const drugs = data.drugs || data;
+    inventoryDrugs =
+      data.drugs || data;
 
-const tableBody = document.querySelector("#inventoryTable tbody");
+    renderInventory(inventoryDrugs);
 
-if (!tableBody) {
-    console.error("Inventory table body not found");
-    return;
+  } catch (error) {
+
+    console.error(
+      "Inventory API error:",
+      error
+    );
+
+  }
+
 }
 
-tableBody.innerHTML = "";
 
-drugs.forEach(drug => {
-    const row = document.createElement("tr");
+function renderInventory(drugs) {
 
-    row.className = "inventory-row";
+  const tableBody =
+    document.querySelector(
+      "#inventoryTable tbody"
+    );
+
+  if (!tableBody) {
+
+    console.error(
+      "Inventory table body not found"
+    );
+
+    return;
+  }
+
+  tableBody.innerHTML = "";
+
+  drugs.forEach(drug => {
+
+    const row =
+      document.createElement("tr");
+
+    row.className =
+      "inventory-row";
+
+    const expiryDate =
+      new Date(drug.expiryDate);
+
+    const expiry =
+      expiryDate.toLocaleDateString(
+        "en-US",
+        {
+          month: "short",
+          year: "numeric"
+        }
+      );
+
+    const statusClass =
+      drug.status === "Available"
+        ? "healthy"
+        : drug.status === "Low Stock"
+          ? "warning"
+          : "critical";
+
+    row.dataset.medicine =
+      drug.name || "";
+
+    row.dataset.category =
+      drug.category || "";
+
+    row.dataset.batch =
+      drug.batchNumber || "";
+
+    row.dataset.quantity =
+      drug.quantity ?? 0;
+
+    row.dataset.facility =
+      drug.location || "";
+
+    row.dataset.expiry =
+      expiry;
+
+    row.dataset.status =
+      statusClass;
+
+    row.dataset.qr =
+      drug._id ||
+      drug.id ||
+      "";
 
     row.innerHTML = `
-        <td>
-            <b>${drug.name}</b>
-        </td>
 
-        <td>${drug.batchNumber}</td>
+      <td>
+        <b>${drug.name || "Unknown medicine"}</b>
+      </td>
 
-        <td>
-            <b>${drug.quantity}</b> units
-        </td>
+      <td>
+        ${drug.batchNumber || "—"}
+      </td>
 
-        <td>${drug.location}</td>
+      <td>
+        <b>${drug.quantity ?? 0}</b> units
+      </td>
 
-        <td>
-            ${new Date(drug.expiryDate).toLocaleDateString("en-US", {
-                month: "short",
-                year: "numeric"
-            })}
-        </td>
+      <td>
+        ${drug.location || "—"}
+      </td>
 
-        <td>
-            <span class="status ${drug.status === "Available"
-                ? "healthy"
-                : drug.status === "Low Stock"
-                ? "warning"
-                : "critical"}">
-                ${drug.status}
-            </span>
-        </td>
+      <td>
+        ${expiry}
+      </td>
 
-        <td>→</td>
+      <td>
+        <span class="status ${statusClass}">
+          ${drug.status || "Unknown"}
+        </span>
+      </td>
+
+      <td>→</td>
+
     `;
 
     tableBody.appendChild(row);
-});
 
-  } catch (error) {
-    console.error("Inventory API error:", error);
-  }
+  });
+
+  attachInventoryRowListeners();
+
+
+
 }
+
+
+function attachInventoryRowListeners() {
+
+  const rows =
+    document.querySelectorAll(
+      ".inventory-row"
+    );
+
+  rows.forEach(row => {
+
+    row.addEventListener(
+      "click",
+      () => {
+        openInventoryDrawer(row);
+      }
+    );
+
+  });
+
+}
+
 
 loadInventoryFromAPI();
 
-const inventoryRows = document.querySelectorAll(".inventory-row");
+function getInventoryRows() {
+  return document.querySelectorAll(".inventory-row");
+}
 
 const inventoryDrawer =
   document.getElementById("inventoryDrawer");
@@ -350,7 +1409,7 @@ function closeInventoryDrawer() {
 }
 
 
-inventoryRows.forEach(row => {
+getInventoryRows().forEach(row => {
 
   row.addEventListener("click", () => {
     openInventoryDrawer(row);
@@ -402,7 +1461,7 @@ function filterInventory() {
   let shown = 0;
 
 
-  inventoryRows.forEach(row => {
+  getInventoryRows().forEach(row => {
 
     const d = row.dataset;
 
@@ -489,15 +1548,16 @@ function filterInventory() {
 
 });
 
+filterInventory();
+
 
 // ================= INVENTORY EXPORT =================
 
 document
   .getElementById("inventoryExport")
   ?.addEventListener("click", () => {
-
-    const visible =
-      [...inventoryRows]
+const visible =
+      [...getInventoryRows()]
         .filter(
           r => r.style.display !== "none"
         )
@@ -735,7 +1795,7 @@ document
 
 
       const destinationRow =
-        [...inventoryRows].find(row => {
+        [...getInventoryRows()].find(row => {
 
           const facilityCell =
             row.querySelectorAll("td")[3];
@@ -1559,7 +2619,7 @@ async function loadOrders() {
 
     try {
 
-        const response = await fetch("${API_BASE_URL}/orders", {
+        const response = await fetch(`${API_BASE_URL}/orders`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`
@@ -1653,7 +2713,7 @@ confirmCreateOrder?.addEventListener("click", async () => {
 
     try {
 
-        const response = await fetch("${API_BASE_URL}/orders", {
+        const response = await fetch(`${API_BASE_URL}/orders`, {
             method: "POST",
 
             headers: {

@@ -471,7 +471,7 @@
 
 </div>
 
-<section id="page-shipments" class="page">
+
 
 <section id="page-shipments" class="page">
   <div class="page-head">
@@ -738,11 +738,330 @@
       </section>
 
       <section id="page-settings" class="page">
-        <div class="page-head"><div><div class="eyebrow">ACCOUNT</div><h1>Settings</h1><p>Manage your profile, workspace and notifications.</p></div></div>
-        <div class="settings-layout"><div class="settings-nav"><button class="selected">Profile</button><button>Notifications</button><button>Workspace</button><button>Security</button></div><article class="panel settings-content"><h2>Profile</h2><p>Personal details shown across the MediChain workspace.</p><label>Full name<input value="Rahul Sharma"></label><label>Role<input value="Pharmacist" disabled></label><label>Email<input value="rahul@medichain.example"></label><div class="setting-actions"><button class="primary-btn">Save changes</button></div></article></div>
-      </section>
-    </main>
+
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">ACCOUNT</div>
+      <h1>Settings</h1>
+      <p>Manage your profile, workspace and notifications.</p>
+    </div>
   </div>
+
+  <div class="settings-layout">
+
+    <div class="settings-nav">
+
+      <button
+        class="selected"
+        data-settings-tab="profile"
+      >
+        Profile
+      </button>
+
+      <button
+        data-settings-tab="notifications"
+      >
+        Notifications
+      </button>
+
+      <button
+        data-settings-tab="workspace"
+      >
+        Workspace
+      </button>
+
+      <button
+        data-settings-tab="security"
+      >
+        Security
+      </button>
+
+    </div>
+
+
+    <!-- PROFILE -->
+
+    <article
+      class="panel settings-content settings-panel active"
+      data-settings-panel="profile"
+    >
+
+      <h2>Profile</h2>
+
+      <p>
+        Personal details shown across the MediChain workspace.
+      </p>
+
+      <label>
+        Full name
+        <input
+          type="text"
+          id="settingsName"
+          placeholder="Your name"
+        >
+      </label>
+
+      <label>
+        Role
+        <input
+          type="text"
+          id="settingsRole"
+          disabled
+        >
+      </label>
+
+      <label>
+        Email
+        <input
+          type="email"
+          id="settingsEmail"
+          placeholder="you@example.com"
+        >
+      </label>
+
+      <div
+        class="settings-message hidden"
+        id="profileMessage"
+      ></div>
+
+      <div class="setting-actions">
+
+        <button
+          class="primary-btn"
+          id="saveProfileBtn"
+        >
+          Save changes
+        </button>
+
+      </div>
+
+    </article>
+
+
+    <!-- NOTIFICATIONS -->
+
+    <article
+      class="panel settings-content settings-panel"
+      data-settings-panel="notifications"
+    >
+
+      <h2>Notifications</h2>
+
+      <p>
+        Choose which operational events should notify you.
+      </p>
+
+      <label class="setting-toggle">
+        <span>
+          <b>Low-stock alerts</b>
+          <small>Notify me when inventory reaches critical levels.</small>
+        </span>
+
+        <input
+          type="checkbox"
+          id="notifyLowStock"
+        >
+      </label>
+
+      <label class="setting-toggle">
+        <span>
+          <b>Expiry alerts</b>
+          <small>Notify me about medicines approaching expiry.</small>
+        </span>
+
+        <input
+          type="checkbox"
+          id="notifyExpiry"
+        >
+      </label>
+
+      <label class="setting-toggle">
+        <span>
+          <b>Order updates</b>
+          <small>Notify me when order status changes.</small>
+        </span>
+
+        <input
+          type="checkbox"
+          id="notifyOrders"
+        >
+      </label>
+
+      <label class="setting-toggle">
+        <span>
+          <b>Shipment updates</b>
+          <small>Notify me about shipment progress and delays.</small>
+        </span>
+
+        <input
+          type="checkbox"
+          id="notifyShipments"
+        >
+      </label>
+
+      <div
+        class="settings-message hidden"
+        id="notificationMessage"
+      ></div>
+
+      <div class="setting-actions">
+
+        <button
+          class="primary-btn"
+          id="saveNotificationsBtn"
+        >
+          Save preferences
+        </button>
+
+      </div>
+
+    </article>
+
+
+    <!-- WORKSPACE -->
+
+    <article
+      class="panel settings-content settings-panel"
+      data-settings-panel="workspace"
+    >
+
+      <h2>Workspace</h2>
+
+      <p>
+        Information about your current MediChain operating workspace.
+      </p>
+
+      <label>
+        Workspace name
+        <input
+          type="text"
+          id="workspaceName"
+        >
+      </label>
+
+      <label>
+        Region
+        <input
+          type="text"
+          id="workspaceRegion"
+        >
+      </label>
+
+      <div
+        class="settings-message hidden"
+        id="workspaceMessage"
+      ></div>
+
+      <div class="setting-actions">
+
+        <button
+          class="primary-btn"
+          id="saveWorkspaceBtn"
+        >
+          Save workspace
+        </button>
+
+      </div>
+
+    </article>
+
+
+    <!-- SECURITY -->
+
+    <article
+      class="panel settings-content settings-panel"
+      data-settings-panel="security"
+    >
+
+      <h2>Security</h2>
+
+      <p>
+        Protect your MediChain account and active session.
+      </p>
+
+      <label>
+        Current password
+        <input
+          type="password"
+          id="currentPassword"
+          autocomplete="current-password"
+        >
+      </label>
+
+      <label>
+        New password
+        <input
+          type="password"
+          id="newPassword"
+          autocomplete="new-password"
+        >
+      </label>
+
+      <label>
+        Confirm new password
+        <input
+          type="password"
+          id="confirmPassword"
+          autocomplete="new-password"
+        >
+      </label>
+
+      <div
+        class="settings-message hidden"
+        id="securityMessage"
+      ></div>
+
+      <div class="setting-actions">
+
+        <button
+          class="primary-btn"
+          id="changePasswordBtn"
+        >
+          Change password
+        </button>
+
+        <button
+          class="ghost-btn"
+          id="logoutBtn"
+        >
+          Log out
+        </button>
+
+      </div>
+
+    </article>
+
+  </div>
+
+</section>
+
+
+  <!-- GLOBAL SEARCH MODAL -->
+<div class="modal hidden" id="globalSearchModal">
+  <div class="modal-card search-modal-card">
+    <button class="modal-close" id="globalSearchClose">×</button>
+
+    <div class="eyebrow">SEARCH</div>
+    <h2>Search MediChain</h2>
+    <p>Find medicines, orders and warehouses across the network.</p>
+
+    <div class="search-modal-input">
+      <span>⌕</span>
+      <input
+        type="text"
+        id="globalSearchInput"
+        placeholder="Search medicine, order or warehouse..."
+        autocomplete="off"
+      >
+    </div>
+
+    <div id="globalSearchResults" class="search-results">
+      <div class="search-empty">
+        Start typing to search MediChain.
+      </div>
+    </div>
+  </div>
+</div>
 
 
   <div class="drawer-backdrop hidden" id="inventoryDrawerBackdrop"></div>
