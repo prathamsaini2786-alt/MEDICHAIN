@@ -4152,3 +4152,203 @@ markAllAlertsReviewed?.addEventListener(
 
 // Load alerts
 loadAlerts();
+
+// ============================================================
+// ANALYTICS
+// ============================================================
+
+const analyticsOrderFulfillment =
+  document.getElementById("analyticsOrderFulfillment");
+
+const analyticsOnTimeDelivery =
+  document.getElementById("analyticsOnTimeDelivery");
+
+const analyticsStockHealth =
+  document.getElementById("analyticsStockHealth");
+
+const analyticsExpiryPrevention =
+  document.getElementById("analyticsExpiryPrevention");
+
+const analyticsInventory =
+  document.getElementById("analyticsInventory");
+
+const analyticsMedicines =
+  document.getElementById("analyticsMedicines");
+
+const analyticsSuppliers =
+  document.getElementById("analyticsSuppliers");
+
+const analyticsActiveSuppliers =
+  document.getElementById("analyticsActiveSuppliers");
+
+const analyticsShipments =
+  document.getElementById("analyticsShipments");
+
+const analyticsExpired =
+  document.getElementById("analyticsExpired");
+
+const analyticsTrendChart =
+  document.getElementById("analyticsTrendChart");
+
+
+async function loadAnalytics() {
+  const token = getToken();
+
+  if (!token) return;
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/analytics`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Failed to load analytics"
+      );
+    }
+
+    const metrics = data.metrics || {};
+    const inventory = data.inventory || {};
+    const network = data.network || {};
+    const trends = data.trends || [];
+
+    if (analyticsOrderFulfillment) {
+      analyticsOrderFulfillment.textContent =
+        `${Number(metrics.orderFulfillment || 0).toFixed(1)}%`;
+    }
+
+    if (analyticsOnTimeDelivery) {
+      analyticsOnTimeDelivery.textContent =
+        `${Number(metrics.onTimeDelivery || 0).toFixed(1)}%`;
+    }
+
+    if (analyticsStockHealth) {
+      analyticsStockHealth.textContent =
+        `${Number(metrics.stockHealth || 0).toFixed(1)}%`;
+    }
+
+    if (analyticsExpiryPrevention) {
+      analyticsExpiryPrevention.textContent =
+        `${Number(metrics.expiryPrevention || 0).toFixed(1)}%`;
+    }
+
+    if (analyticsInventory) {
+      analyticsInventory.textContent =
+        Number(inventory.totalQuantity || 0).toLocaleString();
+    }
+
+    if (analyticsMedicines) {
+      analyticsMedicines.textContent =
+        Number(inventory.totalMedicines || 0).toLocaleString();
+    }
+
+    if (analyticsSuppliers) {
+      analyticsSuppliers.textContent =
+        Number(network.totalSuppliers || 0).toLocaleString();
+    }
+
+    if (analyticsActiveSuppliers) {
+      analyticsActiveSuppliers.textContent =
+        Number(network.activeSuppliers || 0).toLocaleString();
+    }
+
+    if (analyticsShipments) {
+      analyticsShipments.textContent =
+        Number(network.totalShipments || 0).toLocaleString();
+    }
+
+    if (analyticsExpired) {
+      analyticsExpired.textContent =
+        Number(inventory.expired || 0).toLocaleString();
+    }
+
+    renderAnalyticsTrend(trends);
+
+  } catch (error) {
+    console.error("Analytics error:", error);
+
+    if (analyticsTrendChart) {
+      analyticsTrendChart.innerHTML = `
+        <p>Unable to load analytics.</p>
+      `;
+    }
+  }
+}
+
+
+function renderAnalyticsTrend(trends) {
+  if (!analyticsTrendChart) return;
+
+  if (!trends.length) {
+    analyticsTrendChart.innerHTML = `
+      <p>No trend data available yet.</p>
+    `;
+    return;
+  }
+
+  const maxValue = Math.max(
+    ...trends.flatMap(item => [
+      Number(item.demand || 0),
+      Number(item.supply || 0)
+    ]),
+    1
+  );
+
+  analyticsTrendChart.innerHTML = `
+    <div class="analytics-bars">
+      ${trends.map(item => {
+        const demand = Number(item.demand || 0);
+        const supply = Number(item.supply || 0);
+
+        const demandHeight =
+          Math.max(4, (demand / maxValue) * 100);
+
+        const supplyHeight =
+          Math.max(4, (supply / maxValue) * 100);
+
+        return `
+          <div class="analytics-week">
+            <div class="analytics-bar-group">
+              <div
+                class="analytics-bar demand"
+                style="height:${demandHeight}%"
+                title="Demand: ${demand}"
+              ></div>
+
+              <div
+                class="analytics-bar supply"
+                style="height:${supplyHeight}%"
+                title="Supply: ${supply}"
+              ></div>
+            </div>
+
+            <small>${item.label}</small>
+          </div>
+        `;
+      }).join("")}
+    </div>
+
+    <div class="analytics-legend">
+      <span>
+        <i class="legend-demand"></i>
+        Demand
+      </span>
+
+      <span>
+        <i class="legend-supply"></i>
+        Supply
+      </span>
+    </div>
+  `;
+}
+
+
+loadAnalytics();
+
