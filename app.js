@@ -1936,261 +1936,495 @@ addInventoryForm?.addEventListener("submit", async (event) => {
 
 // ================= SHIPMENT TRACKING =================
 
-const shipmentCards =
-  document.querySelectorAll(
-    ".route-card[data-shipment-id]"
-  );
+let shipments = [];
+let selectedShipment = null;
+
+const shipmentCardsContainer =
+  document.querySelector(".shipment-cards");
 
 const shipmentDrawer =
-  document.getElementById(
-    "shipmentDrawer"
-  );
+  document.getElementById("shipmentDrawer");
 
 const shipmentDrawerBackdrop =
-  document.getElementById(
-    "shipmentDrawerBackdrop"
-  );
-
+  document.getElementById("shipmentDrawerBackdrop");
 
 const shipmentDrawerId =
-  document.getElementById(
-    "shipmentDrawerId"
-  );
+  document.getElementById("shipmentDrawerId");
 
 const shipmentDrawerStatus =
-  document.getElementById(
-    "shipmentDrawerStatus"
-  );
+  document.getElementById("shipmentDrawerStatus");
 
 const shipmentDrawerStatusBadge =
-  document.getElementById(
-    "shipmentDrawerStatusBadge"
-  );
-
+  document.getElementById("shipmentDrawerStatusBadge");
 
 const shipmentOrigin =
-  document.getElementById(
-    "shipmentOrigin"
-  );
+  document.getElementById("shipmentOrigin");
 
 const shipmentDestination =
-  document.getElementById(
-    "shipmentDestination"
-  );
+  document.getElementById("shipmentDestination");
 
 const shipmentProgress =
-  document.getElementById(
-    "shipmentProgress"
-  );
+  document.getElementById("shipmentProgress");
 
 const shipmentEta =
-  document.getElementById(
-    "shipmentEta"
-  );
-
+  document.getElementById("shipmentEta");
 
 const shipmentProgressText =
-  document.getElementById(
-    "shipmentProgressText"
-  );
+  document.getElementById("shipmentProgressText");
 
 const shipmentProgressBar =
-  document.getElementById(
-    "shipmentProgressBar"
-  );
-
+  document.getElementById("shipmentProgressBar");
 
 const shipmentRouteOrigin =
-  document.getElementById(
-    "shipmentRouteOrigin"
-  );
+  document.getElementById("shipmentRouteOrigin");
 
 const shipmentRouteDestination =
-  document.getElementById(
-    "shipmentRouteDestination"
-  );
-
+  document.getElementById("shipmentRouteDestination");
 
 const shipmentTemperature =
-  document.getElementById(
-    "shipmentTemperature"
-  );
+  document.getElementById("shipmentTemperature");
 
 const shipmentDriver =
-  document.getElementById(
-    "shipmentDriver"
-  );
+  document.getElementById("shipmentDriver");
 
 const shipmentVehicle =
-  document.getElementById(
-    "shipmentVehicle"
-  );
+  document.getElementById("shipmentVehicle");
 
 
-function openShipmentDrawer(card) {
+// ================= LOAD SHIPMENTS =================
 
-  if (!shipmentDrawer || !card) {
+async function loadShipments() {
+
+  if (!getToken()) return;
+
+  try {
+
+    const response = await fetch(
+      `${API_BASE_URL}/shipments`,
+      {
+        headers: getSettingsHeaders()
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Unable to load shipments");
+    }
+
+    const data = await response.json();
+
+    shipments = Array.isArray(data)
+      ? data
+      : (data.shipments || []);
+
+    renderShipments();
+
+  } catch (error) {
+
+    console.error(
+      "Shipments load error:",
+      error
+    );
+
+  }
+}
+
+
+// ================= STATUS CLASS =================
+
+function getShipmentStatusClass(status) {
+
+  switch (status) {
+
+    case "In transit":
+      return "healthy";
+
+    case "Delivered":
+      return "success";
+
+    case "Delayed":
+      return "warning";
+
+    case "Cancelled":
+      return "danger";
+
+    default:
+      return "warning";
+  }
+}
+
+
+// ================= RENDER SHIPMENTS =================
+
+function renderShipments() {
+
+  if (!shipmentCardsContainer) return;
+
+  shipmentCardsContainer.innerHTML = "";
+
+  if (!shipments.length) {
+
+    shipmentCardsContainer.innerHTML = `
+      <div class="panel" style="padding:24px;">
+        <b>No shipments yet</b>
+        <p>Create a shipment to begin tracking it.</p>
+      </div>
+    `;
+
+    updateShipmentOverview();
+
     return;
   }
 
 
-  const data = card.dataset;
+  shipments.forEach(shipment => {
+
+    const progress =
+      Number(shipment.progress) || 0;
+
+    const temperature =
+      shipment.temperature !== null &&
+      shipment.temperature !== undefined
+        ? `${shipment.temperature}°C`
+        : "—";
 
 
-  shipmentDrawerId.textContent =
-    data.shipmentId || "—";
+    const card =
+      document.createElement("article");
+
+    card.className =
+      "route-card shipment-clickable";
 
 
-  shipmentDrawerStatus.textContent =
-    data.status || "—";
+    card.dataset.shipmentId =
+      shipment.shipmentId || shipment._id;
+
+    card.dataset.mongoId =
+      shipment._id || "";
+
+    card.dataset.status =
+      shipment.status || "Pending";
+
+    card.dataset.origin =
+      shipment.origin || "—";
+
+    card.dataset.destination =
+      shipment.destination || "—";
+
+    card.dataset.progress =
+      progress;
+
+    card.dataset.eta =
+      shipment.eta || "—";
+
+    card.dataset.temperature =
+      temperature;
+
+    card.dataset.driver =
+      shipment.driver || "—";
+
+    card.dataset.vehicle =
+      shipment.vehicle || "—";
 
 
-  if (shipmentDrawerStatusBadge) {
+    card.innerHTML = `
+      <div class="route-head">
+        <span class="status ${getShipmentStatusClass(shipment.status)}">
+          ${shipment.status || "Pending"}
+        </span>
 
-    shipmentDrawerStatusBadge.textContent =
-      data.status || "—";
+        <b>${shipment.shipmentId || shipment._id}</b>
+      </div>
 
+      <h3>
+        ${shipment.origin || "—"}
+        <span>→</span>
+        ${shipment.destination || "—"}
+      </h3>
+
+      <div class="route-bar">
+        <i style="width:${progress}%"></i>
+      </div>
+
+      <div class="route-info">
+        <span>${progress}% complete</span>
+        <b>ETA ${shipment.eta || "—"}</b>
+      </div>
+
+      <div class="temp">
+        ❄ Temperature
+        <b>${temperature}</b>
+        <span>✓ Recorded</span>
+      </div>
+
+      <button class="track-btn">
+        View live tracking →
+      </button>
+    `;
+
+
+    card.addEventListener(
+      "click",
+      event => {
+
+        event.preventDefault();
+
+        openShipmentDrawer(
+          card,
+          shipment
+        );
+
+      }
+    );
+
+
+    shipmentCardsContainer.appendChild(card);
+
+  });
+
+
+  updateShipmentOverview();
+
+  updateShipmentMap();
+
+}
+
+
+// ================= OVERVIEW =================
+
+function updateShipmentOverview() {
+
+  const overview =
+    document.querySelectorAll(
+      ".shipment-overview .stat-card"
+    );
+
+  if (!overview.length) return;
+
+
+  const active =
+    shipments.filter(
+      shipment =>
+        shipment.status !== "Delivered" &&
+        shipment.status !== "Cancelled"
+    ).length;
+
+
+  const inTransit =
+    shipments.filter(
+      shipment =>
+        shipment.status === "In transit"
+    ).length;
+
+
+  const delayed =
+    shipments.filter(
+      shipment =>
+        shipment.status === "Delayed"
+    ).length;
+
+
+  if (overview[0]?.querySelector("b")) {
+    overview[0].querySelector("b").textContent =
+      active;
   }
 
 
-  shipmentOrigin.textContent =
-    data.origin || "—";
+  if (overview[1]?.querySelector("b")) {
+    overview[1].querySelector("b").textContent =
+      inTransit;
+  }
 
 
-  shipmentDestination.textContent =
-    data.destination || "—";
+  if (overview[2]?.querySelector("b")) {
+    overview[2].querySelector("b").textContent =
+      delayed;
+  }
+
+}
+
+
+// ================= MAP =================
+
+function updateShipmentMap() {
+
+  const mapRoute =
+    document.querySelector(".map-route");
+
+  if (!mapRoute || !shipments.length) return;
+
+  const shipment =
+    shipments.find(
+      item =>
+        item.status === "In transit"
+    ) || shipments[0];
+
+
+  const start =
+    mapRoute.querySelector(".map-node.start");
+
+  const end =
+    mapRoute.querySelector(".map-node.end");
+
+  const line =
+    mapRoute.querySelector(".map-line i");
+
+
+  if (start) {
+    start.textContent =
+      shipment.origin || "Origin";
+  }
+
+  if (end) {
+    end.textContent =
+      shipment.destination || "Destination";
+  }
+
+  if (line) {
+    line.style.width =
+      `${Number(shipment.progress) || 0}%`;
+  }
+
+}
+
+
+// ================= DRAWER =================
+
+function openShipmentDrawer(
+  card,
+  shipment
+) {
+
+  selectedShipment = shipment;
+
+  const statusSelect =
+  document.getElementById("shipmentStatusSelect");
+
+const progressInput =
+  document.getElementById("shipmentProgressInput");
+
+if (statusSelect) {
+  statusSelect.value =
+    shipment.status || "Pending";
+}
+
+if (progressInput) {
+  progressInput.value =
+    Number(shipment.progress) || 0;
+}
+
+  const data = card.dataset;
+
+  if (shipmentDrawerId) {
+    shipmentDrawerId.textContent =
+      data.shipmentId || "—";
+  }
+
+  if (shipmentDrawerStatus) {
+    shipmentDrawerStatus.textContent =
+      data.status || "—";
+  }
+
+  if (shipmentDrawerStatusBadge) {
+    shipmentDrawerStatusBadge.textContent =
+      data.status || "—";
+  }
+
+  if (shipmentOrigin) {
+    shipmentOrigin.textContent =
+      data.origin || "—";
+  }
+
+  if (shipmentDestination) {
+    shipmentDestination.textContent =
+      data.destination || "—";
+  }
 
 
   const progress =
-    parseInt(
-      data.progress,
-      10
-    ) || 0;
+    parseInt(data.progress, 10) || 0;
 
 
-  shipmentProgress.textContent =
-    `${progress}%`;
+  if (shipmentProgress) {
+    shipmentProgress.textContent =
+      `${progress}%`;
+  }
 
-
-  shipmentEta.textContent =
-    data.eta || "—";
-
+  if (shipmentEta) {
+    shipmentEta.textContent =
+      data.eta || "—";
+  }
 
   if (shipmentProgressText) {
-
     shipmentProgressText.textContent =
       `${progress}% complete`;
-
   }
-
 
   if (shipmentProgressBar) {
-
     shipmentProgressBar.style.width =
       `${progress}%`;
-
   }
-
 
   if (shipmentRouteOrigin) {
-
     shipmentRouteOrigin.textContent =
       data.origin || "—";
-
   }
-
 
   if (shipmentRouteDestination) {
-
     shipmentRouteDestination.textContent =
       data.destination || "—";
+  }
 
+  if (shipmentTemperature) {
+    shipmentTemperature.textContent =
+      data.temperature || "—";
+  }
+
+  if (shipmentDriver) {
+    shipmentDriver.textContent =
+      data.driver || "—";
+  }
+
+  if (shipmentVehicle) {
+    shipmentVehicle.textContent =
+      data.vehicle || "—";
   }
 
 
-  shipmentTemperature.textContent =
-    data.temperature || "—";
+  shipmentDrawer?.classList.remove("hidden");
+  shipmentDrawer?.classList.add("open");
 
+  shipmentDrawerBackdrop?.classList.remove("hidden");
 
-  shipmentDriver.textContent =
-    data.driver || "—";
-
-
-  shipmentVehicle.textContent =
-    data.vehicle || "—";
-
-
-  // IMPORTANT:
-  // Remove hidden AND add open.
-  shipmentDrawer.classList.remove(
-    "hidden"
-  );
-
-  shipmentDrawer.classList.add(
-    "open"
-  );
-
-
-  shipmentDrawer.setAttribute(
+  shipmentDrawer?.setAttribute(
     "aria-hidden",
     "false"
   );
 
-
-  shipmentDrawerBackdrop?.classList.remove(
-    "hidden"
-  );
-
 }
 
 
+// ================= CLOSE DRAWER =================
+
 function closeShipmentDrawer() {
 
-  if (!shipmentDrawer) return;
+  shipmentDrawer?.classList.remove("open");
 
+  shipmentDrawer?.classList.add("hidden");
 
-  shipmentDrawer.classList.remove(
-    "open"
-  );
+  shipmentDrawerBackdrop?.classList.add("hidden");
 
-  shipmentDrawer.classList.add(
-    "hidden"
-  );
-
-
-  shipmentDrawerBackdrop?.classList.add(
-    "hidden"
-  );
-
-
-  shipmentDrawer.setAttribute(
+  shipmentDrawer?.setAttribute(
     "aria-hidden",
     "true"
   );
 
+  selectedShipment = null;
+
 }
 
 
-shipmentCards.forEach(card => {
-
-  card.addEventListener(
-    "click",
-    event => {
-
-      event.preventDefault();
-
-      openShipmentDrawer(card);
-
-    }
-  );
-
-});
-
-
 document
-  .getElementById(
-    "shipmentDrawerClose"
-  )
+  .getElementById("shipmentDrawerClose")
   ?.addEventListener(
     "click",
     closeShipmentDrawer
@@ -2198,9 +2432,7 @@ document
 
 
 document
-  .getElementById(
-    "shipmentDrawerDone"
-  )
+  .getElementById("shipmentDrawerDone")
   ?.addEventListener(
     "click",
     closeShipmentDrawer
@@ -2213,39 +2445,331 @@ shipmentDrawerBackdrop?.addEventListener(
 );
 
 
+// ================= CREATE SHIPMENT =================
+
 document
-  .getElementById(
-    "shipmentAlertBtn"
-  )
+  .getElementById("newShipmentBtn")
   ?.addEventListener(
     "click",
     () => {
 
-      alert(
-        "Shipment issue report is ready to connect to the backend."
-      );
+      document
+        .getElementById("shipmentModal")
+        ?.classList.remove("hidden");
 
     }
   );
 
 
 document
-  .getElementById(
-    "newShipmentBtn"
-  )
+  .getElementById("shipmentModalClose")
+  ?.addEventListener(
+    "click",
+    closeShipmentModal
+  );
+
+
+document
+  .getElementById("shipmentCancel")
+  ?.addEventListener(
+    "click",
+    closeShipmentModal
+  );
+
+
+document
+  .getElementById("shipmentModal")
+  ?.addEventListener(
+    "click",
+    event => {
+
+      if (
+        event.target ===
+        document.getElementById("shipmentModal")
+      ) {
+        closeShipmentModal();
+      }
+
+    }
+  );
+
+
+function closeShipmentModal() {
+
+  document
+    .getElementById("shipmentModal")
+    ?.classList.add("hidden");
+
+}
+
+
+document
+  .getElementById("confirmShipment")
+  ?.addEventListener(
+    "click",
+    async () => {
+
+      const origin =
+        document
+          .getElementById("shipmentOriginInput")
+          ?.value.trim();
+
+      const destination =
+        document
+          .getElementById("shipmentDestinationInput")
+          ?.value.trim();
+
+      const quantity =
+        Number(
+          document
+            .getElementById("shipmentQuantity")
+            ?.value
+        );
+
+      const eta =
+        document
+          .getElementById("shipmentEtaInput")
+          ?.value.trim();
+
+      const temperature =
+        document
+          .getElementById("shipmentTemperatureInput")
+          ?.value;
+
+      const driver =
+        document
+          .getElementById("shipmentDriverInput")
+          ?.value.trim();
+
+      const vehicle =
+        document
+          .getElementById("shipmentVehicleInput")
+          ?.value.trim();
+
+
+      if (
+        !origin ||
+        !destination ||
+        !Number.isInteger(quantity) ||
+        quantity < 1
+      ) {
+
+        alert(
+          "Please fill origin, destination and a valid quantity."
+        );
+
+        return;
+      }
+
+
+      try {
+
+        const response =
+          await fetch(
+            `${API_BASE_URL}/shipments`,
+            {
+              method: "POST",
+
+              headers: {
+                ...getSettingsHeaders(),
+                "Content-Type":
+                  "application/json"
+              },
+
+              body: JSON.stringify({
+                origin,
+                destination,
+                quantity,
+                eta,
+                temperature,
+                driver,
+                vehicle
+              })
+
+            }
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            data.message ||
+            "Unable to create shipment"
+          );
+
+        }
+
+
+        closeShipmentModal();
+
+        document
+          ?.reset();
+
+
+        await loadShipments();
+
+
+        alert(
+          `Shipment created successfully.\n\n` +
+          `${data.shipment?.shipmentId || ""}`
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          "Create shipment error:",
+          error
+        );
+
+        alert(
+          error.message ||
+          "Unable to create shipment."
+        );
+
+      }
+
+    }
+  );
+
+
+// ================= UPDATE SHIPMENT STATUS =================
+
+document
+  .getElementById("updateShipmentStatusBtn")
+  ?.addEventListener(
+    "click",
+    async () => {
+
+      if (!selectedShipment?._id) {
+        alert("No shipment selected.");
+        return;
+      }
+
+      const status =
+        document
+          .getElementById("shipmentStatusSelect")
+          ?.value;
+
+      const progress =
+        Number(
+          document
+            .getElementById("shipmentProgressInput")
+            ?.value
+        );
+
+
+      if (
+        !status ||
+        !Number.isFinite(progress) ||
+        progress < 0 ||
+        progress > 100
+      ) {
+
+        alert(
+          "Please enter a progress value between 0 and 100."
+        );
+
+        return;
+      }
+
+
+      try {
+
+        const response =
+          await fetch(
+            `${API_BASE_URL}/shipments/${selectedShipment._id}/status`,
+            {
+              method: "PUT",
+
+              headers: {
+                ...getSettingsHeaders(),
+                "Content-Type":
+                  "application/json"
+              },
+
+              body: JSON.stringify({
+                status,
+                progress
+              })
+            }
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            data.message ||
+            "Unable to update shipment"
+          );
+
+        }
+
+
+        alert(
+          `Shipment updated successfully.\n\n` +
+          `${data.shipment?.shipmentId || selectedShipment.shipmentId}\n` +
+          `Status: ${status}\n` +
+          `Progress: ${progress}%`
+        );
+
+
+        closeShipmentDrawer();
+
+        await loadShipments();
+
+
+      } catch (error) {
+
+        console.error(
+          "Update shipment error:",
+          error
+        );
+
+        alert(
+          error.message ||
+          "Unable to update shipment."
+        );
+
+      }
+
+    }
+  );
+
+// ================= REPORT ISSUE =================
+
+document
+  .getElementById("shipmentAlertBtn")
   ?.addEventListener(
     "click",
     () => {
 
+      if (!selectedShipment?._id) {
+        alert("No shipment selected.");
+        return;
+      }
+
       alert(
-        "New shipment creation is ready to connect to the backend."
+        `Issue report started for ${selectedShipment.shipmentId}.`
       );
 
     }
   );
 
 
-  // ============================================================
+// ================= INITIAL LOAD =================
+
+loadShipments();
+
+// ============================================================
 // FINAL FRONTEND PASS — QUICK ACTIONS + ORDERS
 // ============================================================
 

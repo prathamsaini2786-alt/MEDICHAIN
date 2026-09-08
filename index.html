@@ -704,6 +704,56 @@
 
   </div>
 
+  <div style="margin-top:20px;">
+    <label
+      for="shipmentStatusSelect"
+      style="display:block; margin-bottom:8px; font-size:12px; font-weight:600;"
+    >
+      Update status
+    </label>
+
+    <div style="display:flex; gap:8px;">
+      <select
+        id="shipmentStatusSelect"
+        style="flex:1; padding:10px; border:1px solid #d9e1ea; border-radius:8px;"
+      >
+        <option value="Pending">Pending</option>
+        <option value="In transit">In transit</option>
+        <option value="Delayed">Delayed</option>
+        <option value="Delivered">Delivered</option>
+        <option value="Cancelled">Cancelled</option>
+      </select>
+
+      <button
+        class="primary-btn"
+        id="updateShipmentStatusBtn"
+      >
+        Update
+      </button>
+    </div>
+
+    <div
+      style="margin-top:10px;"
+    >
+      <label
+        for="shipmentProgressInput"
+        style="display:block; margin-bottom:6px; font-size:12px; font-weight:600;"
+      >
+        Progress (%)
+      </label>
+
+      <input
+        id="shipmentProgressInput"
+        type="number"
+        min="0"
+        max="100"
+        step="1"
+        placeholder="0"
+        style="width:100%; box-sizing:border-box; padding:10px; border:1px solid #d9e1ea; border-radius:8px;"
+      >
+    </div>
+  </div>
+
   <div class="drawer-actions">
     <button class="ghost-btn" id="shipmentAlertBtn">
       ⚠ Report issue
@@ -721,7 +771,117 @@
 
 
 
-      <section id="page-suppliers" class="page">
+      
+<!-- Create Shipment Modal -->
+<div class="modal hidden" id="shipmentModal">
+
+  <div class="modal-card">
+
+    <div class="modal-head">
+      <div>
+        <div class="eyebrow">LOGISTICS</div>
+        <h2>Create shipment</h2>
+        <p>Register a new medicine shipment.</p>
+      </div>
+
+      <button class="modal-close" id="shipmentModalClose">
+        ×
+      </button>
+    </div>
+
+    <div class="form-grid" id="shipmentCreateForm">
+
+      <div class="form-group">
+        <label>Origin</label>
+        <input
+          id="shipmentOriginInput"
+          type="text"
+          placeholder="Delhi Warehouse"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Destination</label>
+        <input
+          id="shipmentDestinationInput"
+          type="text"
+          placeholder="Mohali Store"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Quantity</label>
+        <input
+          id="shipmentQuantity"
+          type="number"
+          min="1"
+          placeholder="100"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>ETA</label>
+        <input
+          id="shipmentEtaInput"
+          type="text"
+          placeholder="2h 30m"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Temperature °C</label>
+        <input
+          id="shipmentTemperatureInput"
+          type="number"
+          step="0.1"
+          placeholder="4.2"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Driver</label>
+        <input
+          id="shipmentDriverInput"
+          type="text"
+          placeholder="Rajesh Kumar"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Vehicle</label>
+        <input
+          id="shipmentVehicleInput"
+          type="text"
+          placeholder="MH-12-TR-4821"
+        >
+      </div>
+
+    </div>
+
+    <div class="drawer-actions">
+
+      <button
+        class="ghost-btn"
+        id="shipmentCancel"
+      >
+        Cancel
+      </button>
+
+      <button
+        class="primary-btn"
+        id="confirmShipment"
+      >
+        Create shipment
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<section id="page-suppliers" class="page">
         <div class="page-head"><div><div class="eyebrow">NETWORK</div><h1>Suppliers</h1><p>Manage trusted suppliers and monitor fulfillment performance.</p></div><button class="primary-btn">＋ Add supplier</button></div>
         <div class="supplier-grid"><article class="supplier-card"><div class="supplier-logo">MS</div><div><h3>MedSupply India</h3><small>General medicines</small></div><span class="rating">98.2%</span><div class="supplier-stats"><span><b>96.7%</b><small>On-time</small></span><span><b>14</b><small>Active orders</small></span><span><b>4.8/5</b><small>Reliability</small></span></div></article><article class="supplier-card"><div class="supplier-logo">PL</div><div><h3>PharmaLink</h3><small>Specialty medicines</small></div><span class="rating">95.4%</span><div class="supplier-stats"><span><b>94.1%</b><small>On-time</small></span><span><b>8</b><small>Active orders</small></span><span><b>4.6/5</b><small>Reliability</small></span></div></article></div>
       </section>
