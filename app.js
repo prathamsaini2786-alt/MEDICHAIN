@@ -1247,9 +1247,14 @@ function renderInventory(drugs) {
       statusClass;
 
     row.dataset.qr =
-      drug._id ||
-      drug.id ||
-      "";
+  drug._id ||
+  drug.id ||
+  "";
+
+row.dataset.drugId =
+  drug._id ||
+  drug.id ||
+  "";
 
     row.innerHTML = `
 
@@ -1722,10 +1727,16 @@ document
   .getElementById("confirmTransfer")
   ?.addEventListener(
     "click",
-    () => {
+    async () => {
 
       if (!selectedInventory) return;
 
+      const token = getToken();
+
+      if (!token) {
+        alert("Please login first.");
+        return;
+      }
 
       const units =
         Number(
@@ -1734,123 +1745,140 @@ document
           ).value
         );
 
-
       const destination =
         document.getElementById(
           "transferDestination"
         ).value;
 
-
       const sourceQuantity =
         Number(
-          selectedInventory.dataset.quantity
+          selectedInventory.dataset.quantity || 0
         );
 
+      const drugId =
+        selectedInventory.dataset.drugId ||
+        selectedInventory.dataset.qr ||
+        "";
 
-      if (
-        !Number.isFinite(units) ||
-        units < 1
-      ) {
+      const source =
+        selectedInventory.dataset.facility ||
+        "";
 
-        alert(
-          "Enter a valid quantity."
-        );
+      const batchNumber =
+        selectedInventory.dataset.batch ||
+        "";
 
+      const medicine =
+        selectedInventory.dataset.medicine ||
+        "medicine";
+
+      if (!drugId) {
+        alert("Unable to identify this medicine.");
         return;
-
       }
 
+      if (!Number.isFinite(units) || units < 1) {
+        alert("Enter a valid quantity.");
+        return;
+      }
 
       if (units > sourceQuantity) {
-
         alert(
           `Only ${sourceQuantity.toLocaleString()} units are available.`
         );
-
         return;
-
       }
 
+      if (!source || !destination) {
+        alert("Source and destination are required.");
+        return;
+      }
 
-      const newSourceQuantity =
-        sourceQuantity - units;
+      if (source === destination) {
+        alert(
+          "Source and destination must be different."
+        );
+        return;
+      }
 
-
-      selectedInventory.dataset.quantity =
-        newSourceQuantity;
-
-
-      const sourceCells =
-        selectedInventory.querySelectorAll(
-          "td"
+      const confirmButton =
+        document.getElementById(
+          "confirmTransfer"
         );
 
-
-      if (sourceCells[2]) {
-
-        sourceCells[2].innerHTML =
-          `<strong>${newSourceQuantity.toLocaleString()}</strong> units`;
-
+      if (confirmButton) {
+        confirmButton.disabled = true;
+        confirmButton.textContent = "Creating...";
       }
 
+      try {
 
-      const destinationRow =
-        [...getInventoryRows()].find(row => {
+        const response = await fetch(
+          `${API_BASE_URL}/movements`,
+          {
+            method: "POST",
 
-          const facilityCell =
-            row.querySelectorAll("td")[3];
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            },
 
-          return (
-            facilityCell &&
-            facilityCell.textContent.trim() ===
-              destination
+            body: JSON.stringify({
+              drug: drugId,
+              batchNumber,
+              fromLocation: source,
+              toLocation: destination,
+              quantity: units,
+              movedBy: "Current user",
+              notes: `Transfer of ${medicine}`
+            })
+          }
+        );
+
+        const data =
+          await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.message ||
+            "Failed to create stock movement"
           );
+        }
 
-        });
+        closeTransferModal();
+        closeInventoryDrawer();
 
+       showToast(
+  `Transfer created · ${units.toLocaleString()} units of ${medicine} · ${source} → ${destination}`,
+  "success"
+);
 
-      if (destinationRow) {
+        console.log(
+          "Stock movement created:",
+          data
+        );
 
-        const destinationQuantity =
-          Number(
-            destinationRow.dataset.quantity || 0
-          );
+      } catch (error) {
 
+        console.error(
+          "Create stock movement error:",
+          error
+        );
 
-        const newDestinationQuantity =
-          destinationQuantity + units;
+       showToast(
+  error.message || "Failed to create stock movement",
+  "error"
+);
 
+      } finally {
 
-        destinationRow.dataset.quantity =
-          newDestinationQuantity;
-
-
-        const destinationCells =
-          destinationRow.querySelectorAll(
-            "td"
-          );
-
-
-        if (destinationCells[2]) {
-
-          destinationCells[2].innerHTML =
-            `<strong>${newDestinationQuantity.toLocaleString()}</strong> units`;
-
+        if (confirmButton) {
+          confirmButton.disabled = false;
+          confirmButton.textContent =
+            "Create transfer plan";
         }
 
       }
-
-
-      closeTransferModal();
-
-      closeInventoryDrawer();
-
-
-      alert(
-        `Transfer successful!\n\n` +
-        `${units.toLocaleString()} units transferred to ${destination}.`
-      );
-
     }
   );
 
@@ -3931,17 +3959,35 @@ async function loadAlerts() {
 
     const alerts = data.alerts || data || [];
 
-    const critical = alerts.filter(
-      alert => alert.severity === "Critical" && !alert.reviewed
-    ).length;
+   const critical = alerts.filter(
+  alert =>
+    String(alert.severity || "").toLowerCase() === "critical" &&
+    !alert.reviewed
+).length;
 
-    const warning = alerts.filter(
-      alert => alert.severity === "Warning" && !alert.reviewed
-    ).length;
+const warning = alerts.filter(
+  alert =>
+    String(alert.severity || "").toLowerCase() === "warning" &&
+    !alert.reviewed
+).length;
 
-    const info = alerts.filter(
-      alert => alert.severity === "Info" && !alert.reviewed
-    ).length;
+const info = alerts.filter(
+  alert =>
+    String(alert.severity || "").toLowerCase() === "info" &&
+    !alert.reviewed
+).length;
+
+    const activeAlerts =
+  alerts.filter(alert => !alert.reviewed).length;
+
+const alertsNavBadge =
+  document.getElementById("alertsNavBadge");
+
+if (alertsNavBadge) {
+  alertsNavBadge.textContent = activeAlerts;
+  alertsNavBadge.style.display =
+    activeAlerts > 0 ? "inline-flex" : "none";
+}
 
     if (criticalAlertCount) {
       criticalAlertCount.textContent = critical;
@@ -4352,3 +4398,1047 @@ function renderAnalyticsTrend(trends) {
 
 loadAnalytics();
 
+
+// ==================== TRANSFER WAREHOUSES ====================
+
+async function loadTransferWarehouses() {
+  const select = document.getElementById("transferDestination");
+  const token = getToken();
+
+  if (!select || !token) return;
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/warehouses`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Failed to load warehouses"
+      );
+    }
+
+    const warehouses = Array.isArray(data)
+      ? data
+      : data.warehouses || [];
+
+    select.innerHTML = "";
+
+    if (!warehouses.length) {
+      select.innerHTML =
+        `<option value="">No warehouses available</option>`;
+      return;
+    }
+
+    warehouses.forEach(warehouse => {
+      const option = document.createElement("option");
+
+      option.value = warehouse.name;
+      option.textContent =
+        `${warehouse.name} · ${warehouse.location || ""}`;
+
+      select.appendChild(option);
+    });
+
+  } catch (error) {
+    console.error(
+      "Load transfer warehouses error:",
+      error
+    );
+
+    select.innerHTML =
+      `<option value="">Unable to load warehouses</option>`;
+  }
+}
+
+loadTransferWarehouses();
+
+// ==================== TRANSFER WAREHOUSES ====================
+
+async function loadTransferWarehouses() {
+  const select = document.getElementById("transferDestination");
+  const token = getToken();
+
+  if (!select || !token) return;
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/warehouses`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Failed to load warehouses"
+      );
+    }
+
+    const warehouses = Array.isArray(data)
+      ? data
+      : data.warehouses || [];
+
+    select.innerHTML = "";
+
+    if (!warehouses.length) {
+      select.innerHTML =
+        `<option value="">No warehouses available</option>`;
+      return;
+    }
+
+    warehouses.forEach(warehouse => {
+      const option = document.createElement("option");
+
+      option.value = warehouse.name;
+      option.textContent =
+        `${warehouse.name} · ${warehouse.location || ""}`;
+
+      select.appendChild(option);
+    });
+
+  } catch (error) {
+    console.error(
+      "Load transfer warehouses error:",
+      error
+    );
+
+    select.innerHTML =
+      `<option value="">Unable to load warehouses</option>`;
+  }
+}
+
+loadTransferWarehouses();
+
+
+// =========================================
+// STOCK MOVEMENTS
+// =========================================
+
+async function loadMovements() {
+  const tableBody = document.getElementById("movementsTableBody");
+  const token = getToken();
+
+  if (!tableBody || !token) return;
+
+  tableBody.innerHTML = `
+    <tr>
+      <td colspan="7">Loading stock movements...</td>
+    </tr>
+  `;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/movements`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to load movements");
+    }
+
+    const movements = Array.isArray(data)
+      ? data
+      : data.movements || [];
+
+    if (!movements.length) {
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="7">No stock movements found.</td>
+        </tr>
+      `;
+      return;
+    }
+
+    tableBody.innerHTML = "";
+
+    movements.forEach(movement => {
+      const row = document.createElement("tr");
+
+      const medicine =
+        movement.drug?.name ||
+        movement.drug?.genericName ||
+        "Unknown medicine";
+
+      const batch = movement.batchNumber || movement.drug?.batchNumber || "—";
+
+      const created = movement.createdAt
+        ? new Date(movement.createdAt).toLocaleDateString()
+        : "—";
+
+      const status = movement.status || "Pending";
+
+      const statusClass =
+        status === "Delivered"
+          ? "healthy"
+          : status === "Cancelled"
+            ? "critical"
+            : status === "In Transit"
+              ? "info"
+              : "warning";
+
+      row.innerHTML = `
+        <td>
+          <b>${medicine}</b>
+        </td>
+
+        <td>${batch}</td>
+
+        <td>
+          <small>
+            ${movement.fromLocation || "—"}
+            →
+            ${movement.toLocation || "—"}
+          </small>
+        </td>
+
+        <td>
+          <b>${Number(movement.quantity || 0).toLocaleString()}</b>
+          units
+        </td>
+
+        <td>${created}</td>
+
+        <td>
+          <span class="status ${statusClass}">
+            ${status}
+          </span>
+        </td>
+
+        <td>
+          ${getMovementActionButton(movement)}
+        </td>
+      `;
+
+      tableBody.appendChild(row);
+    });
+
+    bindMovementActions();
+
+  } catch (error) {
+    console.error("Load movements error:", error);
+
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="7">
+          Failed to load stock movements.
+        </td>
+      </tr>
+    `;
+  }
+}
+
+
+function getMovementActionButton(movement) {
+  const status = movement.status;
+
+  if (status === "Pending") {
+    return `
+      <button
+        class="ghost-btn movement-action-btn"
+        data-movement-id="${movement._id}"
+        data-next-status="In Transit"
+      >
+        Start transfer
+      </button>
+    `;
+  }
+
+  if (status === "In Transit") {
+    return `
+      <button
+        class="primary-btn movement-action-btn"
+        data-movement-id="${movement._id}"
+        data-next-status="Delivered"
+      >
+        Mark delivered
+      </button>
+    `;
+  }
+
+  return `
+    <span class="muted-text">No action</span>
+  `;
+}
+
+
+function bindMovementActions() {
+  document
+    .querySelectorAll(".movement-action-btn")
+    .forEach(button => {
+
+      button.addEventListener("click", async () => {
+
+        const movementId = button.dataset.movementId;
+        const nextStatus = button.dataset.nextStatus;
+        const token = getToken();
+
+        if (!movementId || !token) {
+          alert("Unable to update this movement.");
+          return;
+        }
+
+        const originalText = button.textContent;
+
+        button.disabled = true;
+        button.textContent = "Updating...";
+
+        try {
+
+          const response = await fetch(
+            `${API_BASE_URL}/movements/${movementId}/status`,
+            {
+              method: "PUT",
+
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+              },
+
+              body: JSON.stringify({
+                status: nextStatus
+              })
+            }
+          );
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(
+              data.message ||
+              data.error ||
+              "Failed to update movement"
+            );
+          }
+
+          await loadMovements();
+
+          showToast(
+  `Movement updated successfully · Status: ${nextStatus}`,
+  "success"
+);
+
+        } catch (error) {
+
+          console.error(
+            "Update movement status error:",
+            error
+          );
+
+          showToast(
+  error.message ||
+  "Failed to update movement",
+  "error"
+);
+          button.disabled = false;
+          button.textContent = originalText;
+        }
+      });
+    });
+}
+
+
+document
+  .getElementById("refreshMovementsBtn")
+  ?.addEventListener(
+    "click",
+    loadMovements
+  );
+
+
+// Load movements when the app starts
+loadMovements();
+
+// =========================================
+// MEDICHAIN TOAST NOTIFICATIONS
+// =========================================
+
+function showToast(message, type = "success") {
+  let container = document.getElementById("toastContainer");
+
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "toastContainer";
+    container.className = "toast-container";
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement("div");
+  toast.className = `toast toast-${type}`;
+
+  const icon =
+    type === "error"
+      ? "!"
+      : type === "warning"
+        ? "⚠"
+        : "✓";
+
+  toast.innerHTML = `
+    <div class="toast-icon">${icon}</div>
+    <div class="toast-message">${message}</div>
+    <button class="toast-close" aria-label="Close">×</button>
+  `;
+
+  container.appendChild(toast);
+
+  const closeToast = () => {
+    toast.classList.add("toast-hide");
+
+    setTimeout(() => {
+      toast.remove();
+    }, 250);
+  };
+
+  toast.querySelector(".toast-close")?.addEventListener(
+    "click",
+    closeToast
+  );
+
+  setTimeout(closeToast, 4500);
+}
+
+
+// =========================================
+// DASHBOARD 2.0 — LIVE DATA
+// =========================================
+
+async function loadDashboard() {
+  const token = getToken();
+
+  if (!token) return;
+
+  try {
+    const headers = {
+      Authorization: `Bearer ${token}`
+    };
+
+    const [
+  analyticsResponse,
+  alertsResponse,
+  shipmentsResponse,
+  warehousesResponse,
+  drugsResponse
+] = await Promise.all([
+  fetch(`${API_BASE_URL}/analytics`, { headers }),
+  fetch(`${API_BASE_URL}/alerts`, { headers }),
+  fetch(`${API_BASE_URL}/shipments`, { headers }),
+  fetch(`${API_BASE_URL}/warehouses`, { headers }),
+  fetch(`${API_BASE_URL}/drugs`, { headers })
+]);
+
+    const analytics =
+      analyticsResponse.ok
+        ? await analyticsResponse.json()
+        : null;
+
+    const alerts =
+      alertsResponse.ok
+        ? await alertsResponse.json()
+        : [];
+
+    const shipments =
+      shipmentsResponse.ok
+        ? await shipmentsResponse.json()
+        : [];
+
+    const warehouses =
+      warehousesResponse.ok
+        ? await warehousesResponse.json()
+        : [];
+
+    const metrics = analytics?.metrics || {};
+    const inventory = analytics?.inventory || {};
+    const network = analytics?.network || {};
+
+    const alertList =
+      Array.isArray(alerts)
+        ? alerts
+        : alerts.alerts || [];
+
+    const shipmentList =
+      Array.isArray(shipments)
+        ? shipments
+        : shipments.shipments || [];
+
+    const warehouseList =
+      Array.isArray(warehouses)
+        ? warehouses
+        : warehouses.warehouses || [];
+
+        const drugs =
+  drugsResponse.ok
+    ? await drugsResponse.json()
+    : [];
+
+const drugList =
+  Array.isArray(drugs)
+    ? drugs
+    : drugs.drugs || [];
+
+
+    // -----------------------------------------
+    // TOP SUMMARY
+    // -----------------------------------------
+
+    const inventoryUnits =
+      inventory.totalQuantity || 0;
+
+    const totalOrders =
+      metrics.totalOrders || 0;
+
+    const activeShipments =
+      shipmentList.filter(shipment =>
+        ["Pending", "In Transit", "Delayed"].includes(
+          shipment.status
+        )
+      ).length;
+
+    const activeAlerts =
+      alertList.filter(alert =>
+        !alert.reviewed
+      ).length;
+
+
+    setDashboardText(
+      "dashboardInventoryUnits",
+      inventoryUnits.toLocaleString()
+    );
+
+    setDashboardText(
+      "dashboardOrdersPipeline",
+      totalOrders.toLocaleString()
+    );
+
+    setDashboardText(
+      "dashboardActiveShipments",
+      activeShipments.toLocaleString()
+    );
+
+    setDashboardText(
+      "dashboardRiskCount",
+      activeAlerts.toLocaleString()
+    );
+
+setDashboardText(
+  "dashboardInventoryDetail",
+  `${drugList.length} medicine records`
+);
+
+    setDashboardText(
+      "dashboardOrdersDetail",
+      `${metrics.completedOrders || 0} completed`
+    );
+
+    setDashboardText(
+      "dashboardShipmentsDetail",
+      `${metrics.deliveredShipments || 0} delivered`
+    );
+
+    setDashboardText(
+      "dashboardRiskDetail",
+     `${alertList.filter(
+  a =>
+    !a.reviewed &&
+    String(a.severity || "").toLowerCase() === "critical"
+).length} critical`
+    );
+
+
+    // -----------------------------------------
+    // NETWORK HEALTH
+    // -----------------------------------------
+
+    const stockHealth =
+      Number(metrics.stockHealth || 0);
+
+    const expiryPrevention =
+      Number(metrics.expiryPrevention || 0);
+
+    const networkScore = Math.round(
+      (stockHealth + expiryPrevention) / 2
+    );
+
+    setDashboardText(
+      "dashboardNetworkScore",
+      networkScore
+    );
+
+    setDashboardText(
+      "dashboardNetworkScoreText",
+      `${stockHealth.toFixed(1)}% stock health`
+    );
+
+    setDashboardText(
+      "dashboardNetworkSummary",
+      `${warehouseList.length} facilities online · ${activeShipments} shipments moving · ${activeAlerts} risks need attention`
+    );
+
+
+    // -----------------------------------------
+    // INVENTORY HEALTH
+    // -----------------------------------------
+
+    const totalMedicines =
+  drugList.length ||
+  metrics.totalDrugs ||
+  0;
+
+const healthyMedicines =
+  drugList.length
+    ? drugList.filter(
+        drug =>
+          String(drug.status || "").toLowerCase() ===
+          "available"
+      ).length
+    : (metrics.healthyDrugs || 0);
+
+const expiredMedicines =
+  drugList.length
+    ? drugList.filter(
+        drug =>
+          String(drug.status || "").toLowerCase() ===
+          "expired"
+      ).length
+    : (metrics.expiredDrugs || 0);
+
+const lowStockMedicines =
+  drugList.length
+    ? drugList.filter(
+        drug =>
+          String(drug.status || "").toLowerCase() ===
+          "low stock"
+      ).length
+    : Math.max(
+        0,
+        totalMedicines -
+        healthyMedicines -
+        expiredMedicines
+      );
+
+    const healthyPercent =
+      totalMedicines
+        ? (healthyMedicines / totalMedicines) * 100
+        : 0;
+
+    const lowStockPercent =
+      totalMedicines
+        ? (lowStockMedicines / totalMedicines) * 100
+        : 0;
+
+    const expiredPercent =
+      totalMedicines
+        ? (expiredMedicines / totalMedicines) * 100
+        : 0;
+
+
+    setDashboardText(
+      "dashboardHealthyPercent",
+      `${healthyPercent.toFixed(0)}%`
+    );
+
+    setDashboardText(
+      "dashboardHealthyPercentList",
+      `${healthyPercent.toFixed(1)}%`
+    );
+
+    setDashboardText(
+      "dashboardLowStockPercent",
+      `${lowStockPercent.toFixed(1)}%`
+    );
+
+    setDashboardText(
+      "dashboardExpiredPercent",
+      `${expiredPercent.toFixed(1)}%`
+    );
+
+    setDashboardText(
+      "dashboardHealthyUnits",
+      `${healthyMedicines} medicine records`
+    );
+
+    setDashboardText(
+      "dashboardLowStockUnits",
+      `${lowStockMedicines} medicine records`
+    );
+
+    setDashboardText(
+      "dashboardExpiredUnits",
+      `${expiredMedicines} medicine records`
+    );
+
+    setDashboardText(
+      "dashboardInventoryFacilities",
+      `Across ${warehouseList.length} facilities`
+    );
+
+
+    // -----------------------------------------
+    // PRIMARY RISK
+    // -----------------------------------------
+
+   const criticalAlerts =
+  alertList.filter(
+    alert =>
+      !alert.reviewed &&
+      String(alert.severity || "").toLowerCase() ===
+      "critical"
+  );
+
+   const warningAlerts =
+  alertList.filter(
+    alert =>
+      !alert.reviewed &&
+      String(alert.severity || "").toLowerCase() ===
+      "warning"
+  );
+
+
+    const primaryAlert =
+      criticalAlerts[0] ||
+      warningAlerts[0] ||
+      alertList.find(a => !a.reviewed);
+
+
+    if (primaryAlert) {
+
+      setDashboardText(
+        "dashboardPrimaryRiskLabel",
+        `${primaryAlert.severity || "ALERT"} · ACTION REQUIRED`
+      );
+
+      setDashboardText(
+        "dashboardPrimaryRisk",
+        primaryAlert.title ||
+        primaryAlert.message ||
+        "Operational risk detected"
+      );
+
+      setDashboardText(
+        "dashboardPrimaryRiskDescription",
+        primaryAlert.message ||
+        "Review the alert for more information."
+      );
+
+      setDashboardText(
+        "dashboardRiskRecommendation",
+        "Open the Alerts center and review this event."
+      );
+
+    } else {
+
+      setDashboardText(
+        "dashboardPrimaryRiskLabel",
+        "SYSTEM STATUS"
+      );
+
+      setDashboardText(
+        "dashboardPrimaryRisk",
+        "No active operational risks"
+      );
+
+      setDashboardText(
+        "dashboardPrimaryRiskDescription",
+        "The current network has no unreviewed alerts."
+      );
+
+      setDashboardText(
+        "dashboardRiskRecommendation",
+        "Continue monitoring the network."
+      );
+    }
+
+
+    // -----------------------------------------
+    // SECONDARY RISKS
+    // -----------------------------------------
+
+    const secondaryContainer =
+      document.getElementById(
+        "dashboardSecondaryRisks"
+      );
+
+    if (secondaryContainer) {
+
+      const secondaryAlerts =
+        alertList
+          .filter(a => !a.reviewed)
+          .slice(1, 3);
+
+      if (!secondaryAlerts.length) {
+
+        secondaryContainer.innerHTML = `
+          <div>
+            <span class="severity info-bg">✓</span>
+            <div>
+              <b>No additional alerts</b>
+              <small>Network monitoring active</small>
+            </div>
+          </div>
+
+          <div>
+            <span class="severity info-bg">i</span>
+            <div>
+              <b>Inventory monitoring active</b>
+              <small>Stock levels being tracked</small>
+            </div>
+          </div>
+        `;
+
+      } else {
+
+        secondaryContainer.innerHTML =
+          secondaryAlerts
+            .map(alert => `
+              <div>
+                <span class="severity warning-bg">!</span>
+                <div>
+                  <b>${alert.title || alert.message || "Operational alert"}</b>
+                  <small>${alert.message || "Review required"}</small>
+                </div>
+              </div>
+            `)
+            .join("");
+      }
+    }
+
+
+    // -----------------------------------------
+    // LIVE SHIPMENTS
+    // -----------------------------------------
+
+    const shipmentContainer =
+      document.getElementById(
+        "dashboardShipmentsList"
+      );
+
+    if (shipmentContainer) {
+
+      const liveShipments =
+        shipmentList
+          .filter(shipment =>
+            ["Pending", "In Transit", "Delayed"].includes(
+              shipment.status
+            )
+          )
+          .slice(0, 3);
+
+
+      if (!liveShipments.length) {
+
+        shipmentContainer.innerHTML = `
+          <div class="shipment">
+            <div class="shipment-line">
+              <span class="route-dot"></span>
+
+              <div>
+                <b>No active shipments</b>
+                <small>All current shipments are settled</small>
+              </div>
+
+              <span class="route-progress">—</span>
+            </div>
+
+            <div class="progress">
+              <i style="width:0%"></i>
+            </div>
+
+            <div class="shipment-meta">
+              <span>Network monitoring active</span>
+              <b>—</b>
+            </div>
+          </div>
+        `;
+
+      } else {
+
+        shipmentContainer.innerHTML =
+          liveShipments
+            .map(shipment => {
+
+              const progress =
+                Math.max(
+                  0,
+                  Math.min(
+                    100,
+                    Number(shipment.progress || 0)
+                  )
+                );
+
+              return `
+                <div class="shipment">
+
+                  <div class="shipment-line">
+
+                    <span class="route-dot ${
+                      shipment.status === "Delayed"
+                        ? "orange"
+                        : ""
+                    }"></span>
+
+                    <div>
+                      <b>
+                        ${shipment.origin || "Origin"}
+                        → 
+                        ${shipment.destination || "Destination"}
+                      </b>
+
+                      <small>
+                        ${shipment.shipmentId || "Shipment"} ·
+                        ${shipment.status || "Pending"}
+                      </small>
+                    </div>
+
+                    <span class="route-progress">
+                      ${progress}%
+                    </span>
+
+                  </div>
+
+                  <div class="progress">
+                    <i style="width:${progress}%"></i>
+                  </div>
+
+                  <div class="shipment-meta">
+
+                    <span>
+                      ${shipment.temperature != null
+                        ? `❄ ${shipment.temperature}°C`
+                        : "Temperature normal"}
+                    </span>
+
+                    <b>
+                      ETA ${shipment.eta || "—"}
+                    </b>
+
+                  </div>
+
+                </div>
+              `;
+            })
+            .join("");
+      }
+    }
+
+
+    // -----------------------------------------
+    // FACILITY BARS
+    // -----------------------------------------
+
+    const facilityBars =
+      document.getElementById(
+        "dashboardFacilityBars"
+      );
+
+    if (facilityBars && warehouseList.length) {
+
+      const maxStock =
+        Math.max(
+          ...warehouseList.map(
+            warehouse =>
+              Number(warehouse.currentStock || 0)
+          ),
+          1
+        );
+
+      facilityBars.innerHTML =
+        warehouseList
+          .slice(0, 4)
+          .map(warehouse => {
+
+            const width =
+              (
+                Number(warehouse.currentStock || 0) /
+                maxStock
+              ) * 100;
+
+            return `
+              <i
+                style="width:${Math.max(8, width)}%"
+                title="${warehouse.name}: ${warehouse.currentStock || 0} units"
+              ></i>
+            `;
+          })
+          .join("");
+    }
+
+
+    // -----------------------------------------
+    // ACTIVITY BARS
+    // -----------------------------------------
+
+    const activityBars =
+      document.getElementById(
+        "dashboardActivityBars"
+      );
+
+    if (activityBars) {
+
+      const values = [
+        inventoryUnits,
+        totalOrders,
+        activeShipments,
+        network.activeSuppliers || 0
+      ];
+
+      const maxValue =
+        Math.max(...values, 1);
+
+      activityBars.innerHTML =
+        values
+          .map(value => `
+            <i
+              style="
+                width:16%;
+                height:${Math.max(
+                  8,
+                  (value / maxValue) * 100
+                )}%;
+                border-radius:8px 8px 0 0;
+                background:rgba(37, 126, 244, .78);
+                display:block;
+              "
+            ></i>
+          `)
+          .join("");
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Dashboard load error:",
+      error
+    );
+
+    showToast(
+      "Unable to load some live dashboard data.",
+      "error"
+    );
+  }
+}
+
+
+function setDashboardText(id, value) {
+  const element =
+    document.getElementById(id);
+
+  if (element) {
+    element.textContent = value;
+  }
+}
+
+
+loadDashboard();
