@@ -13,6 +13,7 @@ const orderRoutes = require("./routes/orderRoutes");
 const shipmentRoutes = require("./routes/shipmentRoutes");
 const supplierRoutes = require("./routes/supplierRoutes");
 const alertRoutes = require("./routes/alertRoutes");
+const analyticsRoutes = require("./routes/analyticsRoutes");
 
 require("dotenv").config();
 
@@ -40,6 +41,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/warehouses", warehouseRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/shipments", shipmentRoutes);
+app.use("/api/analytics", analyticsRoutes);
 app.use("/api/alerts", alertRoutes);
 app.use("/api/suppliers", supplierRoutes);
 
