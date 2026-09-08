@@ -3878,3 +3878,277 @@ confirmSupplier?.addEventListener(
 
 // Load suppliers on startup
 loadSuppliers();
+
+
+// ============================================================
+// ALERTS
+// ============================================================
+
+const alertsList = document.getElementById("alertsList");
+const markAllAlertsReviewed =
+  document.getElementById("markAllAlertsReviewed");
+
+const criticalAlertCount =
+  document.getElementById("criticalAlertCount");
+
+const warningAlertCount =
+  document.getElementById("warningAlertCount");
+
+const infoAlertCount =
+  document.getElementById("infoAlertCount");
+
+
+async function loadAlerts() {
+  const token = getToken();
+
+  if (!token || !alertsList) return;
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/alerts`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    const text = await response.text();
+
+    let data;
+
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error("Invalid server response");
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Failed to load alerts"
+      );
+    }
+
+    const alerts = data.alerts || data || [];
+
+    const critical = alerts.filter(
+      alert => alert.severity === "Critical" && !alert.reviewed
+    ).length;
+
+    const warning = alerts.filter(
+      alert => alert.severity === "Warning" && !alert.reviewed
+    ).length;
+
+    const info = alerts.filter(
+      alert => alert.severity === "Info" && !alert.reviewed
+    ).length;
+
+    if (criticalAlertCount) {
+      criticalAlertCount.textContent = critical;
+    }
+
+    if (warningAlertCount) {
+      warningAlertCount.textContent = warning;
+    }
+
+    if (infoAlertCount) {
+      infoAlertCount.textContent = info;
+    }
+
+    alertsList.innerHTML = "";
+
+    if (!alerts.length) {
+      alertsList.innerHTML = `
+        <div class="large-alert info">
+          <span class="severity info-bg">i</span>
+          <div>
+            <b>No alerts</b>
+            <p>
+              There are currently no disruptions,
+              stock risks or compliance events.
+            </p>
+          </div>
+        </div>
+      `;
+
+      return;
+    }
+
+    alerts.forEach(alert => {
+      const severityClass =
+        alert.severity === "Critical"
+          ? "critical"
+          : alert.severity === "Warning"
+            ? "warning"
+            : "info";
+
+      const severityIcon =
+        alert.severity === "Info" ? "i" : "!";
+
+      const detected = alert.createdAt
+        ? new Date(alert.createdAt).toLocaleString()
+        : "Recently";
+
+      const recommendation =
+        alert.recommendation
+          ? `<small>Recommended action: ${alert.recommendation}</small>`
+          : "";
+
+      const actionButton = alert.reviewed
+        ? `<button class="ghost-btn" disabled>Reviewed</button>`
+        : `<button
+            class="primary-btn review-alert-btn"
+            data-alert-id="${alert._id}"
+          >
+            Review action
+          </button>`;
+
+      const item = document.createElement("div");
+
+      item.className = `large-alert ${severityClass}`;
+
+      item.innerHTML = `
+        <span class="severity ${severityClass}-bg">
+          ${severityIcon}
+        </span>
+
+        <div>
+          <b>${alert.title || "Alert"}</b>
+
+          <p>
+            ${alert.message || ""}
+          </p>
+
+          <small>
+            Detected ${detected}
+            ${recommendation ? " · " : ""}
+          </small>
+
+          ${recommendation}
+        </div>
+
+        ${actionButton}
+      `;
+
+      alertsList.appendChild(item);
+    });
+
+    document
+      .querySelectorAll(".review-alert-btn")
+      .forEach(button => {
+        button.addEventListener("click", () => {
+          reviewAlert(button.dataset.alertId);
+        });
+      });
+
+  } catch (error) {
+    console.error("Load alerts error:", error);
+
+    alertsList.innerHTML = `
+      <div class="large-alert critical">
+        <span class="severity critical-bg">!</span>
+        <div>
+          <b>Unable to load alerts</b>
+          <p>${error.message}</p>
+        </div>
+      </div>
+    `;
+  }
+}
+
+
+async function reviewAlert(alertId) {
+  const token = getToken();
+
+  if (!token || !alertId) return;
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/alerts/${alertId}/review`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Failed to review alert"
+      );
+    }
+
+    await loadAlerts();
+
+  } catch (error) {
+    console.error("Review alert error:", error);
+
+    alert(
+      error.message || "Failed to review alert"
+    );
+  }
+}
+
+
+markAllAlertsReviewed?.addEventListener(
+  "click",
+  async () => {
+
+    const token = getToken();
+
+    if (!token) {
+      alert("Please login first.");
+      return;
+    }
+
+    try {
+      markAllAlertsReviewed.disabled = true;
+      markAllAlertsReviewed.textContent = "Updating...";
+
+      const response = await fetch(
+        `${API_BASE_URL}/alerts/review-all`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Failed to review alerts"
+        );
+      }
+
+      await loadAlerts();
+
+      alert("All alerts marked as reviewed.");
+
+    } catch (error) {
+      console.error(
+        "Mark all alerts reviewed error:",
+        error
+      );
+
+      alert(
+        error.message ||
+        "Failed to mark alerts as reviewed"
+      );
+
+    } finally {
+      markAllAlertsReviewed.disabled = false;
+      markAllAlertsReviewed.textContent =
+        "Mark all reviewed";
+    }
+  }
+);
+
+
+// Load alerts
+loadAlerts();

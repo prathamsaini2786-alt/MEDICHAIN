@@ -966,16 +966,43 @@
 
 </div>
 
-      <section id="page-alerts" class="page">
-        <div class="page-head"><div><div class="eyebrow">RISK CENTER</div><h1>Alerts</h1><p>Prioritized disruptions, stock risks and compliance events.</p></div><button class="ghost-btn">Mark all reviewed</button></div>
-        <div class="alert-summary"><div><span class="severity critical-bg">!</span><b>3</b><small>Critical</small></div><div><span class="severity warning-bg">!</span><b>3</b><small>Warnings</small></div><div><span class="severity info-bg">i</span><b>2</b><small>For review</small></div></div>
-        <article class="panel"><div class="large-alert critical"><span class="severity critical-bg">!</span><div><b>Insulin stock projected to run out</b><p>Mohali Store is projected to reach zero stock in approximately 18 hours based on current demand.</p><small>Detected 24 min ago · Recommended action: redistribute 120 units from Chandigarh DC.</small></div><button class="primary-btn">Review action</button></div><div class="large-alert warning"><span class="severity warning-bg">!</span><div><b>Shipment MC-28491 delayed</b><p>Expected delivery has moved by 47 minutes due to route congestion.</p><small>Detected 41 min ago · Temperature remains within safe range.</small></div><button class="ghost-btn">Track shipment</button></div></article>
-      </section>
+     <section id="page-alerts" class="page">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">RISK CENTER</div>
+      <h1>Alerts</h1>
+      <p>Prioritized disruptions, stock risks and compliance events.</p>
+    </div>
 
-      <section id="page-analytics" class="page">
-        <div class="page-head"><div><div class="eyebrow">INSIGHTS</div><h1>Analytics</h1><p>Understand demand, stock efficiency and network performance.</p></div><span class="select-like">This month ⌄</span></div>
-        <div class="analytics-grid"><article class="panel big-chart"><div class="panel-head"><div><h2>Demand vs supply</h2><p>Units across the network</p></div></div><div class="fake-bars"><i style="height:48%"></i><i style="height:61%"></i><i style="height:55%"></i><i style="height:72%"></i><i style="height:66%"></i><i style="height:84%"></i><i style="height:77%"></i><i style="height:92%"></i><i style="height:81%"></i><i style="height:96%"></i></div><div class="bar-labels"><span>W1</span><span>W2</span><span>W3</span><span>W4</span></div></article><article class="panel"><div class="panel-head"><div><h2>Network performance</h2><p>Key operating metrics</p></div></div><div class="metric"><span>Order fulfillment</span><b>96.4%</b><div><i style="width:96.4%"></i></div></div><div class="metric"><span>On-time delivery</span><b>94.8%</b><div><i style="width:94.8%"></i></div></div><div class="metric"><span>Inventory accuracy</span><b>98.7%</b><div><i style="width:98.7%"></i></div></div><div class="metric"><span>Expiry prevention</span><b>91.2%</b><div><i style="width:91.2%"></i></div></div></article></div>
-      </section>
+    <button class="ghost-btn" id="markAllAlertsReviewed">
+      Mark all reviewed
+    </button>
+  </div>
+
+  <div class="alert-summary">
+    <div>
+      <span class="severity critical-bg">!</span>
+      <b id="criticalAlertCount">0</b>
+      <small>Critical</small>
+    </div>
+
+    <div>
+      <span class="severity warning-bg">!</span>
+      <b id="warningAlertCount">0</b>
+      <small>Warnings</small>
+    </div>
+
+    <div>
+      <span class="severity info-bg">i</span>
+      <b id="infoAlertCount">0</b>
+      <small>For review</small>
+    </div>
+  </div>
+
+  <article class="panel" id="alertsList">
+    <p>Loading alerts...</p>
+  </article>
+</section>
 
       <section id="page-settings" class="page">
 
