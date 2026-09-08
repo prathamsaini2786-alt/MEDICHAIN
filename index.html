@@ -880,11 +880,91 @@
 
 </div>
 
-
 <section id="page-suppliers" class="page">
-        <div class="page-head"><div><div class="eyebrow">NETWORK</div><h1>Suppliers</h1><p>Manage trusted suppliers and monitor fulfillment performance.</p></div><button class="primary-btn">＋ Add supplier</button></div>
-        <div class="supplier-grid"><article class="supplier-card"><div class="supplier-logo">MS</div><div><h3>MedSupply India</h3><small>General medicines</small></div><span class="rating">98.2%</span><div class="supplier-stats"><span><b>96.7%</b><small>On-time</small></span><span><b>14</b><small>Active orders</small></span><span><b>4.8/5</b><small>Reliability</small></span></div></article><article class="supplier-card"><div class="supplier-logo">PL</div><div><h3>PharmaLink</h3><small>Specialty medicines</small></div><span class="rating">95.4%</span><div class="supplier-stats"><span><b>94.1%</b><small>On-time</small></span><span><b>8</b><small>Active orders</small></span><span><b>4.6/5</b><small>Reliability</small></span></div></article></div>
-      </section>
+
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">NETWORK</div>
+      <h1>Suppliers</h1>
+      <p>Manage trusted suppliers and monitor fulfillment performance.</p>
+    </div>
+
+    <button class="primary-btn" id="addSupplierBtn">
+      ＋ Add supplier
+    </button>
+  </div>
+
+  <div class="supplier-grid" id="supplierGrid">
+    <div class="panel">
+      <p>Loading suppliers...</p>
+    </div>
+  </div>
+
+</section>
+
+<!-- Create Supplier Modal -->
+<div class="modal hidden" id="supplierModal">
+
+  <div class="modal-card">
+
+    <div class="modal-head">
+      <div>
+        <div class="eyebrow">NETWORK</div>
+        <h2>Add supplier</h2>
+        <p>Register a trusted medicine supplier.</p>
+      </div>
+
+      <button class="modal-close" id="supplierModalClose">
+        ×
+      </button>
+    </div>
+
+    <div class="form-grid">
+
+      <label>
+        Supplier name
+        <input
+          type="text"
+          id="supplierName"
+          placeholder="MedSupply India"
+        >
+      </label>
+
+      <label>
+        Supplier code
+        <input
+          type="text"
+          id="supplierCode"
+          placeholder="MSI001"
+        >
+      </label>
+
+      <label>
+        Category
+        <input
+          type="text"
+          id="supplierCategory"
+          placeholder="General medicines"
+        >
+      </label>
+
+    </div>
+
+    <div class="modal-actions">
+
+      <button class="ghost-btn" id="supplierCancel">
+        Cancel
+      </button>
+
+      <button class="primary-btn" id="confirmSupplier">
+        Add supplier
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
 
       <section id="page-alerts" class="page">
         <div class="page-head"><div><div class="eyebrow">RISK CENTER</div><h1>Alerts</h1><p>Prioritized disruptions, stock risks and compliance events.</p></div><button class="ghost-btn">Mark all reviewed</button></div>

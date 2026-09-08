@@ -3521,3 +3521,360 @@ const createOrderBtn = document.getElementById("createOrderBtn");
 
 const createOrderModal = document.getElementById("createOrderModal");
 
+// ============================================================
+// SUPPLIERS
+// ============================================================
+
+const supplierGrid =
+  document.getElementById("supplierGrid");
+
+const supplierModal =
+  document.getElementById("supplierModal");
+
+const addSupplierBtn =
+  document.getElementById("addSupplierBtn");
+
+const supplierModalClose =
+  document.getElementById("supplierModalClose");
+
+const supplierCancel =
+  document.getElementById("supplierCancel");
+
+const confirmSupplier =
+  document.getElementById("confirmSupplier");
+
+const supplierName =
+  document.getElementById("supplierName");
+
+const supplierCode =
+  document.getElementById("supplierCode");
+
+const supplierCategory =
+  document.getElementById("supplierCategory");
+
+
+function openSupplierModal() {
+
+  supplierModal?.classList.remove("hidden");
+
+}
+
+
+function closeSupplierModal() {
+
+  supplierModal?.classList.add("hidden");
+
+}
+
+
+addSupplierBtn?.addEventListener(
+  "click",
+  openSupplierModal
+);
+
+
+supplierModalClose?.addEventListener(
+  "click",
+  closeSupplierModal
+);
+
+
+supplierCancel?.addEventListener(
+  "click",
+  closeSupplierModal
+);
+
+
+supplierModal?.addEventListener(
+  "click",
+  event => {
+
+    if (event.target === supplierModal) {
+      closeSupplierModal();
+    }
+
+  }
+);
+
+
+// ============================================================
+// LOAD SUPPLIERS
+// ============================================================
+
+async function loadSuppliers() {
+
+  const token = getToken();
+
+  if (!token) return;
+
+  if (!supplierGrid) return;
+
+  try {
+
+    const response = await fetch(
+      `${API_BASE_URL}/suppliers`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+
+    const data = await response.json();
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.message || "Failed to load suppliers"
+      );
+
+    }
+
+
+    const suppliers =
+      data.suppliers || data || [];
+
+
+    supplierGrid.innerHTML = "";
+
+
+    if (!suppliers.length) {
+
+      supplierGrid.innerHTML = `
+        <div class="panel">
+          <p>No suppliers registered yet.</p>
+        </div>
+      `;
+
+      return;
+
+    }
+
+
+    suppliers.forEach(supplier => {
+
+      const card =
+        document.createElement("article");
+
+
+      card.className = "supplier-card";
+
+
+      const initials =
+        supplier.name
+          ? supplier.name
+              .split(/\s+/)
+              .map(word => word[0])
+              .join("")
+              .slice(0, 2)
+              .toUpperCase()
+          : "SU";
+
+
+      card.innerHTML = `
+
+        <div class="supplier-logo">
+          ${initials}
+        </div>
+
+        <div>
+          <h3>${supplier.name || "Unnamed supplier"}</h3>
+
+          <small>
+            ${supplier.category || "General medicines"}
+          </small>
+        </div>
+
+        <span class="rating">
+          ${Number(supplier.rating || 0).toFixed(1)}%
+        </span>
+
+        <div class="supplier-stats">
+
+          <span>
+            <b>${Number(supplier.onTimeRate || 0).toFixed(1)}%</b>
+            <small>On-time</small>
+          </span>
+
+          <span>
+            <b>${supplier.activeOrders || 0}</b>
+            <small>Active orders</small>
+          </span>
+
+          <span>
+            <b>${Number(supplier.reliability || 0).toFixed(1)}/5</b>
+            <small>Reliability</small>
+          </span>
+
+        </div>
+
+      `;
+
+
+      supplierGrid.appendChild(card);
+
+    });
+
+
+  } catch (error) {
+
+    console.error(
+      "Load suppliers error:",
+      error
+    );
+
+
+    supplierGrid.innerHTML = `
+      <div class="panel">
+        <p>Unable to load suppliers.</p>
+      </div>
+    `;
+
+  }
+
+}
+
+
+// ============================================================
+// CREATE SUPPLIER
+// ============================================================
+
+confirmSupplier?.addEventListener(
+  "click",
+  async () => {
+
+    const name =
+      supplierName?.value.trim();
+
+    const code =
+      supplierCode?.value.trim();
+
+    const category =
+      supplierCategory?.value.trim();
+
+
+    if (!name || !code || !category) {
+
+      alert(
+        "Please fill in supplier name, code and category."
+      );
+
+      return;
+
+    }
+
+
+    const token = getToken();
+
+
+    if (!token) {
+
+      alert("Please login first.");
+
+      return;
+
+    }
+
+
+    confirmSupplier.disabled = true;
+
+    confirmSupplier.textContent =
+      "Adding...";
+
+
+    try {
+
+      const response = await fetch(
+        `${API_BASE_URL}/suppliers`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+
+          body: JSON.stringify({
+
+            name,
+            code,
+            category,
+
+            onTimeRate: 0,
+            activeOrders: 0,
+            reliability: 0,
+            rating: 0,
+            status: "Active"
+
+          })
+        }
+      );
+
+
+      const data =
+        await response.json();
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          data.message ||
+          "Failed to create supplier"
+        );
+
+      }
+
+
+      console.log(
+        "Supplier created:",
+        data
+      );
+
+
+      closeSupplierModal();
+
+
+      supplierName.value = "";
+      supplierCode.value = "";
+      supplierCategory.value = "";
+
+
+      await loadSuppliers();
+
+
+      alert(
+        "Supplier added successfully."
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "Create supplier error:",
+        error
+      );
+
+
+      alert(
+        error.message ||
+        "Failed to create supplier"
+      );
+
+
+    } finally {
+
+      confirmSupplier.disabled = false;
+
+      confirmSupplier.textContent =
+        "Add supplier";
+
+    }
+
+  }
+);
+
+
+// Load suppliers on startup
+loadSuppliers();
