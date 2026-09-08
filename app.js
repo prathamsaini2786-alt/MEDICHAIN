@@ -2316,6 +2316,12 @@ const orderModal = document.getElementById("orderModal");
 const ordersTableBody = document.getElementById("ordersTableBody");
 const pendingOrderCount = document.getElementById("pendingOrderCount");
 
+let orders = [];
+let selectedOrder = null;
+
+
+// ================= ORDER MODAL =================
+
 function openOrderModal() {
   orderModal?.classList.remove("hidden");
 }
@@ -2346,72 +2352,313 @@ orderModal?.addEventListener("click", event => {
 });
 
 
-// Create new order
-document.getElementById("confirmOrder")?.addEventListener(
-  "click",
-  () => {
+// ================= LOAD ORDERS =================
 
-    const medicine =
-      document.getElementById("orderMedicine")?.value;
+async function loadOrders() {
 
-    const quantity =
-      Number(document.getElementById("orderQuantity")?.value);
+  if (!getToken()) return;
 
-    const supplier =
-      document.getElementById("orderSupplier")?.value;
+  try {
+
+    const response = await fetch(
+      `${API_BASE_URL}/orders`,
+      {
+        headers: getSettingsHeaders()
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Unable to load orders");
+    }
+
+    const data = await response.json();
+
+    orders = Array.isArray(data)
+      ? data
+      : (data.orders || []);
+
+    renderOrders();
+
+  } catch (error) {
+
+    console.error("Orders load error:", error);
+
+    if (ordersTableBody) {
+      ordersTableBody.innerHTML = `
+        <tr>
+          <td colspan="6" style="text-align:center;">
+            Unable to load orders.
+          </td>
+        </tr>
+      `;
+    }
+  }
+}
+
+
+// ================= RENDER ORDERS =================
+
+function renderOrders() {
+
+  if (!ordersTableBody) return;
+
+  ordersTableBody.innerHTML = "";
+
+  if (!orders.length) {
+
+    ordersTableBody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align:center;">
+          No orders found.
+        </td>
+      </tr>
+    `;
+
+    if (pendingOrderCount) {
+      pendingOrderCount.textContent = "0";
+    }
+
+    return;
+  }
+
+
+  const pendingOrders = orders.filter(
+    order => order.status === "Pending"
+  );
+
+  if (pendingOrderCount) {
+    pendingOrderCount.textContent = pendingOrders.length;
+  }
+
+
+  orders.forEach(order => {
+
+    const row = document.createElement("tr");
+
+    row.className = "order-row";
+
+    const orderId =
+      order.orderNumber ||
+      order.orderId ||
+      order._id ||
+      "N/A";
 
     const facility =
-      document.getElementById("orderFacility")?.value;
+      order.destination ||
+      order.facility ||
+      "—";
+
+    const quantity =
+      Number(order.quantity || 0);
+
+    const supplier =
+      order.supplier ||
+      "—";
+
+    const date = order.createdAt
+      ? new Date(order.createdAt).toLocaleDateString(
+          "en-US",
+          {
+            month: "short",
+            day: "numeric"
+          }
+        )
+      : "—";
+
+    const status =
+      order.status ||
+      "Pending";
 
 
-    // Validation
-    if (!medicine || !Number.isFinite(quantity) || quantity < 1) {
+    row.dataset.orderId = order._id || "";
+    row.dataset.orderNumber = orderId;
+    row.dataset.status = status;
+    row.dataset.facility = facility;
+    row.dataset.items = quantity.toLocaleString();
+    row.dataset.supplier = supplier;
+    row.dataset.date = date;
+
+
+    row.innerHTML = `
+      <td>
+        <b>#${orderId}</b>
+      </td>
+
+      <td>
+        ${facility}
+      </td>
+
+      <td>
+        ${quantity.toLocaleString()}
+      </td>
+
+      <td>
+        ${supplier}
+      </td>
+
+      <td>
+        ${date}
+      </td>
+
+      <td>
+        <span class="status ${getOrderStatusClass(status)}">
+          ${status}
+        </span>
+      </td>
+    `;
+
+
+    row.addEventListener("click", () => {
+      openOrderDrawer(row, order);
+    });
+
+
+    ordersTableBody.appendChild(row);
+
+  });
+}
+
+
+// ================= STATUS STYLE =================
+
+function getOrderStatusClass(status) {
+
+  switch (status) {
+
+    case "Approved":
+      return "success";
+
+    case "Processing":
+      return "info";
+
+    case "Completed":
+      return "success";
+
+    case "Cancelled":
+      return "danger";
+
+    case "Pending":
+    default:
+      return "warning";
+  }
+}
+
+
+// ================= CREATE ORDER =================
+
+document.getElementById("confirmOrder")?.addEventListener(
+  "click",
+  async () => {
+
+    const medicine =
+      document.getElementById("orderMedicine")?.value.trim();
+
+    const quantity =
+      Number(
+        document.getElementById("orderQuantity")?.value
+      );
+
+    const supplier =
+      document.getElementById("orderSupplier")?.value.trim();
+
+    const facility =
+      document.getElementById("orderFacility")?.value.trim();
+
+    const priority =
+      document.getElementById("orderPriority")?.value ||
+      "Normal";
+
+
+    if (
+      !medicine ||
+      !Number.isFinite(quantity) ||
+      quantity < 1
+    ) {
       alert("Please enter a valid medicine quantity.");
       return;
     }
 
 
-    // Generate frontend order number
-    const orderNumber =
-      `#ORD-${10500 + ordersTableBody.children.length}`;
-
-
-    // Create table row
-    const row = document.createElement("tr");
-
-    row.className = "order-row";
-
-    row.innerHTML = `
-      <td><b>${orderNumber}</b></td>
-      <td>${facility}</td>
-      <td>${quantity}</td>
-      <td>${supplier}</td>
-      <td>Aug 29</td>
-      <td>
-        <span class="status warning">Pending</span>
-      </td>
-    `;
-
-
-    // Put newest order at top
-    ordersTableBody.prepend(row);
-
-
-    // Update pending count
-    if (pendingOrderCount) {
-      pendingOrderCount.textContent =
-        Number(pendingOrderCount.textContent) + 1;
+    if (!supplier || !facility) {
+      alert("Please select a supplier and facility.");
+      return;
     }
 
 
-    closeOrderModal();
+    try {
+
+      const response = await fetch(
+        `${API_BASE_URL}/orders`,
+        {
+          method: "POST",
+
+          headers: {
+            ...getSettingsHeaders(),
+            "Content-Type": "application/json"
+          },
+
+          body: JSON.stringify({
+            medicine,
+            supplier,
+            facility,
+            quantity,
+            priority
+          })
+        }
+      );
 
 
-    alert(
-      `Order created successfully.\n\n` +
-      `${orderNumber}\n` +
-      `${medicine} — ${quantity.toLocaleString()} units`
-    );
+      const data = await response.json();
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          data.message ||
+          "Unable to create order"
+        );
+      }
+
+
+      closeOrderModal();
+
+
+      // Reset form
+      const quantityInput =
+        document.getElementById("orderQuantity");
+
+      if (quantityInput) {
+        quantityInput.value = "";
+      }
+
+
+      await loadOrders();
+
+
+      const createdOrder = data.order;
+
+      const createdId =
+        createdOrder?._id ||
+        "New order";
+
+
+      alert(
+        `Order created successfully.\n\n` +
+        `${createdId}\n` +
+        `${medicine} — ${quantity.toLocaleString()} units`
+      );
+
+
+    } catch (error) {
+
+      console.error("Create order error:", error);
+
+      alert(
+        error.message ||
+        "Unable to create order."
+      );
+    }
+
   }
 );
 
@@ -2438,9 +2685,11 @@ document.getElementById("exportOrdersBtn")?.addEventListener(
       .querySelectorAll("#ordersTableBody tr")
       .forEach(row => {
 
-        const cells = row.querySelectorAll("td");
+        const cells =
+          row.querySelectorAll("td");
 
         if (cells.length < 6) return;
+
 
         rows.push([
           cells[0].textContent.trim(),
@@ -2467,16 +2716,22 @@ document.getElementById("exportOrdersBtn")?.addEventListener(
 
     const blob = new Blob(
       [csv],
-      { type: "text/csv;charset=utf-8;" }
+      {
+        type: "text/csv;charset=utf-8;"
+      }
     );
 
 
-    const url = URL.createObjectURL(blob);
+    const url =
+      URL.createObjectURL(blob);
 
-    const link = document.createElement("a");
+    const link =
+      document.createElement("a");
 
     link.href = url;
-    link.download = "medichain-orders.csv";
+
+    link.download =
+      "medichain-orders.csv";
 
     document.body.appendChild(link);
 
@@ -2485,68 +2740,239 @@ document.getElementById("exportOrdersBtn")?.addEventListener(
     link.remove();
 
     URL.revokeObjectURL(url);
+
   }
 );
 
 
-// ==================== ORDERS ====================
+// ================= ORDER DRAWER =================
 
-const orderRows = document.querySelectorAll(".order-row");
+const orderDrawer =
+  document.getElementById("orderDrawer");
 
-const orderDrawer = document.getElementById("orderDrawer");
-const orderDrawerBackdrop = document.getElementById("orderDrawerBackdrop");
+const orderDrawerBackdrop =
+  document.getElementById("orderDrawerBackdrop");
 
-const orderDrawerId = document.getElementById("orderDrawerId");
-const orderDrawerStatus = document.getElementById("orderDrawerStatus");
-const orderDrawerStatusBadge = document.getElementById("orderDrawerStatusBadge");
+const orderDrawerId =
+  document.getElementById("orderDrawerId");
 
-const orderDrawerFacility = document.getElementById("orderDrawerFacility");
-const orderDrawerItems = document.getElementById("orderDrawerItems");
-const orderDrawerSupplier = document.getElementById("orderDrawerSupplier");
-const orderDrawerDate = document.getElementById("orderDrawerDate");
-const orderTimelineDate = document.getElementById("orderTimelineDate");
+const orderDrawerStatus =
+  document.getElementById("orderDrawerStatus");
 
-const orderDrawerClose = document.getElementById("orderDrawerClose");
-const orderDrawerCloseAction = document.getElementById("orderDrawerCloseAction");
-const orderApproveBtn = document.getElementById("orderApproveBtn");
+const orderDrawerStatusBadge =
+  document.getElementById("orderDrawerStatusBadge");
 
-function openOrderDrawer(row) {
+const orderDrawerFacility =
+  document.getElementById("orderDrawerFacility");
 
-    const data = row.dataset;
+const orderDrawerItems =
+  document.getElementById("orderDrawerItems");
 
-    orderDrawerId.textContent = `#${data.orderId}`;
-    orderDrawerStatus.textContent = data.status;
-    orderDrawerStatusBadge.textContent = data.status;
+const orderDrawerSupplier =
+  document.getElementById("orderDrawerSupplier");
 
-    orderDrawerFacility.textContent = data.facility;
-    orderDrawerItems.textContent = data.items;
-    orderDrawerSupplier.textContent = data.supplier;
-    orderDrawerDate.textContent = data.date;
-    orderTimelineDate.textContent = data.date;
+const orderDrawerDate =
+  document.getElementById("orderDrawerDate");
 
-    orderDrawer.classList.remove("hidden");
-    orderDrawer.classList.add("open");
+const orderTimelineDate =
+  document.getElementById("orderTimelineDate");
 
-    orderDrawerBackdrop.classList.remove("hidden");
-    orderDrawer.setAttribute("aria-hidden", "false");
+const orderDrawerClose =
+  document.getElementById("orderDrawerClose");
+
+const orderDrawerCloseAction =
+  document.getElementById("orderDrawerCloseAction");
+
+const orderApproveBtn =
+  document.getElementById("orderApproveBtn");
+
+
+function openOrderDrawer(row, order) {
+
+  selectedOrder = order;
+
+
+  const data = row.dataset;
+
+
+  if (orderDrawerId) {
+    orderDrawerId.textContent =
+      `#${data.orderNumber || data.orderId}`;
+  }
+
+
+  if (orderDrawerStatus) {
+    orderDrawerStatus.textContent =
+      data.status;
+  }
+
+
+  if (orderDrawerStatusBadge) {
+    orderDrawerStatusBadge.textContent =
+      data.status;
+  }
+
+
+  if (orderDrawerFacility) {
+    orderDrawerFacility.textContent =
+      data.facility;
+  }
+
+
+  if (orderDrawerItems) {
+    orderDrawerItems.textContent =
+      data.items;
+  }
+
+
+  if (orderDrawerSupplier) {
+    orderDrawerSupplier.textContent =
+      data.supplier;
+  }
+
+
+  if (orderDrawerDate) {
+    orderDrawerDate.textContent =
+      data.date;
+  }
+
+
+  if (orderTimelineDate) {
+    orderTimelineDate.textContent =
+      data.date;
+  }
+
+
+  // Only allow approval for Pending orders
+  if (orderApproveBtn) {
+
+    const canApprove =
+      data.status === "Pending";
+
+    orderApproveBtn.style.display =
+      canApprove ? "" : "none";
+  }
+
+
+  orderDrawer?.classList.remove("hidden");
+  orderDrawer?.classList.add("open");
+
+  orderDrawerBackdrop?.classList.remove("hidden");
+
+  orderDrawer?.setAttribute(
+    "aria-hidden",
+    "false"
+  );
 }
+
+
+// ================= CLOSE DRAWER =================
 
 function closeOrderDrawer() {
 
-    orderDrawer.classList.remove("open");
-    orderDrawer.classList.add("hidden");
+  orderDrawer?.classList.remove("open");
 
-    orderDrawerBackdrop.classList.add("hidden");
-    orderDrawer.setAttribute("aria-hidden", "true");
+  orderDrawer?.classList.add("hidden");
+
+  orderDrawerBackdrop?.classList.add("hidden");
+
+  orderDrawer?.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  selectedOrder = null;
 }
 
-orderRows.forEach(row => {
 
-    row.addEventListener("click", () => {
-        openOrderDrawer(row);
-    });
+orderDrawerClose?.addEventListener(
+  "click",
+  closeOrderDrawer
+);
 
-});
+orderDrawerCloseAction?.addEventListener(
+  "click",
+  closeOrderDrawer
+);
+
+orderDrawerBackdrop?.addEventListener(
+  "click",
+  closeOrderDrawer
+);
+
+
+// ================= APPROVE ORDER =================
+
+orderApproveBtn?.addEventListener(
+  "click",
+  async () => {
+
+    if (!selectedOrder?._id) {
+      alert("Invalid order.");
+      return;
+    }
+
+
+    try {
+
+      const response = await fetch(
+        `${API_BASE_URL}/orders/${selectedOrder._id}/status`,
+        {
+          method: "PUT",
+
+          headers: {
+            ...getSettingsHeaders(),
+            "Content-Type": "application/json"
+          },
+
+          body: JSON.stringify({
+            status: "Approved"
+          })
+        }
+      );
+
+
+      const data =
+        await response.json();
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          data.message ||
+          "Unable to approve order"
+        );
+      }
+
+
+      closeOrderDrawer();
+
+      await loadOrders();
+
+
+      alert("Order approved successfully.");
+
+
+    } catch (error) {
+
+      console.error(
+        "Approve order error:",
+        error
+      );
+
+      alert(
+        error.message ||
+        "Unable to approve order."
+      );
+    }
+
+  }
+);
+
+
+// ================= INITIAL LOAD =================
+
+loadOrders();
 
 orderDrawerClose?.addEventListener("click", closeOrderDrawer);
 
@@ -2571,194 +2997,3 @@ const createOrderBtn = document.getElementById("createOrderBtn");
 
 const createOrderModal = document.getElementById("createOrderModal");
 
-const createOrderClose = document.getElementById("createOrderClose");
-const createOrderCancel = document.getElementById("createOrderCancel");
-
-const confirmCreateOrder = document.getElementById("confirmCreateOrder");
-
-const orderMedicine = document.getElementById("orderMedicine");
-const orderFacility = document.getElementById("orderFacility");
-const orderSupplier = document.getElementById("orderSupplier");
-const orderQuantity = document.getElementById("orderQuantity");
-const orderPriority = document.getElementById("orderPriority");
-
-function openCreateOrderModal() {
-
-    createOrderModal.classList.remove("hidden");
-
-}
-
-function closeCreateOrderModal() {
-
-    createOrderModal.classList.add("hidden");
-
-}
-
-createOrderBtn?.addEventListener("click", openCreateOrderModal);
-
-createOrderClose?.addEventListener("click", closeCreateOrderModal);
-
-createOrderCancel?.addEventListener("click", closeCreateOrderModal);
-
-createOrderModal?.addEventListener("click", (event) => {
-
-    if (event.target === createOrderModal) {
-        closeCreateOrderModal();
-    }
-
-});
-
-async function loadOrders() {
-
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-        console.warn("No authentication token found.");
-        return;
-    }
-
-    try {
-
-        const response = await fetch(`${API_BASE_URL}/orders`, {
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${token}`
-            }
-        });
-
-        const orders = await response.json();
-
-        if (!response.ok) {
-            throw new Error(orders.message || "Failed to load orders");
-        }
-
-        const tableBody = document.getElementById("ordersTableBody");
-
-        if (!tableBody) return;
-
-        tableBody.innerHTML = "";
-
-        orders.forEach(order => {
-
-            const row = document.createElement("tr");
-
-            row.className = "order-row";
-
-            row.dataset.orderId = order._id;
-            row.dataset.facility = order.facility || "";
-            row.dataset.items = order.quantity || 0;
-            row.dataset.supplier = order.supplier || "";
-            row.dataset.date = order.createdAt
-                ? new Date(order.createdAt).toLocaleDateString()
-                : "";
-            row.dataset.status = order.status || "Pending";
-
-            row.innerHTML = `
-                <td><b>#${order._id}</b></td>
-                <td>${order.facility || "-"}</td>
-                <td>${order.quantity || 0}</td>
-                <td>${order.supplier || "-"}</td>
-                <td>
-                    ${order.createdAt
-                        ? new Date(order.createdAt).toLocaleDateString()
-                        : "-"}
-                </td>
-                <td>
-                    <span class="status ${
-                        order.status === "Delivered"
-                            ? "success"
-                            : order.status === "Cancelled"
-                            ? "danger"
-                            : "warning"
-                    }">
-                        ${order.status || "Pending"}
-                    </span>
-                </td>
-            `;
-
-            row.addEventListener("click", () => {
-                openOrderDrawer(row);
-            });
-
-            tableBody.appendChild(row);
-
-        });
-
-    } catch (error) {
-
-        console.error("Load orders error:", error);
-
-    }
-}
-confirmCreateOrder?.addEventListener("click", async () => {
-
-    const drug = orderMedicine.value;
-    const destination = orderFacility.value;
-    const supplier = orderSupplier.value;
-    const quantity = Number(orderQuantity.value);
-    const priority = orderPriority.value;
-
-    // Validate form
-    if (!drug || !destination || !supplier || !quantity || quantity < 1) {
-        alert("Please fill all fields with a valid quantity.");
-        return;
-    }
-
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-        alert("Please login first.");
-        return;
-    }
-
-    try {
-
-        const response = await fetch(`${API_BASE_URL}/orders`, {
-            method: "POST",
-
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            },
-
-            body: JSON.stringify({
-                drug: drug,
-                supplier: supplier,
-                destination: destination,
-                quantity: quantity,
-                priority: priority
-            })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(
-                data.message || "Failed to create order"
-            );
-        }
-
-        console.log("Order created:", data);
-
-        closeCreateOrderModal();
-
-        alert("Order created successfully.");
-
-        // Refresh orders from MongoDB
-        await loadOrders();
-
-        // Reset form
-        orderMedicine.value = "";
-        orderFacility.value = "";
-        orderSupplier.value = "";
-        orderQuantity.value = "";
-        orderPriority.value = "Normal";
-
-    } catch (error) {
-
-        console.error("Create order error:", error);
-
-        alert(error.message);
-    }
-
-});
