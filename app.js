@@ -6230,3 +6230,47 @@ facilityDrawerBackdrop
     "click",
     closeFacilityDrawer
   );
+
+  // =========================================
+// GLOBAL SEARCH
+// =========================================
+
+const globalSearchBtn =
+  document.getElementById("globalSearchBtn");
+
+  "click",
+  openGlobalSearch
+;
+
+globalSearchClose?.addEventListener(
+  "click",
+  closeGlobalSearch
+);
+
+globalSearchModal?.addEventListener(
+  "click",
+  event => {
+    if (event.target === globalSearchModal) {
+      closeGlobalSearch();
+    }
+  }
+);
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+    if (event.key === "Escape") {
+      closeGlobalSearch();
+    }
+
+    if (
+      (event.metaKey || event.ctrlKey) &&
+      event.key.toLowerCase() === "k"
+    ) {
+      event.preventDefault();
+      openGlobalSearch();
+    }
+
+  }
+);

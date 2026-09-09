@@ -59,7 +59,7 @@
         <div class="mobile-brand"><div class="brand-mark"><span>+</span></div><b>MediChain</b></div>
         <div class="breadcrumbs"><span>Operations</span><b>/</b><strong id="breadcrumb">Dashboard</strong></div>
         <div class="top-actions">
-          <button class="icon-btn" title="Search">⌕</button>
+        <button class="icon-btn" id="globalSearchBtn" title="Search">⌕</button>
           <button class="icon-btn notification" title="Notifications">♢<i></i></button>
           <div class="top-user"><div class="avatar small">RS</div><span>Rahul</span><b>⌄</b></div>
         </div>
@@ -2333,7 +2333,7 @@
       class="modal-close drawer-close"
       id="facilityDrawerClose"
       type="button"
-      
+
     >
       ×
     </button>
@@ -2456,6 +2456,48 @@
   </div>
 
 </aside>
+
+<!-- GLOBAL SEARCH -->
+<div class="modal hidden" id="globalSearchModal">
+  <div class="modal-card global-search-card">
+
+    <button
+      class="modal-close"
+      id="globalSearchClose"
+      type="button"
+    >
+      ×
+    </button>
+
+    <div class="eyebrow">MEDICHAIN SEARCH</div>
+
+    <h2>Search network</h2>
+
+    <p class="modal-subtitle">
+      Search medicines, facilities, orders, shipments and suppliers.
+    </p>
+
+    <div class="global-search-input-wrap">
+      <span>⌕</span>
+      <input
+        type="text"
+        id="globalSearchInput"
+        placeholder="Search by name, code, batch, location..."
+        autocomplete="off"
+      />
+    </div>
+
+    <div id="globalSearchResults" class="global-search-results">
+      <div class="global-search-empty">
+        <strong>Search across MEDICHAIN</strong>
+        <small>
+          Start typing to find records across your supply network.
+        </small>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 </body>
 </html>
