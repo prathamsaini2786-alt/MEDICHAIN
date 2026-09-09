@@ -1203,6 +1203,11 @@ function renderInventory(drugs) {
     const row =
       document.createElement("tr");
 
+      row.className = "facility-row";
+row.dataset.facilityId =
+  facility._id || facility.id || "";
+row.style.cursor = "pointer";
+
     row.className =
       "inventory-row";
 
@@ -5442,3 +5447,786 @@ function setDashboardText(id, value) {
 
 
 loadDashboard();
+
+// =========================================
+// FACILITIES / WAREHOUSES
+// =========================================
+
+async function loadFacilities() {
+
+  const token = getToken();
+  const tableBody =
+    document.getElementById("facilitiesTableBody");
+
+  if (!token || !tableBody) return;
+
+  tableBody.innerHTML = `
+    <tr>
+      <td colspan="7">Loading facilities...</td>
+    </tr>
+  `;
+
+  try {
+
+    const response = await fetch(
+      `${API_BASE_URL}/warehouses`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message ||
+        "Failed to load facilities"
+      );
+    }
+
+    const facilities =
+      Array.isArray(data)
+        ? data
+        : data.warehouses || [];
+
+
+    // -----------------------------------------
+    // SUMMARY
+    // -----------------------------------------
+
+    const total =
+      facilities.length;
+
+    const operational =
+      facilities.filter(
+        facility =>
+          facility.status === "Operational"
+      ).length;
+
+    const capacity =
+      facilities.reduce(
+        (sum, facility) =>
+          sum + Number(facility.capacity || 0),
+        0
+      );
+
+    const stock =
+      facilities.reduce(
+        (sum, facility) =>
+          sum + Number(facility.currentStock || 0),
+        0
+      );
+
+
+    setDashboardText(
+      "facilityTotalCount",
+      total.toLocaleString()
+    );
+
+    setDashboardText(
+      "facilityOperationalCount",
+      operational.toLocaleString()
+    );
+
+    setDashboardText(
+      "facilityCapacity",
+      capacity.toLocaleString()
+    );
+
+    setDashboardText(
+      "facilityStock",
+      stock.toLocaleString()
+    );
+
+
+    // -----------------------------------------
+    // TABLE
+    // -----------------------------------------
+
+    if (!facilities.length) {
+
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="7">
+            No facilities found.
+          </td>
+        </tr>
+      `;
+
+      return;
+    }
+
+
+    tableBody.innerHTML = "";
+
+facilities.forEach(facility => {
+
+  const row = document.createElement("tr");
+
+  const facilityCapacity =
+    Number(facility.capacity || 0);
+
+  const currentStock =
+    Number(facility.currentStock || 0);
+
+  const utilization =
+    facilityCapacity > 0
+      ? Math.min(
+          100,
+          (currentStock / facilityCapacity) * 100
+        )
+      : 0;
+
+  const status =
+    facility.status || "Operational";
+
+  const statusClass =
+    status === "Operational"
+      ? "healthy"
+      : status === "Full"
+        ? "warning"
+        : status === "Maintenance"
+          ? "critical"
+          : "info";
+
+  row.innerHTML = `
+    <td>
+      <b>${facility.name || "Unnamed facility"}</b>
+      <small>
+        ${facility.storageConditions || "Standard storage"}
+      </small>
+    </td>
+
+    <td>
+      ${facility.code || "—"}
+    </td>
+
+    <td>
+      ${facility.location || "—"}
+    </td>
+
+    <td>
+      ${facilityCapacity.toLocaleString()}
+    </td>
+
+    <td>
+      <b>
+        ${currentStock.toLocaleString()}
+      </b>
+    </td>
+
+    <td>
+      <div style="
+        display:flex;
+        align-items:center;
+        gap:10px;
+        min-width:130px;
+      ">
+        <div style="
+          flex:1;
+          height:7px;
+          background:#e8edf3;
+          border-radius:999px;
+          overflow:hidden;
+        ">
+          <i style="
+            display:block;
+            width:${utilization}%;
+            height:100%;
+            background:currentColor;
+            border-radius:999px;
+          "></i>
+        </div>
+
+        <small>
+          ${utilization.toFixed(1)}%
+        </small>
+      </div>
+    </td>
+
+    <td>
+      <span class="status ${statusClass}">
+        ${status}
+      </span>
+    </td>
+  `;
+
+  row.style.cursor = "pointer";
+
+  row.addEventListener("click", () => {
+
+    selectedFacility = facility;
+
+    const drawer =
+      document.getElementById("facilityDrawer");
+
+    const backdrop =
+      document.getElementById("facilityDrawerBackdrop");
+
+    if (!drawer) {
+      console.error("Facility drawer not found");
+      return;
+    }
+
+    document.getElementById(
+      "facilityDrawerName"
+    ).textContent =
+      facility.name || "Facility";
+
+    document.getElementById(
+      "facilityDrawerLocation"
+    ).textContent =
+      facility.location || "Unknown location";
+
+    document.getElementById(
+      "facilityDrawerCode"
+    ).textContent =
+      facility.code || "—";
+
+    const capacity =
+      Number(facility.capacity || 0);
+
+    const stock =
+      Number(facility.currentStock || 0);
+
+    const utilization =
+      capacity > 0
+        ? Math.min(
+            100,
+            (stock / capacity) * 100
+          )
+        : 0;
+
+    document.getElementById(
+      "facilityDrawerCapacity"
+    ).textContent =
+      capacity.toLocaleString();
+
+    document.getElementById(
+      "facilityDrawerStock"
+    ).textContent =
+      stock.toLocaleString();
+
+    document.getElementById(
+      "facilityDrawerUtilization"
+    ).textContent =
+      `${utilization.toFixed(1)}%`;
+
+    document.getElementById(
+      "facilityDrawerStorage"
+    ).textContent =
+      facility.storageConditions ||
+      "Standard storage";
+
+    document.getElementById(
+      "facilityDrawerCapacityText"
+    ).textContent =
+      `${stock.toLocaleString()} / ${capacity.toLocaleString()} units occupied`;
+
+    document.getElementById(
+      "facilityDrawerStatusText"
+    ).textContent =
+      facility.status || "Operational";
+
+    document.getElementById(
+      "facilityDrawerStatus"
+    ).textContent =
+      facility.status || "Operational";
+
+    backdrop?.classList.remove("hidden");
+
+    drawer.classList.add("open");
+
+    drawer.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+  });
+
+  tableBody.appendChild(row);
+});
+
+  } catch (error) {
+
+    console.error(
+      "Load facilities error:",
+      error
+    );
+
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="7">
+          Failed to load facilities.
+        </td>
+      </tr>
+    `;
+
+    showToast(
+      error.message ||
+      "Failed to load facilities",
+      "error"
+    );
+  }
+}
+
+
+document
+  .getElementById("refreshFacilitiesBtn")
+  ?.addEventListener(
+    "click",
+    loadFacilities
+  );
+
+
+// Load facilities when available
+loadFacilities();
+
+// =========================================
+// ADD FACILITY
+// =========================================
+
+let editingFacilityId = null;
+
+const facilityModal =
+  document.getElementById("facilityModal");
+
+const addFacilityBtn =
+  document.getElementById("addFacilityBtn");
+
+const facilityClose =
+  document.getElementById("facilityClose");
+
+const facilityCancel =
+  document.getElementById("facilityCancel");
+
+const confirmFacility =
+  document.getElementById("confirmFacility");
+
+function openFacilityModal(facility = null) {
+  if (!facilityModal) return;
+
+  editingFacilityId = facility
+    ? facility._id || facility.id
+    : null;
+
+  const title = facilityModal.querySelector("h2");
+  const subtitle = facilityModal.querySelector(".modal-subtitle");
+  const confirmButton =
+    document.getElementById("confirmFacility");
+
+  if (facility) {
+    // EDIT MODE
+    if (title) title.textContent = "Edit facility";
+
+    if (subtitle) {
+      subtitle.textContent =
+        "Update warehouse or distribution facility details.";
+    }
+
+    if (confirmButton) {
+      confirmButton.textContent = "Save changes";
+    }
+
+    document.getElementById("facilityName").value =
+      facility.name || "";
+
+    document.getElementById("facilityCode").value =
+      facility.code || "";
+
+    document.getElementById("facilityLocation").value =
+      facility.location || "";
+
+    document.getElementById("facilityCapacityInput").value =
+      facility.capacity ?? "";
+
+    document.getElementById("facilityStockInput").value =
+      facility.currentStock ?? "";
+
+    document.getElementById("facilityStorage").value =
+      facility.storageConditions || "";
+
+    document.getElementById("facilityStatus").value =
+      facility.status || "Operational";
+  } else {
+    // ADD MODE
+    if (title) title.textContent = "Add facility";
+
+    if (subtitle) {
+      subtitle.textContent =
+        "Add a warehouse or distribution facility to the network.";
+    }
+
+    if (confirmButton) {
+      confirmButton.textContent = "Add facility";
+    }
+
+    document.getElementById("facilityName").value = "";
+    document.getElementById("facilityCode").value = "";
+    document.getElementById("facilityLocation").value = "";
+    document.getElementById("facilityCapacityInput").value = "";
+    document.getElementById("facilityStockInput").value = "";
+    document.getElementById("facilityStorage").value = "";
+    document.getElementById("facilityStatus").value =
+      "Operational";
+  }
+
+  facilityModal.classList.remove("hidden");
+}
+
+function closeFacilityModal() {
+
+  if (!facilityModal) return;
+
+  facilityModal.classList.add("hidden");
+
+}
+
+
+addFacilityBtn?.addEventListener(
+  "click",
+  openFacilityModal
+);
+
+
+facilityClose?.addEventListener(
+  "click",
+  closeFacilityModal
+);
+
+
+facilityCancel?.addEventListener(
+  "click",
+  closeFacilityModal
+);
+
+
+confirmFacility?.addEventListener("click", async () => {
+  const name =
+    document.getElementById("facilityName").value.trim();
+
+  const code =
+    document.getElementById("facilityCode").value.trim();
+
+  const location =
+    document.getElementById("facilityLocation").value.trim();
+
+  const capacity =
+    Number(document.getElementById("facilityCapacityInput").value);
+
+  const currentStock =
+    Number(document.getElementById("facilityStockInput").value);
+
+  const storageConditions =
+    document.getElementById("facilityStorage").value.trim();
+
+  const status =
+    document.getElementById("facilityStatus").value;
+
+  if (!name || !code || !location) {
+    showToast(
+      "Please fill in name, code and location.",
+      "error"
+    );
+    return;
+  }
+
+  if (!capacity || capacity <= 0) {
+    showToast(
+      "Capacity must be greater than 0.",
+      "error"
+    );
+    return;
+  }
+
+  if (currentStock < 0) {
+    showToast(
+      "Current stock cannot be negative.",
+      "error"
+    );
+    return;
+  }
+
+  if (currentStock > capacity) {
+    showToast(
+      "Current stock cannot exceed facility capacity.",
+      "error"
+    );
+    return;
+  }
+
+  const payload = {
+    name,
+    code,
+    location,
+    capacity,
+    currentStock,
+    storageConditions:
+      storageConditions || "Standard storage",
+    status: status || "Operational"
+  };
+
+  try {
+    confirmFacility.disabled = true;
+
+    const url = editingFacilityId
+      ? `${API_BASE_URL}/warehouses/${editingFacilityId}`
+      : `${API_BASE_URL}/warehouses`;
+
+    const method = editingFacilityId
+      ? "PUT"
+      : "POST";
+
+    const response = await fetch(url, {
+      method,
+      headers: {
+        ...getAuthHeaders(),
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message ||
+        data.error ||
+        "Unable to save facility"
+      );
+    }
+
+    facilityModal.classList.add("hidden");
+
+    const wasEditing = Boolean(editingFacilityId);
+
+    editingFacilityId = null;
+
+    await loadFacilities();
+
+    closeFacilityDrawer();
+
+    showToast(
+      wasEditing
+        ? "Facility updated successfully."
+        : "Facility added successfully.",
+      "success"
+    );
+
+  } catch (error) {
+    console.error("Facility save error:", error);
+
+    showToast(
+      error.message || "Unable to save facility.",
+      "error"
+    );
+
+  } finally {
+    confirmFacility.disabled = false;
+  }
+});
+
+
+
+// =========================================
+// FACILITY DETAILS DRAWER
+// =========================================
+
+let selectedFacility = null;
+
+
+const facilityDrawer =
+  document.getElementById("facilityDrawer");
+
+const facilityDrawerBackdrop =
+  document.getElementById(
+    "facilityDrawerBackdrop"
+  );
+
+const facilityDrawerClose =
+  document.getElementById(
+    "facilityDrawerClose"
+  );
+
+  document.addEventListener("click", (event) => {
+
+  const editButton =
+    event.target.closest("#facilityEditBtn");
+
+  if (!editButton) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  if (!selectedFacility) {
+    console.error("No facility selected for editing");
+    return;
+  }
+
+  console.log(
+    "Editing facility:",
+    selectedFacility
+  );
+
+  closeFacilityDrawer();
+
+  openFacilityModal(selectedFacility);
+});
+
+const facilityDrawerCloseAction =
+  document.getElementById(
+    "facilityDrawerCloseAction"
+  );
+
+
+function closeFacilityDrawer() {
+
+  const drawer =
+    document.getElementById("facilityDrawer");
+
+  const backdrop =
+    document.getElementById("facilityDrawerBackdrop");
+
+  if (drawer) {
+    drawer.classList.remove("open");
+    drawer.setAttribute("aria-hidden", "true");
+  }
+
+  if (backdrop) {
+    backdrop.classList.add("hidden");
+  }
+}
+
+
+function openFacilityDrawer(facility) {
+  const drawer = document.getElementById("facilityDrawer");
+
+  if (!drawer || !facility) return;
+
+  selectedFacility = facility;
+
+  const capacity =
+    Number(facility.capacity || 0);
+
+  const stock =
+    Number(facility.currentStock || 0);
+
+  const utilization =
+    capacity > 0
+      ? Math.min(
+          100,
+          (stock / capacity) * 100
+        )
+      : 0;
+
+
+  document.getElementById(
+    "facilityDrawerName"
+  ).textContent =
+    facility.name || "Facility";
+
+
+  document.getElementById(
+    "facilityDrawerLocation"
+  ).textContent =
+    facility.location || "Unknown location";
+
+
+  document.getElementById(
+    "facilityDrawerCode"
+  ).textContent =
+    facility.code || "—";
+
+
+  document.getElementById(
+    "facilityDrawerCapacity"
+  ).textContent =
+    capacity.toLocaleString();
+
+
+  document.getElementById(
+    "facilityDrawerStock"
+  ).textContent =
+    stock.toLocaleString();
+
+
+  document.getElementById(
+    "facilityDrawerUtilization"
+  ).textContent =
+    `${utilization.toFixed(1)}%`;
+
+
+  document.getElementById(
+    "facilityDrawerStorage"
+  ).textContent =
+    facility.storageConditions ||
+    "Standard storage";
+
+
+  document.getElementById(
+    "facilityDrawerCapacityText"
+  ).textContent =
+    `${stock.toLocaleString()} / ${capacity.toLocaleString()} units occupied`;
+
+
+  document.getElementById(
+    "facilityDrawerStatusText"
+  ).textContent =
+    facility.status || "Operational";
+
+
+  const statusElement =
+    document.getElementById(
+      "facilityDrawerStatus"
+    );
+
+  if (statusElement) {
+
+    statusElement.textContent =
+      facility.status || "Operational";
+
+    statusElement.className =
+      `drawer-status ${
+        facility.status === "Operational"
+          ? "healthy"
+          : facility.status === "Full"
+            ? "warning"
+            : "critical"
+      }`;
+
+  }
+
+
+  facilityDrawerBackdrop
+    ?.classList.remove("hidden");
+
+  facilityDrawer.classList.add("open");
+
+  facilityDrawer.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+}
+
+
+// Close controls
+
+facilityDrawerClose
+  ?.addEventListener(
+    "click",
+    closeFacilityDrawer
+  );
+
+facilityDrawerCloseAction
+  ?.addEventListener(
+    "click",
+    closeFacilityDrawer
+  );
+
+facilityDrawerBackdrop
+  ?.addEventListener(
+    "click",
+    closeFacilityDrawer
+  );

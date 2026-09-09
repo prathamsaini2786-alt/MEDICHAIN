@@ -35,6 +35,7 @@
         <button class="nav-item" data-page="orders"><span>▤</span>Orders <em>12</em></button>
         <button class="nav-item" data-page="shipments"><span>↗</span>Shipments</button>
         <button class="nav-item" data-page="suppliers"><span>◇</span>Suppliers</button>
+        <button class="nav-item" data-page="facilities"><span>▤</span>Facilities</button>
 
         <div class="nav-label">INSIGHTS</div>
        <button class="nav-item" data-page="alerts">
@@ -1336,6 +1337,104 @@
 
 </div>
 
+<section id="page-facilities" class="page">
+
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">OPERATIONS</div>
+      <h1>Facilities</h1>
+      <p>Monitor warehouse capacity, stock levels and operating conditions.</p>
+    </div>
+
+    <button class="primary-btn" id="addFacilityBtn">
+      ＋ Add facility
+    </button>
+  </div>
+
+
+  <!-- FACILITY SUMMARY -->
+
+  <div class="stat-grid compact">
+
+    <article class="stat-card">
+      <span>Total facilities</span>
+      <strong id="facilityTotalCount">—</strong>
+      <small>Across the network</small>
+    </article>
+
+    <article class="stat-card">
+      <span>Operational</span>
+      <strong id="facilityOperationalCount">—</strong>
+      <small class="positive">Currently active</small>
+    </article>
+
+    <article class="stat-card">
+      <span>Network capacity</span>
+      <strong id="facilityCapacity">—</strong>
+      <small>Total storage capacity</small>
+    </article>
+
+    <article class="stat-card">
+      <span>Current stock</span>
+      <strong id="facilityStock">—</strong>
+      <small>Across all facilities</small>
+    </article>
+
+  </div>
+
+
+  <!-- FACILITY TABLE -->
+
+  <article class="panel table-panel">
+
+    <div class="panel-head">
+
+      <div>
+        <h2>Facility network</h2>
+        <p>Live warehouse status and capacity.</p>
+      </div>
+
+      <button class="ghost-btn" id="refreshFacilitiesBtn">
+        ↻ Refresh
+      </button>
+
+    </div>
+
+    <div class="table-scroll">
+
+      <table id="facilitiesTable">
+
+        <thead>
+          <tr>
+            <th>Facility</th>
+            <th>Code</th>
+            <th>Location</th>
+            <th>Capacity</th>
+            <th>Current stock</th>
+            <th>Utilization</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+
+        <tbody id="facilitiesTableBody">
+
+          <tr>
+            <td colspan="7">
+              Loading facilities...
+            </td>
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </article>
+
+</section>
+
+
      <section id="page-alerts" class="page">
   <div class="page-head">
     <div>
@@ -2096,6 +2195,267 @@
   </div>
 </div>
   
+ 
+
+  <!-- ADD FACILITY MODAL -->
+<div class="modal hidden" id="facilityModal">
+
+  <div class="modal-card">
+
+    <button class="modal-close" id="facilityClose">×</button>
+
+    <h2>Add facility</h2>
+
+    <p class="modal-subtitle">
+      Add a warehouse or distribution facility to the network.
+    </p>
+
+    <div class="form-grid">
+
+      <label class="form-label">
+        Facility name
+        <input
+          type="text"
+          id="facilityName"
+          placeholder="e.g. Pune Medical Warehouse"
+        >
+      </label>
+
+      <label class="form-label">
+        Facility code
+        <input
+          type="text"
+          id="facilityCode"
+          placeholder="e.g. WH-PUN-006"
+        >
+      </label>
+
+      <label class="form-label">
+        Location
+        <input
+          type="text"
+          id="facilityLocation"
+          placeholder="e.g. Pune, Maharashtra"
+        >
+      </label>
+
+      <label class="form-label">
+        Capacity
+        <input
+          type="number"
+          id="facilityCapacityInput"
+          min="0"
+          placeholder="10000"
+        >
+      </label>
+
+      <label class="form-label">
+        Current stock
+        <input
+          type="number"
+          id="facilityStockInput"
+          min="0"
+          placeholder="0"
+        >
+      </label>
+
+      <label class="form-label">
+        Storage conditions
+        <input
+          type="text"
+          id="facilityStorage"
+          placeholder="Store at room temperature"
+        >
+      </label>
+
+      <label class="form-label">
+        Status
+        <select id="facilityStatus">
+          <option value="Operational">Operational</option>
+          <option value="Full">Full</option>
+          <option value="Maintenance">Maintenance</option>
+        </select>
+      </label>
+
+    </div>
+
+    <div class="modal-actions">
+
+      <button
+        class="ghost-btn"
+        id="facilityCancel"
+      >
+        Cancel
+      </button>
+
+      <button
+        class="primary-btn"
+        id="confirmFacility"
+      >
+        Add facility
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
   <script src="app.js"></script>
+
+  <!-- FACILITY DETAILS DRAWER -->
+
+<div
+  class="drawer-backdrop hidden"
+  id="facilityDrawerBackdrop"
+></div>
+
+<aside
+  class="inventory-drawer facility-drawer"
+  id="facilityDrawer"
+  aria-hidden="true"
+>
+
+  <div class="drawer-head">
+
+    <div>
+      <div class="eyebrow">FACILITY DETAILS</div>
+
+      <h2 id="facilityDrawerName">
+        Facility
+      </h2>
+
+      <p id="facilityDrawerLocation">
+        Location
+      </p>
+    </div>
+
+    <button
+      class="modal-close drawer-close"
+      id="facilityDrawerClose"
+      type="button"
+      
+    >
+      ×
+    </button>
+
+  </div>
+
+
+  <div
+    class="drawer-status"
+    id="facilityDrawerStatus"
+  >
+    Operational
+  </div>
+
+
+  <div class="drawer-grid">
+
+    <div>
+      <span>Facility code</span>
+      <b id="facilityDrawerCode">—</b>
+    </div>
+
+    <div>
+      <span>Capacity</span>
+      <b id="facilityDrawerCapacity">—</b>
+    </div>
+
+    <div>
+      <span>Current stock</span>
+      <b id="facilityDrawerStock">—</b>
+    </div>
+
+    <div>
+      <span>Utilization</span>
+      <b id="facilityDrawerUtilization">—</b>
+    </div>
+
+  </div>
+
+
+  <div class="drawer-section">
+
+    <div class="drawer-section-title">
+      <b>Storage conditions</b>
+    </div>
+
+    <div class="mini-alert">
+      <span>❄</span>
+
+      <div>
+        <b id="facilityDrawerStorage">
+          Standard storage
+        </b>
+
+        <small>
+          Facility storage requirements
+        </small>
+      </div>
+    </div>
+
+  </div>
+
+
+  <div class="drawer-section">
+
+    <div class="drawer-section-title">
+      <b>Facility operations</b>
+    </div>
+
+    <div class="movement">
+
+      <span class="movement-dot in"></span>
+
+      <div>
+        <b>Inventory capacity</b>
+        <small id="facilityDrawerCapacityText">
+          Loading...
+        </small>
+      </div>
+
+      <strong>✓</strong>
+
+    </div>
+
+    <div class="movement">
+
+      <span class="movement-dot in"></span>
+
+      <div>
+        <b>Network status</b>
+        <small id="facilityDrawerStatusText">
+          Loading...
+        </small>
+      </div>
+
+      <strong>✓</strong>
+
+    </div>
+
+  </div>
+
+
+  <div class="drawer-actions">
+
+    <button
+      class="ghost-btn"
+      id="facilityDrawerCloseAction"
+    >
+      Done
+    </button>
+
+   <button
+  type="button"
+  class="primary-btn"
+  id="facilityEditBtn"
+>
+  Edit facility
+</button>
+
+  </div>
+
+</aside>
+
 </body>
 </html>
