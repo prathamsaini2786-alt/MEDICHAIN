@@ -32,8 +32,29 @@ const alertSchema = new mongoose.Schema(
     },
 
     reviewed: {
-      type: Boolean,
-      default: false
+  type: Boolean,
+  default: false
+},
+
+autoKey: {
+  type: String,
+  default: "",
+  index: true
+},
+
+autoKey: {
+  type: String,
+  trim: true,
+  index: true,
+  sparse: true
+},
+
+    // Used for automatically generated alerts.
+    // Manual alerts leave this empty.
+    autoKey: {
+      type: String,
+      default: null,
+      index: true
     },
 
     createdBy: {
