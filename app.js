@@ -1749,7 +1749,7 @@ document
       const token = getToken();
 
       if (!token) {
-        alert("Please login first.");
+        showToast("Please login first.", "error");
         return;
       }
 
@@ -1788,31 +1788,33 @@ document
         "medicine";
 
       if (!drugId) {
-        alert("Unable to identify this medicine.");
+        showToast("Unable to identify this medicine.", "error");
         return;
       }
 
       if (!Number.isFinite(units) || units < 1) {
-        alert("Enter a valid quantity.");
+        showToast("Enter a valid quantity.", "error");
         return;
       }
 
       if (units > sourceQuantity) {
-        alert(
-          `Only ${sourceQuantity.toLocaleString()} units are available.`
-        );
+        showToast(
+  `Only ${sourceQuantity.toLocaleString()} units are available.`,
+  "error"
+);
         return;
       }
 
       if (!source || !destination) {
-        alert("Source and destination are required.");
+        showToast("Source and destination are required.", "error");
         return;
       }
 
       if (source === destination) {
-        alert(
-          "Source and destination must be different."
-        );
+        showToast(
+  "Source and destination must be different.",
+  "error"
+);
         return;
       }
 
@@ -2043,7 +2045,7 @@ addInventoryForm?.addEventListener("submit", async (event) => {
 
     console.log("Inventory added:", data);
 
-    alert("Inventory added successfully!");
+    showToast("Inventory added successfully!", "success");
 
     addInventoryForm.reset();
 
@@ -2054,7 +2056,7 @@ addInventoryForm?.addEventListener("submit", async (event) => {
 
   } catch (error) {
     console.error("Add inventory API error:", error);
-    alert(`Failed to add inventory: ${error.message}`);
+    showToast(`Failed to add inventory: ${error.message}`, "error");
   }
 });
 
@@ -2226,6 +2228,9 @@ function renderShipments() {
     card.dataset.mongoId =
       shipment._id || "";
 
+      card.dataset.orderId =
+  shipment.order?._id || "";
+
     card.dataset.status =
       shipment.status || "Pending";
 
@@ -2250,6 +2255,11 @@ function renderShipments() {
     card.dataset.vehicle =
       shipment.vehicle || "—";
 
+      card.dataset.orderNumber =
+  shipment.order?.orderNumber ||
+  shipment.order?.orderId ||
+  shipment.order?._id ||
+  "—";
 
     card.innerHTML = `
       <div class="route-head">
@@ -2578,6 +2588,38 @@ document
     "click",
     () => {
 
+      const order =
+        window.selectedShipmentOrder;
+
+      const destinationInput =
+        document.getElementById(
+          "shipmentDestinationInput"
+        );
+
+      const quantityInput =
+        document.getElementById(
+          "shipmentQuantity"
+        );
+
+
+      // Prefill from selected order
+      if (order) {
+
+        if (destinationInput) {
+          destinationInput.value =
+            order.destination ||
+            order.facility ||
+            "";
+        }
+
+        if (quantityInput) {
+          quantityInput.value =
+            order.quantity || "";
+        }
+
+      }
+
+
       document
         .getElementById("shipmentModal")
         ?.classList.remove("hidden");
@@ -2679,9 +2721,10 @@ document
         quantity < 1
       ) {
 
-        alert(
-          "Please fill origin, destination and a valid quantity."
-        );
+        showToast(
+  "Please fill origin, destination and a valid quantity.",
+  "error"
+);
 
         return;
       }
@@ -2702,14 +2745,18 @@ document
               },
 
               body: JSON.stringify({
-                origin,
-                destination,
-                quantity,
-                eta,
-                temperature,
-                driver,
-                vehicle
-              })
+  order:
+  window.selectedShipmentOrder?._id ||
+  null,
+
+  origin,
+  destination,
+  quantity,
+  eta,
+  temperature,
+  driver,
+  vehicle
+})
 
             }
           );
@@ -2728,20 +2775,62 @@ document
 
         }
 
+        // Move linked order to Processing
+const linkedOrder =
+  window.selectedShipmentOrder;
+
+if (linkedOrder?._id) {
+
+  const orderResponse =
+    await fetch(
+      `${API_BASE_URL}/orders/${linkedOrder._id}/status`,
+      {
+        method: "PUT",
+
+        headers: {
+          ...getSettingsHeaders(),
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          status: "Processing"
+        })
+      }
+    );
+
+
+  if (!orderResponse.ok) {
+
+    console.warn(
+      "Shipment created, but order could not be moved to Processing."
+    );
+
+  }
+
+}
+
 
         closeShipmentModal();
 
-        document
-          ?.reset();
+       const shipmentModal =
+  document.getElementById("shipmentModal");
 
+shipmentModal
+  ?.querySelectorAll("input")
+  .forEach(input => {
+    input.value = "";
+  });
 
         await loadShipments();
 
+        window.selectedShipmentOrder = null;
 
-        alert(
-          `Shipment created successfully.\n\n` +
-          `${data.shipment?.shipmentId || ""}`
-        );
+await loadOrders();
+
+showToast(
+  `Shipment ${data.shipment?.shipmentId || ""} created successfully.`,
+  "success"
+);
 
 
       } catch (error) {
@@ -2750,12 +2839,11 @@ document
           "Create shipment error:",
           error
         );
-
-        alert(
-          error.message ||
-          "Unable to create shipment."
-        );
-
+showToast(
+  error.message ||
+  "Unable to create shipment.",
+  "error"
+);
       }
 
     }
@@ -2771,7 +2859,7 @@ document
     async () => {
 
       if (!selectedShipment?._id) {
-        alert("No shipment selected.");
+        showToast("No shipment selected.", "error");
         return;
       }
 
@@ -2795,8 +2883,9 @@ document
         progress > 100
       ) {
 
-        alert(
-          "Please enter a progress value between 0 and 100."
+        showToast(
+          "Please enter a progress value between 0 and 100.",
+          "error"
         );
 
         return;
@@ -2839,12 +2928,10 @@ document
         }
 
 
-        alert(
-          `Shipment updated successfully.\n\n` +
-          `${data.shipment?.shipmentId || selectedShipment.shipmentId}\n` +
-          `Status: ${status}\n` +
-          `Progress: ${progress}%`
-        );
+        showToast(
+  `Shipment ${data.shipment?.shipmentId || selectedShipment.shipmentId} updated — ${status} (${progress}%).`,
+  "success"
+);
 
 
         closeShipmentDrawer();
@@ -2859,10 +2946,11 @@ document
           error
         );
 
-        alert(
-          error.message ||
-          "Unable to update shipment."
-        );
+        showToast(
+  error.message ||
+  "Unable to update shipment.",
+  "error"
+);
 
       }
 
@@ -2878,12 +2966,13 @@ document
     () => {
 
       if (!selectedShipment?._id) {
-        alert("No shipment selected.");
+         showToast("No shipment selected.", "error");
         return;
       }
 
-      alert(
-        `Issue report started for ${selectedShipment.shipmentId}.`
+      showToast(
+        `Issue report started for ${selectedShipment.shipmentId}.`,
+        "success"
       );
 
     }
@@ -2968,15 +3057,17 @@ const pendingOrderCount = document.getElementById("pendingOrderCount");
 let orders = [];
 let selectedOrder = null;
 
-
 // ================= ORDER MODAL =================
 
+const createOrderModal =
+  document.getElementById("createOrderModal");
+
 function openOrderModal() {
-  orderModal?.classList.remove("hidden");
+  createOrderModal?.classList.remove("hidden");
 }
 
 function closeOrderModal() {
-  orderModal?.classList.add("hidden");
+  createOrderModal?.classList.add("hidden");
 }
 
 document.getElementById("createOrderBtn")?.addEventListener(
@@ -2984,18 +3075,18 @@ document.getElementById("createOrderBtn")?.addEventListener(
   openOrderModal
 );
 
-document.getElementById("orderModalClose")?.addEventListener(
+document.getElementById("createOrderClose")?.addEventListener(
   "click",
   closeOrderModal
 );
 
-document.getElementById("orderCancel")?.addEventListener(
+document.getElementById("createOrderCancel")?.addEventListener(
   "click",
   closeOrderModal
 );
 
-orderModal?.addEventListener("click", event => {
-  if (event.target === orderModal) {
+createOrderModal?.addEventListener("click", event => {
+  if (event.target === createOrderModal) {
     closeOrderModal();
   }
 });
@@ -3195,7 +3286,7 @@ function getOrderStatusClass(status) {
 
 // ================= CREATE ORDER =================
 
-document.getElementById("confirmOrder")?.addEventListener(
+document.getElementById("confirmCreateOrder")?.addEventListener(
   "click",
   async () => {
 
@@ -3223,13 +3314,13 @@ document.getElementById("confirmOrder")?.addEventListener(
       !Number.isFinite(quantity) ||
       quantity < 1
     ) {
-      alert("Please enter a valid medicine quantity.");
+      showToast("Please enter a valid medicine quantity.", "error");
       return;
     }
 
 
     if (!supplier || !facility) {
-      alert("Please select a supplier and facility.");
+      showToast("Please select a supplier and facility.", "error");
       return;
     }
 
@@ -3291,10 +3382,9 @@ document.getElementById("confirmOrder")?.addEventListener(
         "New order";
 
 
-      alert(
-        `Order created successfully.\n\n` +
-        `${createdId}\n` +
-        `${medicine} — ${quantity.toLocaleString()} units`
+      showToast(
+        `Order ${createdId} created — ${medicine} (${quantity.toLocaleString()} units).`,
+        "success"
       );
 
 
@@ -3302,9 +3392,10 @@ document.getElementById("confirmOrder")?.addEventListener(
 
       console.error("Create order error:", error);
 
-      alert(
+      showToast(
         error.message ||
-        "Unable to create order."
+        "Unable to create order.",
+        "error"
       );
     }
 
@@ -3435,56 +3526,50 @@ const orderDrawerCloseAction =
 const orderApproveBtn =
   document.getElementById("orderApproveBtn");
 
+const orderCreateShipmentBtn =
+  document.getElementById("orderCreateShipmentBtn");
+
 
 function openOrderDrawer(row, order) {
 
   selectedOrder = order;
 
-
   const data = row.dataset;
-
 
   if (orderDrawerId) {
     orderDrawerId.textContent =
       `#${data.orderNumber || data.orderId}`;
   }
 
-
   if (orderDrawerStatus) {
     orderDrawerStatus.textContent =
       data.status;
   }
-
 
   if (orderDrawerStatusBadge) {
     orderDrawerStatusBadge.textContent =
       data.status;
   }
 
-
   if (orderDrawerFacility) {
     orderDrawerFacility.textContent =
       data.facility;
   }
-
 
   if (orderDrawerItems) {
     orderDrawerItems.textContent =
       data.items;
   }
 
-
   if (orderDrawerSupplier) {
     orderDrawerSupplier.textContent =
       data.supplier;
   }
 
-
   if (orderDrawerDate) {
     orderDrawerDate.textContent =
       data.date;
   }
-
 
   if (orderTimelineDate) {
     orderTimelineDate.textContent =
@@ -3492,7 +3577,10 @@ function openOrderDrawer(row, order) {
   }
 
 
-  // Only allow approval for Pending orders
+  // ============================
+  // APPROVE BUTTON
+  // ============================
+
   if (orderApproveBtn) {
 
     const canApprove =
@@ -3500,6 +3588,21 @@ function openOrderDrawer(row, order) {
 
     orderApproveBtn.style.display =
       canApprove ? "" : "none";
+  }
+
+
+  // ============================
+  // CREATE SHIPMENT BUTTON
+  // ============================
+
+  if (orderCreateShipmentBtn) {
+
+    const canCreateShipment =
+      data.status === "Approved" ||
+      data.status === "Processing";
+
+    orderCreateShipmentBtn.style.display =
+      canCreateShipment ? "" : "none";
   }
 
 
@@ -3557,7 +3660,12 @@ orderApproveBtn?.addEventListener(
   async () => {
 
     if (!selectedOrder?._id) {
-      alert("Invalid order.");
+
+      showToast(
+        "Invalid order.",
+        "error"
+      );
+
       return;
     }
 
@@ -3599,7 +3707,10 @@ orderApproveBtn?.addEventListener(
       await loadOrders();
 
 
-      alert("Order approved successfully.");
+      showToast(
+        "Order approved successfully.",
+        "success"
+      );
 
 
     } catch (error) {
@@ -3609,42 +3720,63 @@ orderApproveBtn?.addEventListener(
         error
       );
 
-      alert(
+      showToast(
         error.message ||
-        "Unable to approve order."
+        "Unable to approve order.",
+        "error"
       );
+
     }
 
   }
 );
 
 
+// ================= CREATE SHIPMENT FROM ORDER =================
+orderCreateShipmentBtn?.addEventListener(
+  "click",
+  () => {
+
+    if (!selectedOrder?._id) {
+      showToast("Invalid order.", "error");
+      return;
+    }
+
+    const order = selectedOrder;
+
+    // Store BEFORE opening shipment modal
+    window.selectedShipmentOrder = order;
+
+    closeOrderDrawer();
+
+    const shipmentNav =
+      document.querySelector(
+        '[data-page="shipments"]'
+      );
+
+    if (shipmentNav) {
+      shipmentNav.click();
+    }
+
+    setTimeout(() => {
+
+      const newShipmentBtn =
+        document.getElementById("newShipmentBtn");
+
+      if (newShipmentBtn) {
+        newShipmentBtn.click();
+      }
+
+    }, 100);
+
+  }
+);
+
 // ================= INITIAL LOAD =================
 
 loadOrders();
 
-orderDrawerClose?.addEventListener("click", closeOrderDrawer);
 
-orderDrawerCloseAction?.addEventListener("click", closeOrderDrawer);
-
-orderDrawerBackdrop?.addEventListener("click", closeOrderDrawer);
-
-orderApproveBtn?.addEventListener("click", () => {
-
-    orderDrawerStatus.textContent = "Approved";
-    orderDrawerStatusBadge.textContent = "Approved";
-
-    orderApproveBtn.textContent = "Approved";
-    orderApproveBtn.disabled = true;
-
-});
-
-
-// ==================== CREATE ORDER ====================
-
-const createOrderBtn = document.getElementById("createOrderBtn");
-
-const createOrderModal = document.getElementById("createOrderModal");
 
 // ============================================================
 // SUPPLIERS
@@ -3882,8 +4014,9 @@ confirmSupplier?.addEventListener(
 
     if (!name || !code || !category) {
 
-      alert(
-        "Please fill in supplier name, code and category."
+      showToast(
+        "Please fill in supplier name, code and category.",
+        "error"
       );
 
       return;
@@ -3896,7 +4029,7 @@ confirmSupplier?.addEventListener(
 
     if (!token) {
 
-      alert("Please login first.");
+      showToast("Please login first.", "error");
 
       return;
 
@@ -3969,8 +4102,9 @@ confirmSupplier?.addEventListener(
       await loadSuppliers();
 
 
-      alert(
-        "Supplier added successfully."
+      showToast(
+        "Supplier added successfully.",
+        "success"
       );
 
 
@@ -3982,9 +4116,10 @@ confirmSupplier?.addEventListener(
       );
 
 
-      alert(
+      showToast(
         error.message ||
-        "Failed to create supplier"
+        "Failed to create supplier",
+        "error"
       );
 
 
@@ -4293,8 +4428,9 @@ async function reviewAlert(alertId) {
   } catch (error) {
     console.error("Review alert error:", error);
 
-    alert(
-      error.message || "Failed to review alert"
+    showToast(
+      error.message || "Failed to review alert",
+      "error"
     );
   }
 }
@@ -4307,7 +4443,7 @@ markAllAlertsReviewed?.addEventListener(
     const token = getToken();
 
     if (!token) {
-      alert("Please login first.");
+      showToast("Please login first.", "error");
       return;
     }
 
@@ -4335,7 +4471,10 @@ markAllAlertsReviewed?.addEventListener(
 
       await loadAlerts();
 
-      alert("All alerts marked as reviewed.");
+      showToast(
+        "All alerts marked as reviewed.",
+        "success"
+      );
 
     } catch (error) {
       console.error(
@@ -4343,9 +4482,10 @@ markAllAlertsReviewed?.addEventListener(
         error
       );
 
-      alert(
+      showToast(
         error.message ||
-        "Failed to mark alerts as reviewed"
+        "Failed to mark alerts as reviewed",
+        "error"
       );
 
     } finally {
@@ -5403,7 +5543,10 @@ function bindMovementActions() {
         const token = getToken();
 
         if (!movementId || !token) {
-          alert("Unable to update this movement.");
+          showToast(
+            "Unable to update this movement.",
+            "error"
+          );
           return;
         }
 
