@@ -139,6 +139,14 @@ function showPage(name) {
     top: 0,
     behavior: "smooth"
   });
+
+  // Refresh alerts whenever the Alerts page is opened
+  if (name === "alerts") {
+    generateAutomatedAlerts();
+  }
+  if (name === "medicines") {
+  loadMedicines();
+}
 }
 
 navItems.forEach(item => {
@@ -1203,13 +1211,8 @@ function renderInventory(drugs) {
     const row =
       document.createElement("tr");
 
-      row.className = "facility-row";
-row.dataset.facilityId =
-  facility._id || facility.id || "";
+      row.className = "inventory-row";
 row.style.cursor = "pointer";
-
-    row.className =
-      "inventory-row";
 
     const expiryDate =
       new Date(drug.expiryDate);
@@ -1247,6 +1250,9 @@ row.style.cursor = "pointer";
 
     row.dataset.expiry =
       expiry;
+
+      row.dataset.expiryDate =
+  drug.expiryDate || "";
 
     row.dataset.status =
       statusClass;
@@ -1299,6 +1305,8 @@ row.dataset.drugId =
 
   attachInventoryRowListeners();
 
+  filterInventory();
+
 
 
 }
@@ -1347,7 +1355,7 @@ const inventoryFacility =
   document.getElementById("inventoryFacility");
 
 const inventoryExpiry =
-  document.getElementById("inventoryExpiry");
+  document.getElementById("inventoryExpiryFilter");
 
 const inventoryResultCount =
   document.getElementById("inventoryResultCount");
@@ -1451,9 +1459,7 @@ inventoryDrawerBackdrop?.addEventListener(
 
 
 // ================= INVENTORY FILTERING =================
-
 function filterInventory() {
-
   const q =
     (inventorySearch?.value || "")
       .trim()
@@ -1470,9 +1476,14 @@ function filterInventory() {
 
   let shown = 0;
 
+  const now = new Date();
+
+  const thirtyDaysFromNow = new Date(now);
+  thirtyDaysFromNow.setDate(
+    thirtyDaysFromNow.getDate() + 30
+  );
 
   getInventoryRows().forEach(row => {
-
     const d = row.dataset;
 
     const textMatch =
@@ -1486,36 +1497,40 @@ function filterInventory() {
         .toLowerCase()
         .includes(q);
 
-
     const statusMatch =
       status === "all" ||
       d.status === status;
-
 
     const facilityMatch =
       facility === "all" ||
       d.facility === facility;
 
+    let expiryMatch = true;
 
-    const expiryMatch =
-      expiry === "all" ||
-      (
-        expiry === "soon" &&
-        [
-          "Sep 2026",
-          "Nov 2026",
-          "Dec 2026"
-        ].includes(d.expiry)
-      ) ||
-      (
-        expiry === "normal" &&
-        ![
-          "Sep 2026",
-          "Nov 2026",
-          "Dec 2026"
-        ].includes(d.expiry)
-      );
+    if (expiry !== "all") {
+      if (!d.expiryDate) {
+        expiryMatch = false;
+      } else {
+        const expiryDate =
+          new Date(d.expiryDate);
 
+        if (expiry === "soon") {
+          expiryMatch =
+            expiryDate >= now &&
+            expiryDate <= thirtyDaysFromNow;
+        }
+
+        if (expiry === "expired") {
+          expiryMatch =
+            expiryDate < now;
+        }
+
+        if (expiry === "normal") {
+          expiryMatch =
+            expiryDate > thirtyDaysFromNow;
+        }
+      }
+    }
 
     const visible =
       textMatch &&
@@ -1523,24 +1538,19 @@ function filterInventory() {
       facilityMatch &&
       expiryMatch;
 
-
     row.style.display =
       visible ? "" : "none";
 
-
-    if (visible) shown++;
-
+    if (visible) {
+      shown++;
+    }
   });
 
-
   if (inventoryResultCount) {
-
     inventoryResultCount.textContent =
-      `${shown} medicine${shown === 1 ? "" : "s"} shown`;
-
+      `${shown} record${shown === 1 ? "" : "s"} shown`;
   }
 }
-
 
 [
   inventorySearch,
@@ -1887,13 +1897,69 @@ document
     }
   );
 
+  // ==================== INVENTORY FACILITIES ====================
+
+async function loadInventoryWarehouses() {
+  const locationSelect =
+    document.getElementById("inventoryLocation");
+
+  if (!locationSelect || !getToken()) return;
+
+  try {
+    locationSelect.innerHTML =
+      `<option value="">Loading facilities...</option>`;
+
+    const response = await fetch(
+      `${API_BASE_URL}/warehouses`,
+      {
+        headers: getSettingsHeaders()
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Unable to load facilities");
+    }
+
+    const warehouses = await response.json();
+
+    locationSelect.innerHTML =
+      `<option value="">Select facility</option>`;
+
+    warehouses.forEach((warehouse) => {
+      const option = document.createElement("option");
+
+      option.value = warehouse.name;
+      option.textContent = warehouse.name;
+
+      locationSelect.appendChild(option);
+    });
+
+  } catch (error) {
+    console.error(
+      "Load inventory facilities error:",
+      error
+    );
+
+    locationSelect.innerHTML =
+      `<option value="">Unable to load facilities</option>`;
+
+    showToast(
+      "Unable to load facilities.",
+      "error"
+    );
+  }
+}
+
 // ==================== ADD INVENTORY ====================
+
+let selectedMedicineForInventory = null;
 
 const addInventoryModal = document.getElementById("addInventoryModal");
 const addInventoryForm = document.getElementById("addInventoryForm");
 
 function openAddInventoryModal() {
   addInventoryModal?.classList.remove("hidden");
+  loadInventoryWarehouses();
 }
 
 function closeAddInventoryModal() {
@@ -1919,19 +1985,41 @@ addInventoryForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const inventoryData = {
-    name: document.getElementById("inventoryName").value.trim(),
-    batchNumber: document.getElementById("inventoryBatch").value.trim(),
-    manufacturer: document
-      .getElementById("inventoryManufacturer")
-      .value.trim(),
-    quantity: Number(document.getElementById("inventoryQuantity").value),
-    reorderLevel: Number(
+  name: document.getElementById("inventoryName").value.trim(),
+
+  genericName:
+    selectedMedicineForInventory?.genericName ||
+    document.getElementById("inventoryName").value.trim(),
+
+  batchNumber:
+    document.getElementById("inventoryBatch").value.trim(),
+
+  manufacturer:
+    document.getElementById("inventoryManufacturer").value.trim(),
+
+  dosageForm:
+    selectedMedicineForInventory?.dosageForm || "",
+
+  strength:
+    selectedMedicineForInventory?.strength || "",
+
+  quantity:
+    Number(document.getElementById("inventoryQuantity").value),
+
+  reorderLevel:
+    Number(
       document.getElementById("inventoryReorderLevel").value
     ),
-    expiryDate: document.getElementById("inventoryExpiry").value,
-    location: document.getElementById("inventoryLocation").value,
-    status: document.getElementById("inventoryStatus").value
-  };
+
+  expiryDate:
+    document.getElementById("inventoryExpiry").value,
+
+  location:
+    document.getElementById("inventoryLocation").value,
+
+  status:
+    document.getElementById("inventoryStatus").value
+};
 
   try {
     const response = await fetch(`${API_BASE_URL}/drugs`, {
@@ -1946,8 +2034,12 @@ addInventoryForm?.addEventListener("submit", async (event) => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || "Failed to add inventory");
-    }
+  throw new Error(
+    data.error ||
+    data.message ||
+    "Failed to add inventory"
+  );
+}
 
     console.log("Inventory added:", data);
 
@@ -3921,6 +4013,9 @@ const alertsList = document.getElementById("alertsList");
 const markAllAlertsReviewed =
   document.getElementById("markAllAlertsReviewed");
 
+  const generateAlertsBtn =
+  document.getElementById("generateAlertsBtn");
+
 const criticalAlertCount =
   document.getElementById("criticalAlertCount");
 
@@ -4107,6 +4202,67 @@ if (alertsNavBadge) {
   }
 }
 
+async function generateAutomatedAlerts() {
+  const token = getToken();
+
+  if (!token) {
+    showToast("Please login first.", "error");
+    return;
+  }
+
+  if (!generateAlertsBtn) return;
+
+  try {
+    generateAlertsBtn.disabled = true;
+    generateAlertsBtn.textContent = "Generating...";
+
+    const response = await fetch(
+      `${API_BASE_URL}/alerts/generate`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Failed to generate alerts"
+      );
+    }
+
+    await loadAlerts();
+
+    showToast(
+      `${data.generated || 0} automated alert${data.generated === 1 ? "" : "s"} generated.`,
+      "success"
+    );
+
+  } catch (error) {
+    console.error(
+      "Generate automated alerts error:",
+      error
+    );
+
+    showToast(
+      error.message || "Failed to generate alerts",
+      "error"
+    );
+
+  } finally {
+    generateAlertsBtn.disabled = false;
+    generateAlertsBtn.textContent = "↻ Generate alerts";
+  }
+}
+
+generateAlertsBtn?.addEventListener(
+  "click",
+  generateAutomatedAlerts
+);
+
 
 async function reviewAlert(alertId) {
   const token = getToken();
@@ -4200,9 +4356,563 @@ markAllAlertsReviewed?.addEventListener(
   }
 );
 
+// =====================================================
+// MEDICINE MASTER
+// =====================================================
 
-// Load alerts
-loadAlerts();
+let medicineMasterList = [];
+
+const medicineSearchInput =
+  document.getElementById("medicineSearchInput");
+
+const medicineCategoryFilter =
+  document.getElementById("medicineCategoryFilter");
+
+const medicinePrescriptionFilter =
+  document.getElementById("medicinePrescriptionFilter");
+
+const medicineTableBody =
+  document.getElementById("medicinesTableBody");
+
+const medicineTotalCount =
+  document.getElementById("medicineTotalCount");
+
+const essentialMedicineCount =
+  document.getElementById("essentialMedicineCount");
+
+const prescriptionMedicineCount =
+  document.getElementById("prescriptionMedicineCount");
+
+const medicineCategoryCount =
+  document.getElementById("medicineCategoryCount");
+
+const refreshMedicinesBtn =
+  document.getElementById("refreshMedicinesBtn");
+
+
+async function loadMedicines() {
+
+  const token = getToken();
+
+  if (!token) {
+    showToast("Please login first.", "error");
+    return;
+  }
+
+  if (!medicineTableBody) return;
+
+  try {
+
+    medicineTableBody.innerHTML = `
+      <tr>
+        <td colspan="8">Loading medicines...</td>
+      </tr>
+    `;
+
+    const response = await fetch(
+      `${API_BASE_URL}/medicines`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Failed to load medicines"
+      );
+    }
+
+    medicineMasterList =
+      Array.isArray(data)
+        ? data
+        : data.medicines || [];
+
+    updateMedicineSummary();
+    populateMedicineCategories();
+    renderMedicines();
+
+  } catch (error) {
+
+    console.error(
+      "Medicine master error:",
+      error
+    );
+
+    medicineTableBody.innerHTML = `
+      <tr>
+        <td colspan="8">
+          Unable to load medicines.
+        </td>
+      </tr>
+    `;
+
+    showToast(
+      error.message || "Failed to load medicines",
+      "error"
+    );
+  }
+}
+
+
+function updateMedicineSummary() {
+
+  if (!medicineMasterList.length) {
+
+    if (medicineTotalCount)
+      medicineTotalCount.textContent = "0";
+
+    if (essentialMedicineCount)
+      essentialMedicineCount.textContent = "0";
+
+    if (prescriptionMedicineCount)
+      prescriptionMedicineCount.textContent = "0";
+
+    if (medicineCategoryCount)
+      medicineCategoryCount.textContent = "0";
+
+    return;
+  }
+
+  const categories = new Set(
+    medicineMasterList
+      .map(medicine => medicine.category)
+      .filter(Boolean)
+  );
+
+  const essentialCount =
+    medicineMasterList.filter(
+      medicine => medicine.essentialMedicine
+    ).length;
+
+  const prescriptionCount =
+    medicineMasterList.filter(
+      medicine => medicine.prescriptionRequired
+    ).length;
+
+  medicineTotalCount.textContent =
+    medicineMasterList.length;
+
+  essentialMedicineCount.textContent =
+    essentialCount;
+
+  prescriptionMedicineCount.textContent =
+    prescriptionCount;
+
+  medicineCategoryCount.textContent =
+    categories.size;
+}
+
+
+function populateMedicineCategories() {
+
+  if (!medicineCategoryFilter) return;
+
+  const currentValue =
+    medicineCategoryFilter.value;
+
+  const categories = [
+    ...new Set(
+      medicineMasterList
+        .map(medicine => medicine.category)
+        .filter(Boolean)
+    )
+  ].sort();
+
+  medicineCategoryFilter.innerHTML = `
+    <option value="">All categories</option>
+  `;
+
+  categories.forEach(category => {
+
+    const option =
+      document.createElement("option");
+
+    option.value = category;
+    option.textContent = category;
+
+    medicineCategoryFilter.appendChild(option);
+  });
+
+  if (categories.includes(currentValue)) {
+    medicineCategoryFilter.value =
+      currentValue;
+  }
+}
+
+
+function renderMedicines() {
+
+  if (!medicineTableBody) return;
+
+  const search =
+    (medicineSearchInput?.value || "")
+      .trim()
+      .toLowerCase();
+
+  const category =
+    medicineCategoryFilter?.value || "";
+
+  const prescription =
+    medicinePrescriptionFilter?.value || "";
+
+  const filteredMedicines =
+    medicineMasterList.filter(medicine => {
+
+      const searchableText = [
+        medicine.genericName,
+        medicine.brandName,
+        medicine.manufacturer,
+        medicine.strength,
+        medicine.dosageForm,
+        medicine.category
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      const matchesSearch =
+        !search ||
+        searchableText.includes(search);
+
+      const matchesCategory =
+        !category ||
+        medicine.category === category;
+
+      const matchesPrescription =
+        !prescription ||
+        (prescription === "yes"
+          ? medicine.prescriptionRequired === true
+          : medicine.prescriptionRequired === false);
+
+      return (
+        matchesSearch &&
+        matchesCategory &&
+        matchesPrescription
+      );
+    });
+
+
+  if (!filteredMedicines.length) {
+
+    medicineTableBody.innerHTML = `
+      <tr>
+        <td colspan="8">
+          No medicines found.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+
+  medicineTableBody.innerHTML = "";
+
+  filteredMedicines.forEach(medicine => {
+
+    const row =
+      document.createElement("tr");
+
+    row.style.cursor = "pointer";
+
+    row.innerHTML = `
+      <td>
+        <strong>
+          ${escapeSearchText(
+            medicine.genericName || "—"
+          )}
+        </strong>
+      </td>
+
+      <td>
+        ${escapeSearchText(
+          medicine.brandName || "—"
+        )}
+      </td>
+
+      <td>
+        ${escapeSearchText(
+          medicine.manufacturer || "—"
+        )}
+      </td>
+
+      <td>
+        ${escapeSearchText(
+          medicine.strength || "—"
+        )}
+      </td>
+
+      <td>
+        ${escapeSearchText(
+          medicine.dosageForm || "—"
+        )}
+      </td>
+
+      <td>
+        ${escapeSearchText(
+          medicine.category || "—"
+        )}
+      </td>
+
+      <td>
+        ${
+          medicine.essentialMedicine
+            ? '<span class="status-badge healthy">Yes</span>'
+            : '<span class="status-badge">No</span>'
+        }
+      </td>
+
+      <td>
+        ${
+          medicine.prescriptionRequired
+            ? '<span class="status-badge warning">Required</span>'
+            : '<span class="status-badge healthy">No</span>'
+        }
+      </td>
+    `;
+
+   row.addEventListener("click", () => {
+  openMedicineDrawer(medicine);
+});
+
+medicineTableBody.appendChild(row);
+  });
+}
+
+
+medicineSearchInput?.addEventListener(
+  "input",
+  renderMedicines
+);
+
+medicineCategoryFilter?.addEventListener(
+  "change",
+  renderMedicines
+);
+
+medicinePrescriptionFilter?.addEventListener(
+  "change",
+  renderMedicines
+);
+
+refreshMedicinesBtn?.addEventListener(
+  "click",
+  loadMedicines
+);
+
+// Load alerts and refresh automated inventory risks
+generateAutomatedAlerts();
+
+ function openMedicineDrawer(medicine) {
+
+  const drawer =
+    document.getElementById("medicineDrawer");
+
+  const backdrop =
+    document.getElementById("medicineDrawerBackdrop");
+
+  if (!drawer || !backdrop || !medicine) return;
+
+
+  document.getElementById(
+    "medicineDrawerName"
+  ).textContent =
+    medicine.genericName || "Medicine";
+
+
+  document.getElementById(
+    "medicineDrawerBrand"
+  ).textContent =
+    medicine.brandName || "No brand specified";
+
+
+  document.getElementById(
+    "medicineDrawerManufacturer"
+  ).textContent =
+    medicine.manufacturer || "—";
+
+
+  document.getElementById(
+    "medicineDrawerStrength"
+  ).textContent =
+    medicine.strength || "—";
+
+
+  document.getElementById(
+    "medicineDrawerDosage"
+  ).textContent =
+    medicine.dosageForm || "—";
+
+
+  document.getElementById(
+    "medicineDrawerCategory"
+  ).textContent =
+    medicine.category || "—";
+
+
+  document.getElementById(
+    "medicineDrawerStorage"
+  ).textContent =
+    medicine.storageConditions || "—";
+
+
+  document.getElementById(
+    "medicineDrawerSource"
+  ).textContent =
+    medicine.source || "—";
+
+
+  document.getElementById(
+    "medicineDrawerReference"
+  ).textContent =
+    medicine.sourceReference || "—";
+
+
+  const essential =
+    document.getElementById(
+      "medicineDrawerEssential"
+    );
+
+  essential.textContent =
+    medicine.essentialMedicine
+      ? "Essential medicine"
+      : "Non-essential";
+
+  essential.className =
+    medicine.essentialMedicine
+      ? "status-badge healthy"
+      : "status-badge";
+
+
+  const prescription =
+    document.getElementById(
+      "medicineDrawerPrescription"
+    );
+
+  prescription.textContent =
+    medicine.prescriptionRequired
+      ? "Prescription required"
+      : "No prescription";
+
+
+  prescription.className =
+    medicine.prescriptionRequired
+      ? "status-badge warning"
+      : "status-badge healthy";
+
+
+  const addButton =
+    document.getElementById(
+      "medicineAddInventoryBtn"
+    );
+
+  if (addButton) {
+
+  addButton.onclick = () => {
+
+    selectedMedicineForInventory = medicine;
+
+    closeMedicineDrawer();
+
+    openAddInventoryModal();
+
+    const nameInput =
+      document.getElementById("inventoryName");
+
+    const manufacturerInput =
+      document.getElementById("inventoryManufacturer");
+
+    if (nameInput) {
+      nameInput.value =
+        medicine.genericName || "";
+    }
+
+    if (manufacturerInput) {
+      manufacturerInput.value =
+        medicine.manufacturer || "";
+    }
+
+    showToast(
+      `${medicine.genericName} selected for inventory.`,
+      "success"
+    );
+
+  };
+
+}
+
+
+  drawer.classList.add("open");
+
+  drawer.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+  backdrop.classList.remove("hidden");
+}
+
+
+function closeMedicineDrawer() {
+
+  const drawer =
+    document.getElementById("medicineDrawer");
+
+  const backdrop =
+    document.getElementById(
+      "medicineDrawerBackdrop"
+    );
+
+
+  if (drawer) {
+
+    drawer.classList.remove("open");
+
+    drawer.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+  }
+
+
+  if (backdrop) {
+
+    backdrop.classList.add(
+      "hidden"
+    );
+
+  }
+
+}
+
+
+document.addEventListener(
+  "click",
+  event => {
+
+    if (
+      event.target.closest(
+        "#medicineDrawerClose"
+      )
+    ) {
+      closeMedicineDrawer();
+    }
+
+
+    if (
+      event.target.id ===
+      "medicineDrawerBackdrop"
+    ) {
+      closeMedicineDrawer();
+    }
+
+  }
+);
 
 // ============================================================
 // ANALYTICS

@@ -31,7 +31,13 @@
         <button class="nav-item active" data-page="dashboard"><span>⌂</span>Dashboard</button>
 
         <div class="nav-label">OPERATIONS</div>
-        <button class="nav-item" data-page="inventory"><span>▣</span>Inventory <em>27</em></button>
+       <button class="nav-item" data-page="medicines">
+  <span>⚕</span>Medicines
+</button>
+
+<button class="nav-item" data-page="inventory">
+  <span>▣</span>Inventory <em>27</em>
+</button>
         <button class="nav-item" data-page="orders"><span>▤</span>Orders <em>12</em></button>
         <button class="nav-item" data-page="shipments"><span>↗</span>Shipments</button>
         <button class="nav-item" data-page="suppliers"><span>◇</span>Suppliers</button>
@@ -466,6 +472,108 @@
 
 </section>
 
+<section id="page-medicines" class="page">
+
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">MEDICINE MASTER</div>
+      <h1>Medicines</h1>
+      <p>Reference medicines available across the MediChain network.</p>
+    </div>
+
+    <button class="ghost-btn" id="refreshMedicinesBtn">
+      ↻ Refresh
+    </button>
+  </div>
+
+  <div class="stat-grid compact">
+
+    <article class="stat-card">
+      <span>Total medicines</span>
+      <strong id="medicineTotalCount">—</strong>
+      <small>Active reference records</small>
+    </article>
+
+    <article class="stat-card">
+      <span>Essential medicines</span>
+      <strong id="essentialMedicineCount">—</strong>
+      <small>Listed as essential</small>
+    </article>
+
+    <article class="stat-card">
+      <span>Prescription</span>
+      <strong id="prescriptionMedicineCount">—</strong>
+      <small>Prescription required</small>
+    </article>
+
+    <article class="stat-card">
+      <span>Categories</span>
+      <strong id="medicineCategoryCount">—</strong>
+      <small>Medicine categories</small>
+    </article>
+
+  </div>
+
+  <article class="panel table-panel">
+
+    <div class="panel-head">
+      <div>
+        <h2>Medicine catalog</h2>
+        <p>Search and review the medicine master.</p>
+      </div>
+    </div>
+
+    <div class="inventory-toolbar">
+
+      <input
+        type="search"
+        id="medicineSearchInput"
+        placeholder="Search medicine, brand or manufacturer..."
+      >
+
+      <select id="medicineCategoryFilter">
+        <option value="">All categories</option>
+      </select>
+
+      <select id="medicinePrescriptionFilter">
+        <option value="">All medicines</option>
+        <option value="yes">Prescription required</option>
+        <option value="no">No prescription</option>
+      </select>
+
+    </div>
+
+    <div class="table-scroll">
+
+      <table id="medicinesTable">
+
+        <thead>
+          <tr>
+            <th>Medicine</th>
+            <th>Brand</th>
+            <th>Manufacturer</th>
+            <th>Strength</th>
+            <th>Dosage form</th>
+            <th>Category</th>
+            <th>Essential</th>
+            <th>Prescription</th>
+          </tr>
+        </thead>
+
+        <tbody id="medicinesTableBody">
+          <tr>
+            <td colspan="8">Loading medicines...</td>
+          </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </article>
+
+</section>
+
       <section id="page-inventory" class="page">
         <div class="page-head">
           <div><div class="eyebrow">OPERATIONS</div><h1>Inventory</h1><p>Track medicine stock, batches and expiry across facilities.</p></div>
@@ -504,22 +612,29 @@
             <button class="ghost-btn" id="inventoryExport">Export ↓</button>
           </div>
           <div class="table-scroll">
-          <table id="inventoryTable"><thead><tr><th>Medicine</th><th>Batch / SKU</th><th>Quantity</th><th>Facility</th><th>Expiry</th><th>Status</th><th></th></tr></thead><tbody>
-            <tr class="inventory-row" data-medicine="Insulin Glargine" data-category="Diabetes care" data-batch="INS-24031" data-quantity="240" data-facility="Delhi Warehouse" data-expiry="Apr 2027" data-status="healthy" data-qr="MC-INS-24031">
-              <td><b>Insulin Glargine</b><small>Diabetes care</small></td><td>INS-24031</td><td><b>240</b> units</td><td>Delhi Warehouse</td><td>Apr 2027</td><td><span class="status healthy">Healthy</span></td><td><span class="row-arrow">→</span></td>
-            </tr>
-            <tr class="inventory-row" data-medicine="Amoxicillin 500mg" data-category="Antibiotic" data-batch="AMX-8122" data-quantity="42" data-facility="Mohali Store" data-expiry="Nov 2026" data-status="warning" data-qr="MC-AMX-8122">
-              <td><b>Amoxicillin 500mg</b><small>Antibiotic</small></td><td>AMX-8122</td><td><b>42</b> units</td><td>Mohali Store</td><td>Nov 2026</td><td><span class="status warning">Low stock</span></td><td><span class="row-arrow">→</span></td>
-            </tr>
-            <tr class="inventory-row" data-medicine="Paracetamol 650mg" data-category="Analgesic" data-batch="PCM-9918" data-quantity="1240" data-facility="Chandigarh DC" data-expiry="Feb 2028" data-status="healthy" data-qr="MC-PCM-9918">
-              <td><b>Paracetamol 650mg</b><small>Analgesic</small></td><td>PCM-9918</td><td><b>1,240</b> units</td><td>Chandigarh DC</td><td>Feb 2028</td><td><span class="status healthy">Healthy</span></td><td><span class="row-arrow">→</span></td>
-            </tr>
-            <tr class="inventory-row" data-medicine="Morphine Sulfate" data-category="Controlled medicine" data-batch="MOR-1928" data-quantity="8" data-facility="Delhi Warehouse" data-expiry="Sep 2026" data-status="critical" data-qr="MC-MOR-1928">
-              <td><b>Morphine Sulfate</b><small>Controlled medicine</small></td><td>MOR-1928</td><td><b>8</b> units</td><td>Delhi Warehouse</td><td>Sep 2026</td><td><span class="status critical">Critical</span></td><td><span class="row-arrow">→</span></td>
-            </tr>
-            <tr class="inventory-row" data-medicine="Azithromycin 250mg" data-category="Antibiotic" data-batch="AZI-4421" data-quantity="186" data-facility="Jaipur Hub" data-expiry="Dec 2026" data-status="healthy" data-qr="MC-AZI-4421">
-              <td><b>Azithromycin 250mg</b><small>Antibiotic</small></td><td>AZI-4421</td><td><b>186</b> units</td><td>Jaipur Hub</td><td>Dec 2026</td><td><span class="status healthy">Healthy</span></td><td><span class="row-arrow">→</span></td>
-            </tr>
+        
+            <table id="inventoryTable">
+  <thead>
+    <tr>
+      <th>Medicine</th>
+      <th>Batch / SKU</th>
+      <th>Quantity</th>
+      <th>Facility</th>
+      <th>Expiry</th>
+      <th>Status</th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody id="inventoryTableBody">
+    <tr>
+      <td colspan="7" style="text-align:center; padding:30px;">
+        Loading inventory...
+      </td>
+    </tr>
+  </tbody>
+</table>
+            
           </tbody></table>
           </div>
         </article>
@@ -1443,9 +1558,15 @@
       <p>Prioritized disruptions, stock risks and compliance events.</p>
     </div>
 
-    <button class="ghost-btn" id="markAllAlertsReviewed">
-      Mark all reviewed
-    </button>
+   <div class="page-actions">
+  <button class="ghost-btn" id="generateAlertsBtn">
+    ↻ Generate alerts
+  </button>
+
+  <button class="ghost-btn" id="markAllAlertsReviewed">
+    Mark all reviewed
+  </button>
+</div>
   </div>
 
   <div class="alert-summary">
@@ -1938,6 +2059,7 @@
           type="text"
           id="inventoryName"
           placeholder="e.g. Insulin Glargine"
+          readonly
           required
         >
       </label>
@@ -1959,6 +2081,7 @@
           id="inventoryManufacturer"
           placeholder="e.g. Novo Nordisk"
           required
+          readonly
         >
       </label>
 
@@ -1995,13 +2118,9 @@
 
       <label>
         Facility
-        <select id="inventoryLocation" required>
-          <option value="">Select facility</option>
-          <option value="Delhi Warehouse">Delhi Warehouse</option>
-          <option value="Mohali Store">Mohali Store</option>
-          <option value="Chandigarh DC">Chandigarh DC</option>
-          <option value="Jaipur Hub">Jaipur Hub</option>
-        </select>
+       <select id="inventoryLocation" required>
+  <option value="">Loading facilities...</option>
+</select>
       </label>
 
       <label>
@@ -2300,6 +2419,147 @@
   </div>
 
 </div>
+
+<!-- MEDICINE DETAILS DRAWER -->
+<div
+  class="drawer-backdrop hidden"
+  id="medicineDrawerBackdrop"
+></div>
+
+<aside
+  class="inventory-drawer"
+  id="medicineDrawer"
+  aria-hidden="true"
+>
+
+  <div class="drawer-head">
+
+    <div>
+      <div class="eyebrow">MEDICINE MASTER</div>
+
+      <h2 id="medicineDrawerName">
+        Medicine
+      </h2>
+
+      <p id="medicineDrawerBrand">
+        —
+      </p>
+    </div>
+
+    <button
+      class="icon-btn"
+      id="medicineDrawerClose"
+      type="button"
+      aria-label="Close"
+    >
+      ×
+    </button>
+
+  </div>
+
+
+  <div class="drawer-body">
+
+    <div class="drawer-status-row">
+
+      <span
+        class="status-badge healthy"
+        id="medicineDrawerEssential"
+      >
+        Essential
+      </span>
+
+      <span
+        class="status-badge"
+        id="medicineDrawerPrescription"
+      >
+        —
+      </span>
+
+    </div>
+
+
+    <div class="drawer-section">
+
+      <h3>Medicine information</h3>
+
+      <div class="detail-grid">
+
+        <div>
+          <span>Manufacturer</span>
+          <strong id="medicineDrawerManufacturer">—</strong>
+        </div>
+
+        <div>
+          <span>Strength</span>
+          <strong id="medicineDrawerStrength">—</strong>
+        </div>
+
+        <div>
+          <span>Dosage form</span>
+          <strong id="medicineDrawerDosage">—</strong>
+        </div>
+
+        <div>
+          <span>Category</span>
+          <strong id="medicineDrawerCategory">—</strong>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="drawer-section">
+
+      <h3>Storage conditions</h3>
+
+      <div class="drawer-info-box">
+        <span id="medicineDrawerStorage">
+          —
+        </span>
+      </div>
+
+    </div>
+
+
+    <div class="drawer-section">
+
+      <h3>Reference source</h3>
+
+      <div class="detail-grid">
+
+        <div>
+          <span>Source</span>
+          <strong id="medicineDrawerSource">—</strong>
+        </div>
+
+        <div>
+          <span>Reference</span>
+          <strong id="medicineDrawerReference">—</strong>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="drawer-actions">
+
+      <button
+        class="primary-btn"
+        id="medicineAddInventoryBtn"
+        type="button"
+      >
+        ＋ Add to inventory
+      </button>
+
+    </div>
+
+  </div>
+
+</aside>
+
   <script src="app.js"></script>
 
   <!-- FACILITY DETAILS DRAWER -->
