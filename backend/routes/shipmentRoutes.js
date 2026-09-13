@@ -2,6 +2,9 @@ const express = require("express");
 const mongoose = require("mongoose");
 
 const Shipment = require("../models/Shipment");
+const Order = require("../models/Order");
+const Drug = require("../models/Drug");
+const getDrugStatus = require("../utils/drugStatus");
 const { protect, authorize } = require("../middleware/authMiddleware");
 
 const router = express.Router();
@@ -372,8 +375,159 @@ router.put(
       }
 
 
-      const updatedShipment =
+        const updatedShipment =
         await shipment.save();
+
+// ============================================
+// PROCESS DELIVERED SHIPMENT
+// ============================================
+
+if (
+  shipment.status === "Delivered" &&
+  shipment.order &&
+  !shipment.inventoryProcessed
+) {
+
+  const order =
+    await Order.findById(shipment.order);
+
+  if (!order) {
+
+    return res.status(404).json({
+      message:
+        "Shipment delivered, but linked order was not found."
+    });
+
+  }
+
+
+  // Find medicine at shipment origin
+  const sourceDrug =
+    await Drug.findOne({
+      name: {
+        $regex: `^${order.drug.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
+        $options: "i"
+      },
+      location: {
+        $regex: `^${shipment.origin.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
+        $options: "i"
+      }
+    });
+
+
+  if (!sourceDrug) {
+
+    return res.status(400).json({
+      message:
+        `No ${order.drug} inventory found at ${shipment.origin}.`
+    });
+
+  }
+
+
+  // Make sure enough stock exists
+  if (
+    sourceDrug.quantity <
+    shipment.quantity
+  ) {
+
+    return res.status(400).json({
+      message:
+        `Insufficient ${order.drug} stock at ${shipment.origin}. ` +
+        `Available: ${sourceDrug.quantity}, ` +
+        `Required: ${shipment.quantity}.`
+    });
+
+  }
+
+
+  // Deduct from origin
+  sourceDrug.quantity -=
+    shipment.quantity;
+
+  sourceDrug.status =
+    getDrugStatus(
+      sourceDrug.quantity,
+      sourceDrug.expiryDate,
+      sourceDrug.reorderLevel
+    );
+
+  await sourceDrug.save();
+
+
+  // Find same batch at destination
+  let destinationDrug =
+    await Drug.findOne({
+      batchNumber: sourceDrug.batchNumber,
+      location: {
+        $regex: `^${shipment.destination.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
+        $options: "i"
+      }
+    });
+
+
+  if (destinationDrug) {
+
+    // Add to existing destination stock
+    destinationDrug.quantity +=
+      shipment.quantity;
+
+    destinationDrug.status =
+      getDrugStatus(
+        destinationDrug.quantity,
+        destinationDrug.expiryDate,
+        destinationDrug.reorderLevel
+      );
+
+    await destinationDrug.save();
+
+  } else {
+
+    // Create destination inventory record
+    destinationDrug =
+      new Drug({
+        name: sourceDrug.name,
+        batchNumber: sourceDrug.batchNumber,
+        manufacturer: sourceDrug.manufacturer,
+        genericName: sourceDrug.genericName,
+        dosageForm: sourceDrug.dosageForm,
+        strength: sourceDrug.strength,
+        storageConditions:
+          sourceDrug.storageConditions,
+        quantity: shipment.quantity,
+        reorderLevel:
+          sourceDrug.reorderLevel,
+        expiryDate:
+          sourceDrug.expiryDate,
+        location:
+          shipment.destination,
+        status:
+          getDrugStatus(
+            shipment.quantity,
+            sourceDrug.expiryDate,
+            sourceDrug.reorderLevel
+          )
+      });
+
+    await destinationDrug.save();
+
+  }
+
+
+  // Mark shipment as processed
+  shipment.inventoryProcessed =
+    true;
+
+
+  // Complete the linked order
+  await Order.findByIdAndUpdate(
+    shipment.order,
+    {
+      status: "Completed"
+    }
+  );
+
+}
 
 
       const populatedShipment =

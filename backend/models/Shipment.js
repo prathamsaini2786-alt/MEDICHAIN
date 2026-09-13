@@ -20,6 +20,16 @@ const shipmentSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+progress: {
+  type: Number,
+  min: 0,
+  max: 100,
+  default: 0,
+},
+inventoryProcessed: {
+  type: Boolean,
+  default: false,
+},
 
     destination: {
       type: String,
@@ -33,7 +43,7 @@ const shipmentSchema = new mongoose.Schema(
       min: 1,
     },
 
-    status: {
+       status: {
       type: String,
       enum: [
         "Pending",
@@ -50,6 +60,11 @@ const shipmentSchema = new mongoose.Schema(
       min: 0,
       max: 100,
       default: 0,
+    },
+
+    inventoryProcessed: {
+      type: Boolean,
+      default: false,
     },
 
     eta: {
