@@ -27,6 +27,24 @@ function getStoredUser() {
   }
 }
 
+function applyRolePermissions() {
+  const user = getStoredUser();
+  const userRole = user?.role || "Pharmacy";
+
+  document
+    .querySelectorAll("[data-roles]")
+    .forEach(item => {
+      const allowedRoles = item.dataset.roles
+        .split(",")
+        .map(role => role.trim());
+
+      item.style.display =
+        allowedRoles.includes(userRole)
+          ? ""
+          : "none";
+    });
+}
+
 function showLogin() {
   authOverlay?.classList.remove("hidden");
 }
@@ -86,6 +104,8 @@ loginForm?.addEventListener("submit", async event => {
 
   try {
     const data = await login(email, password);
+
+    applyRolePermissions();
 
     console.log("MediChain login successful:", data.user);
 
@@ -7108,6 +7128,10 @@ globalSearchModal?.addEventListener(
     }
   }
 );
+
+document.addEventListener("DOMContentLoaded", () => {
+  applyRolePermissions();
+});
 
 document.addEventListener(
   "keydown",

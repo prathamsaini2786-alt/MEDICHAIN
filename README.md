@@ -1,21 +1,53 @@
-# MediChain Frontend
+# MediChain
 
-Frontend-only redesign for the `frontend` branch.
+MediChain is a full-stack healthcare medicine supply-chain management platform for managing inventory, orders, shipments, suppliers, facilities, stock movements, alerts, analytics, and role-based operations.
 
-## Run locally
+## 🌐 Live Demo
 
-Open `index.html` in a browser, or use a simple local server:
+**https://medichain-nuaz.onrender.com**
 
-```bash
-python3 -m http.server 5500
-```
+## ✨ Features
 
-Then visit `http://localhost:5500`.
+- JWT authentication and protected APIs
+- Role-based access control
+- Medicine Master
+- Inventory management
+- Order management and status workflows
+- Shipment tracking
+- Facility and warehouse management
+- Inter-facility stock transfers
+- Automated inventory alerts
+- Analytics dashboard
+- Global search
+- User profile and workspace settings
+- Notification preferences
+- CSV inventory export
+- Toast notifications
 
-## Structure
+## 👥 User Roles
 
-- `index.html` — application UI and pages
-- `styles.css` — design system and responsive layout
-- `app.js` — client-side navigation and modal interactions
+| Role | Responsibilities |
+|---|---|
+| Admin | Full system administration |
+| Supplier | Medicine and inventory operations |
+| Distributor | Facilities, shipments and stock movement |
+| Pharmacy | Order and pharmacy-side operations |
 
-This version intentionally uses mock data. Backend/API integration comes later.
+Role permissions are enforced by the backend API as well as the frontend interface.
+
+## 🏗️ Architecture
+
+```text
+MediChain
+│
+├── Frontend
+│   ├── HTML5
+│   ├── CSS3
+│   └── JavaScript
+│
+└── Backend
+    ├── Node.js
+    ├── Express.js
+    ├── MongoDB
+    ├── Mongoose
+    └── JWT Authentication
