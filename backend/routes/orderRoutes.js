@@ -78,7 +78,7 @@ router.get("/:id", protect, async (req, res) => {
 router.post(
   "/",
   protect,
-  authorize("Admin", "Supplier", "Distributor", "Pharmacy"),
+  authorize("Admin", "Pharmacy"),
 
   async (req, res) => {
 
@@ -199,7 +199,7 @@ router.post(
 router.put(
   "/:id/status",
   protect,
-  authorize("Admin", "Supplier", "Distributor", "Pharmacy"),
+  authorize("Admin", "Supplier", "Distributor"),
 
   async (req, res) => {
 
@@ -258,6 +258,34 @@ router.put(
 
       }
 
+
+      const role = req.user.role;
+
+      const transitionMap = {
+        Admin: {
+          Pending: ["Approved", "Processing", "Cancelled"],
+          Approved: ["Processing", "Cancelled"],
+          Processing: ["Completed", "Cancelled"],
+        },
+        Supplier: {
+          Pending: ["Approved"],
+          Approved: ["Processing"],
+        },
+        Distributor: {
+          Approved: ["Processing"],
+        },
+      };
+
+      const allowedNextStatuses =
+        transitionMap[role]?.[order.status] || [];
+
+      if (!allowedNextStatuses.includes(status)) {
+        return res.status(403).json({
+          message:
+            `${role} cannot change order from ` +
+            `${order.status} to ${status}`,
+        });
+      }
 
       order.status = status;
 

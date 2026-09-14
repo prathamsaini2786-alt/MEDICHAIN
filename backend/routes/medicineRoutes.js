@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const Medicine = require("../models/Medicine");
-const { protect } = require("../middleware/authMiddleware");
+const { protect, authorize } = require("../middleware/authMiddleware");
 
 // GET all medicines
 router.get("/", protect, async (req, res) => {
@@ -40,7 +40,7 @@ router.get("/:id", protect, async (req, res) => {
 });
 
 // CREATE medicine
-router.post("/", protect, async (req, res) => {
+router.post("/", protect, authorize("Admin"), async (req, res) => {
   try {
     const medicine = await Medicine.create(req.body);
 
@@ -58,7 +58,7 @@ router.post("/", protect, async (req, res) => {
 });
 
 // UPDATE medicine
-router.put("/:id", protect, async (req, res) => {
+router.put("/:id", protect, authorize("Admin"), async (req, res) => {
   try {
     const medicine = await Medicine.findByIdAndUpdate(
       req.params.id,
@@ -89,7 +89,7 @@ router.put("/:id", protect, async (req, res) => {
 });
 
 // DELETE medicine
-router.delete("/:id", protect, async (req, res) => {
+router.delete("/:id", protect, authorize("Admin"), async (req, res) => {
   try {
     const medicine = await Medicine.findByIdAndUpdate(
       req.params.id,

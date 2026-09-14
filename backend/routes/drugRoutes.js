@@ -98,7 +98,7 @@ router.get("/", protect, async (req, res) => {
 router.post(
   "/",
   protect,
-  authorize("Admin", "Supplier", "Pharmacy"),
+  authorize("Admin", "Supplier"),
   async (req, res) => {
     try {
       const newDrug = new Drug(req.body);

@@ -1,12 +1,12 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const Warehouse = require("../models/Warehouse");
-const { protect } = require("../middleware/authMiddleware");
+const { protect, authorize } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
 // Create a warehouse
-router.post("/", protect, async (req, res) => {
+router.post("/", protect, authorize("Admin", "Distributor"), async (req, res) => {
   try {
     const warehouse = new Warehouse(req.body);
     await warehouse.save();
@@ -68,7 +68,7 @@ router.get("/:id", protect, async (req, res) => {
 });
 
 // Update a warehouse
-router.put("/:id", protect, async (req, res) => {
+router.put("/:id", protect, authorize("Admin", "Distributor"), async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({
@@ -103,7 +103,7 @@ router.put("/:id", protect, async (req, res) => {
 });
 
 // Delete a warehouse
-router.delete("/:id", protect, async (req, res) => {
+router.delete("/:id", protect, authorize("Admin"), async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({

@@ -54,7 +54,7 @@ router.get("/:id", protect, async (req, res) => {
 router.post(
   "/",
   protect,
-  authorize("Admin", "Supplier", "Distributor", "Pharmacy"),
+  authorize("Admin", "Distributor"),
   async (req, res) => {
     try {
       const {
@@ -193,7 +193,7 @@ router.post(
 router.put(
   "/:id/status",
   protect,
-  authorize("Admin", "Distributor", "Pharmacy"),
+  authorize("Admin", "Distributor"),
   async (req, res) => {
     try {
       // Validate movement ID

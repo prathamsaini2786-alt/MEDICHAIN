@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 
 const Supplier = require("../models/Supplier");
-const { protect } = require("../middleware/authMiddleware");
+const { protect, authorize } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -11,7 +11,7 @@ const router = express.Router();
 // CREATE SUPPLIER
 // ============================================
 
-router.post("/", protect, async (req, res) => {
+router.post("/", protect, authorize("Admin"), async (req, res) => {
   try {
     const supplier = new Supplier(req.body);
 
@@ -94,7 +94,7 @@ router.get("/:id", protect, async (req, res) => {
 // UPDATE SUPPLIER
 // ============================================
 
-router.put("/:id", protect, async (req, res) => {
+router.put("/:id", protect, authorize("Admin"), async (req, res) => {
   try {
 
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -137,7 +137,7 @@ router.put("/:id", protect, async (req, res) => {
 // DELETE SUPPLIER
 // ============================================
 
-router.delete("/:id", protect, async (req, res) => {
+router.delete("/:id", protect, authorize("Admin"), async (req, res) => {
   try {
 
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
