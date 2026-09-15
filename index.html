@@ -12,19 +12,33 @@
 <body>
   <div class="app-shell">
     <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-mark"><span>+</span></div>
-        <div>
-          <strong>MediChain</strong>
-          <small>Supply Network</small>
-        </div>
-      </div>
+      <button class="brand brand-button" id="brandDashboardBtn" type="button">
+  <div class="brand-mark"><span>+</span></div>
+  <div>
+    <strong>MediChain</strong>
+    <small>Supply Network</small>
+  </div>
+</button>
 
-      <div class="workspace">
-        <span class="workspace-dot"></span>
-        <div><b>North Region</b><small>Operations workspace</small></div>
-        <span class="chevron">⌄</span>
-      </div>
+      <button class="workspace workspace-button" id="workspaceBtn" type="button">
+  <span class="workspace-dot"></span>
+  <div>
+    <b>North Region</b>
+    <small>Operations workspace</small>
+  </div>
+  <span class="chevron">⌄</span>
+</button>
+
+<div class="workspace-menu" id="workspaceMenu">
+  <div class="workspace-menu-title">CURRENT WORKSPACE</div>
+  <strong>North Region</strong>
+  <p>Operations workspace</p>
+
+  <div class="workspace-status">
+    <span class="workspace-dot"></span>
+    Active
+  </div>
+</div>
 
       <nav class="nav">
         <div class="nav-label">OVERVIEW</div>
@@ -52,11 +66,14 @@
 
       <div class="sidebar-bottom">
         <button class="nav-item" data-page="settings"><span>⚙</span>Settings</button>
-        <div class="user-card">
-          <div class="avatar">RS</div>
-          <div><b>Rahul Sharma</b><small>Pharmacist</small></div>
-          <span>•••</span>
-        </div>
+       <button class="user-card user-card-button" id="bottomUserCard" type="button">
+  <div class="avatar" id="bottomUserAvatar">--</div>
+  <div>
+    <b id="bottomUserName">User</b>
+    <small id="bottomUserRole">Role</small>
+  </div>
+  <span>•••</span>
+</button>
       </div>
     </aside>
 
@@ -67,7 +84,32 @@
         <div class="top-actions">
         <button class="icon-btn" id="globalSearchBtn" title="Search">⌕</button>
           <button class="icon-btn notification" title="Notifications">♢<i></i></button>
-          <div class="top-user"><div class="avatar small">RS</div><span>Rahul</span><b>⌄</b></div>
+        <div class="top-user-wrap">
+  <button class="top-user" id="topUserBtn" type="button">
+    <div class="avatar small" id="topUserAvatar">--</div>
+    <span id="topUserName">User</span>
+    <b>⌄</b>
+  </button>
+
+  <div class="top-user-menu" id="topUserMenu">
+    <div class="top-user-menu-header">
+      <div class="avatar" id="menuUserAvatar">--</div>
+      <div>
+        <strong id="menuUserName">User</strong>
+        <small id="menuUserRole">Role</small>
+      </div>
+    </div>
+
+    <button type="button" id="profileMenuBtn">Profile & Settings</button>
+    <button type="button" id="securityMenuBtn">Security</button>
+
+    <div class="top-user-divider"></div>
+
+    <button type="button" id="logoutMenuBtn" class="logout-menu-btn">
+      Logout
+    </button>
+  </div>
+</div>
         </div>
       </header>
 
@@ -1734,131 +1776,248 @@
 
 
     <!-- PROFILE -->
+<!-- PROFILE -->
 
-    <article
-      class="panel settings-content settings-panel active"
-      data-settings-panel="profile"
-    >
+<article
+  class="panel settings-content settings-panel active profile-settings-panel"
+  data-settings-panel="profile"
+>
 
-      <h2>Profile</h2>
+  <div class="profile-hero">
 
-      <p>
-        Personal details shown across the MediChain workspace.
-      </p>
+    <div class="profile-avatar" id="settingsAvatar">
+      P
+    </div>
 
-      <label>
-        Full name
-        <input
-          type="text"
-          id="settingsName"
-          placeholder="Your name"
-        >
-      </label>
-
-      <label>
-        Role
-        <input
-          type="text"
-          id="settingsRole"
-          disabled
-        >
-      </label>
-
-      <label>
-        Email
-        <input
-          type="email"
-          id="settingsEmail"
-          placeholder="you@example.com"
-        >
-      </label>
-
-      <div
-        class="settings-message hidden"
-        id="profileMessage"
-      ></div>
-
-      <div class="setting-actions">
-
-        <button
-          class="primary-btn"
-          id="saveProfileBtn"
-        >
-          Save changes
-        </button>
-
+    <div class="profile-hero-info">
+      <div class="profile-name-row">
+        <h2 id="profileDisplayName">Pratham</h2>
+        <span class="profile-status">
+          <i></i> Active
+        </span>
       </div>
 
-    </article>
+      <p id="profileDisplayEmail">
+        Your MediChain account
+      </p>
+
+      <span class="profile-role" id="profileDisplayRole">
+        Administrator
+      </span>
+    </div>
+
+  </div>
+
+
+  <div class="settings-section-heading">
+    <span>ACCOUNT INFORMATION</span>
+    <p>Manage the information associated with your MediChain account.</p>
+  </div>
+
+
+  <div class="profile-form-grid">
+
+    <label>
+      Full name
+      <input
+        type="text"
+        id="settingsName"
+        placeholder="Your name"
+      >
+    </label>
+
+    <label>
+      Email address
+      <input
+        type="email"
+        id="settingsEmail"
+        placeholder="you@example.com"
+      >
+    </label>
+
+    <label>
+      Role
+      <input
+        type="text"
+        id="settingsRole"
+        disabled
+      >
+    </label>
+
+    <div class="profile-info-card">
+      <span>ACCOUNT STATUS</span>
+      <strong><i></i> Active</strong>
+      <small>Your account is currently enabled.</small>
+    </div>
+
+  </div>
+
+
+  <div
+    class="settings-message hidden"
+    id="profileMessage"
+  ></div>
+
+
+  <div class="setting-actions profile-actions">
+
+    <div>
+      <strong>Profile changes</strong>
+      <small>Updates are saved to your MediChain account.</small>
+    </div>
+
+    <button
+      class="primary-btn"
+      id="saveProfileBtn"
+    >
+      Save changes
+    </button>
+
+  </div>
+
+</article>
 
 
     <!-- NOTIFICATIONS -->
 
     <article
-      class="panel settings-content settings-panel"
+      class="panel settings-content settings-panel notifications-settings-panel"
       data-settings-panel="notifications"
     >
 
-      <h2>Notifications</h2>
+      <div class="notifications-header">
 
-      <p>
-        Choose which operational events should notify you.
-      </p>
+        <div class="notifications-icon">♢</div>
 
-      <label class="setting-toggle">
-        <span>
-          <b>Low-stock alerts</b>
-          <small>Notify me when inventory reaches critical levels.</small>
-        </span>
+        <div>
+          <h2>Notifications</h2>
+          <p>
+            Control which operational events reach your MediChain account.
+          </p>
+        </div>
 
-        <input
-          type="checkbox"
-          id="notifyLowStock"
-        >
-      </label>
+      </div>
 
-      <label class="setting-toggle">
-        <span>
-          <b>Expiry alerts</b>
-          <small>Notify me about medicines approaching expiry.</small>
-        </span>
 
-        <input
-          type="checkbox"
-          id="notifyExpiry"
-        >
-      </label>
+      <div class="notification-summary">
 
-      <label class="setting-toggle">
-        <span>
-          <b>Order updates</b>
-          <small>Notify me when order status changes.</small>
-        </span>
+        <div class="notification-summary-icon">✓</div>
 
-        <input
-          type="checkbox"
-          id="notifyOrders"
-        >
-      </label>
+        <div>
+          <strong>Notification preferences</strong>
+          <p>Choose the alerts that matter most to your operations.</p>
+        </div>
 
-      <label class="setting-toggle">
-        <span>
-          <b>Shipment updates</b>
-          <small>Notify me about shipment progress and delays.</small>
-        </span>
+        <span id="notificationStatus">Configured</span>
 
-        <input
-          type="checkbox"
-          id="notifyShipments"
-        >
-      </label>
+      </div>
+
+
+      <div class="notification-section-heading">
+        <span>OPERATIONAL ALERTS</span>
+        <h3>What would you like to be notified about?</h3>
+        <p>
+          You can change these preferences at any time.
+        </p>
+      </div>
+
+
+      <div class="notification-options">
+
+        <label class="notification-card">
+          <div class="notification-card-icon stock-icon">▣</div>
+
+          <div class="notification-card-content">
+            <b>Low-stock alerts</b>
+            <small>
+              Get notified when inventory reaches critical or low levels.
+            </small>
+          </div>
+
+          <div class="notification-control">
+            <input
+              type="checkbox"
+              id="notifyLowStock"
+            >
+            <span class="notification-switch"></span>
+          </div>
+        </label>
+
+
+        <label class="notification-card">
+          <div class="notification-card-icon expiry-icon">◷</div>
+
+          <div class="notification-card-content">
+            <b>Expiry alerts</b>
+            <small>
+              Receive warnings when medicines are approaching their expiry date.
+            </small>
+          </div>
+
+          <div class="notification-control">
+            <input
+              type="checkbox"
+              id="notifyExpiry"
+            >
+            <span class="notification-switch"></span>
+          </div>
+        </label>
+
+
+        <label class="notification-card">
+          <div class="notification-card-icon order-icon">≡</div>
+
+          <div class="notification-card-content">
+            <b>Order updates</b>
+            <small>
+              Stay informed when order status or processing stages change.
+            </small>
+          </div>
+
+          <div class="notification-control">
+            <input
+              type="checkbox"
+              id="notifyOrders"
+            >
+            <span class="notification-switch"></span>
+          </div>
+        </label>
+
+
+        <label class="notification-card">
+          <div class="notification-card-icon shipment-icon">↗</div>
+
+          <div class="notification-card-content">
+            <b>Shipment updates</b>
+            <small>
+              Get updates about shipment progress, delivery and delays.
+            </small>
+          </div>
+
+          <div class="notification-control">
+            <input
+              type="checkbox"
+              id="notifyShipments"
+            >
+            <span class="notification-switch"></span>
+          </div>
+        </label>
+
+      </div>
+
 
       <div
         class="settings-message hidden"
         id="notificationMessage"
       ></div>
 
-      <div class="setting-actions">
+
+      <div class="setting-actions notification-actions">
+
+        <div>
+          <strong>Notification preferences</strong>
+          <small>Your choices are saved to your MediChain account.</small>
+        </div>
 
         <button
           class="primary-btn"
@@ -1875,38 +2034,120 @@
     <!-- WORKSPACE -->
 
     <article
-      class="panel settings-content settings-panel"
+      class="panel settings-content settings-panel workspace-settings-panel"
       data-settings-panel="workspace"
     >
 
-      <h2>Workspace</h2>
+      <div class="workspace-settings-header">
 
-      <p>
-        Information about your current MediChain operating workspace.
-      </p>
+        <div class="workspace-settings-icon">⌂</div>
 
-      <label>
-        Workspace name
-        <input
-          type="text"
-          id="workspaceName"
-        >
-      </label>
+        <div>
+          <div class="workspace-title-row">
+            <h2>Workspace</h2>
 
-      <label>
-        Region
-        <input
-          type="text"
-          id="workspaceRegion"
-        >
-      </label>
+            <span class="workspace-active-badge">
+              <i></i> Active
+            </span>
+          </div>
+
+          <p>
+            Manage the operating workspace connected to your MediChain network.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="workspace-identity-card">
+
+        <div class="workspace-large-icon">
+          N
+        </div>
+
+        <div class="workspace-identity-info">
+          <span>OPERATIONS WORKSPACE</span>
+          <h3 id="workspaceDisplayName">North Region</h3>
+          <p id="workspaceDisplayRegion">Regional operations network</p>
+        </div>
+
+        <div class="workspace-connected">
+          <i></i>
+          Connected
+        </div>
+
+      </div>
+
+
+      <div class="workspace-section-heading">
+        <span>WORKSPACE INFORMATION</span>
+        <h3>Operating configuration</h3>
+        <p>
+          These details identify your current MediChain operating environment.
+        </p>
+      </div>
+
+
+      <div class="workspace-form-grid">
+
+        <label>
+          Workspace name
+          <input
+            type="text"
+            id="workspaceName"
+            placeholder="Workspace name"
+          >
+        </label>
+
+        <label>
+          Region
+          <input
+            type="text"
+            id="workspaceRegion"
+            placeholder="Region"
+          >
+        </label>
+
+      </div>
+
+
+      <div class="workspace-network-grid">
+
+        <div class="workspace-network-card">
+          <div class="workspace-network-icon">▣</div>
+          <div>
+            <span>NETWORK</span>
+            <strong>MediChain Supply Network</strong>
+            <small>Connected to operational facilities</small>
+          </div>
+        </div>
+
+        <div class="workspace-network-card">
+          <div class="workspace-network-icon">●</div>
+          <div>
+            <span>STATUS</span>
+            <strong>Operational</strong>
+            <small>Workspace is available</small>
+          </div>
+        </div>
+
+      </div>
+
 
       <div
         class="settings-message hidden"
         id="workspaceMessage"
       ></div>
 
-      <div class="setting-actions">
+
+      <div class="setting-actions workspace-actions">
+
+        <div>
+          <strong>Workspace configuration</strong>
+          <small>
+            Changes apply to your MediChain workspace.
+          </small>
+        </div>
 
         <button
           class="primary-btn"
@@ -1923,63 +2164,164 @@
     <!-- SECURITY -->
 
     <article
-      class="panel settings-content settings-panel"
+      class="panel settings-content settings-panel security-settings-panel"
       data-settings-panel="security"
     >
 
-      <h2>Security</h2>
+      <div class="security-header">
+        <div class="security-icon">🔐</div>
 
-      <p>
-        Protect your MediChain account and active session.
-      </p>
+        <div>
+          <div class="security-title-row">
+            <h2>Security</h2>
+            <span class="security-protected">
+              <i></i> Protected
+            </span>
+          </div>
 
-      <label>
-        Current password
-        <input
-          type="password"
-          id="currentPassword"
-          autocomplete="current-password"
-        >
-      </label>
+          <p>
+            Keep your MediChain account secure and manage your password.
+          </p>
+        </div>
+      </div>
 
-      <label>
-        New password
-        <input
-          type="password"
-          id="newPassword"
-          autocomplete="new-password"
-        >
-      </label>
 
-      <label>
-        Confirm new password
-        <input
-          type="password"
-          id="confirmPassword"
-          autocomplete="new-password"
-        >
-      </label>
+      <div class="security-status-card">
+
+        <div class="security-status-icon">✓</div>
+
+        <div>
+          <strong>Your account is secure</strong>
+          <p>
+            Your account is protected by authenticated access.
+          </p>
+        </div>
+
+        <span class="security-status-label">
+          Active
+        </span>
+
+      </div>
+
+
+      <div class="security-section-heading">
+        <span>PASSWORD</span>
+        <h3>Change your password</h3>
+        <p>
+          Use a strong password that you don't use anywhere else.
+        </p>
+      </div>
+
+
+      <div class="security-password-grid">
+
+        <label>
+          Current password
+          <input
+            type="password"
+            id="currentPassword"
+            autocomplete="current-password"
+            placeholder="Enter current password"
+          >
+        </label>
+
+        <div></div>
+
+        <label>
+          New password
+          <input
+            type="password"
+            id="newPassword"
+            autocomplete="new-password"
+            placeholder="Enter new password"
+          >
+        </label>
+
+        <label>
+          Confirm new password
+          <input
+            type="password"
+            id="confirmPassword"
+            autocomplete="new-password"
+            placeholder="Confirm new password"
+          >
+        </label>
+
+      </div>
+
+
+      <div class="password-tips">
+
+        <strong>Password tips</strong>
+
+        <div>
+          <span>✓</span>
+          Use at least 8 characters
+        </div>
+
+        <div>
+          <span>✓</span>
+          Mix uppercase, lowercase and numbers
+        </div>
+
+        <div>
+          <span>✓</span>
+          Avoid using easily guessed information
+        </div>
+
+      </div>
+
 
       <div
         class="settings-message hidden"
         id="securityMessage"
       ></div>
 
-      <div class="setting-actions">
 
-        <button
-          class="primary-btn"
-          id="changePasswordBtn"
-        >
-          Change password
-        </button>
+      <div class="setting-actions security-actions">
 
-        <button
-          class="ghost-btn"
-          id="logoutBtn"
-        >
-          Log out
-        </button>
+        <div>
+          <strong>Password & session</strong>
+          <small>
+            Changing your password helps protect your account.
+          </small>
+        </div>
+
+        <div class="security-action-buttons">
+
+          <button
+            class="ghost-btn"
+            id="logoutBtn"
+          >
+            Log out
+          </button>
+
+          <button
+            class="primary-btn"
+            id="changePasswordBtn"
+          >
+            Change password
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="session-card">
+
+        <div class="session-device">
+          <div class="session-device-icon">▣</div>
+
+          <div>
+            <strong>Current session</strong>
+            <small>This browser · Active now</small>
+          </div>
+        </div>
+
+        <span class="session-active">
+          ● Active
+        </span>
 
       </div>
 

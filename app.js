@@ -649,7 +649,42 @@ async function loadSettingsProfile() {
     const user = data.user;
 
     if (!user) return;
+  
+    const profileDisplayName =
+  document.getElementById("profileDisplayName");
 
+const profileDisplayEmail =
+  document.getElementById("profileDisplayEmail");
+
+const profileDisplayRole =
+  document.getElementById("profileDisplayRole");
+
+const settingsAvatar =
+  document.getElementById("settingsAvatar");
+
+if (profileDisplayName) {
+  profileDisplayName.textContent = user.name || "User";
+}
+
+if (profileDisplayEmail) {
+  profileDisplayEmail.textContent =
+    user.email || "MediChain account";
+}
+
+if (profileDisplayRole) {
+  profileDisplayRole.textContent =
+    user.role || "Pharmacy";
+}
+
+if (settingsAvatar) {
+  settingsAvatar.textContent =
+    (user.name || "U")
+      .split(" ")
+      .map(part => part[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
+}
 
     if (settingsName) {
       settingsName.value = user.name || "";
@@ -774,12 +809,25 @@ function updateUserUI(user) {
 
   const dashboardHeading =
     document.querySelector("#page-dashboard h1");
-
+    
   if (dashboardHeading) {
 
-    dashboardHeading.textContent =
-      `Good morning, ${user.name || "there"}.`;
+    const hour = new Date().getHours();
 
+    let greeting;
+
+    if (hour >= 5 && hour < 12) {
+      greeting = "Good morning";
+    } else if (hour >= 12 && hour < 17) {
+      greeting = "Good afternoon";
+    } else if (hour >= 17 && hour < 21) {
+      greeting = "Good evening";
+    } else {
+      greeting = "Good night";
+    }
+
+    dashboardHeading.textContent =
+      `${greeting}, ${user.name || "there"}.`;
   }
 
 }
@@ -4864,8 +4912,7 @@ refreshMedicinesBtn?.addEventListener(
   loadMedicines
 );
 
-// Load alerts and refresh automated inventory risks
-generateAutomatedAlerts();
+
 
  function openMedicineDrawer(medicine) {
 
@@ -7128,6 +7175,126 @@ globalSearchModal?.addEventListener(
     }
   }
 );
+
+document.getElementById("brandDashboardBtn")?.addEventListener("click", () => {
+  showPage("dashboard");
+});
+
+const workspaceBtn = document.getElementById("workspaceBtn");
+const workspaceMenu = document.getElementById("workspaceMenu");
+
+workspaceBtn?.addEventListener("click", () => {
+  workspaceMenu?.classList.toggle("show");
+});
+
+// =========================
+// BOTTOM USER CARD
+// =========================
+
+const bottomUserCard =
+  document.getElementById("bottomUserCard");
+
+const bottomUserAvatar =
+  document.getElementById("bottomUserAvatar");
+
+const bottomUserName =
+  document.getElementById("bottomUserName");
+
+const bottomUserRole =
+  document.getElementById("bottomUserRole");
+
+const bottomUser = getStoredUser();
+
+if (bottomUser) {
+  const name = bottomUser.name || "User";
+
+  const initials = name
+    .split(" ")
+    .map(part => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  bottomUserName.textContent = name;
+  bottomUserRole.textContent = bottomUser.role || "Pharmacy";
+  bottomUserAvatar.textContent = initials;
+}
+
+bottomUserCard?.addEventListener("click", () => {
+  showPage("settings");
+});
+
+// =========================
+// TOP USER MENU
+// =========================
+
+const topUserBtn = document.getElementById("topUserBtn");
+const topUserMenu = document.getElementById("topUserMenu");
+
+const topUserAvatar = document.getElementById("topUserAvatar");
+const topUserName = document.getElementById("topUserName");
+
+const menuUserAvatar = document.getElementById("menuUserAvatar");
+const menuUserName = document.getElementById("menuUserName");
+const menuUserRole = document.getElementById("menuUserRole");
+
+const currentUser = getStoredUser();
+
+if (currentUser) {
+  const name = currentUser.name || "User";
+  const initials = name
+    .split(" ")
+    .map(part => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  topUserName.textContent = name.split(" ")[0];
+  topUserAvatar.textContent = initials;
+
+  menuUserName.textContent = name;
+  menuUserRole.textContent = currentUser.role || "Pharmacy";
+  menuUserAvatar.textContent = initials;
+}
+
+topUserBtn?.addEventListener("click", (event) => {
+  event.stopPropagation();
+  topUserMenu?.classList.toggle("show");
+});
+
+document.addEventListener("click", (event) => {
+  if (
+    topUserMenu &&
+    !topUserMenu.contains(event.target) &&
+    !topUserBtn?.contains(event.target)
+  ) {
+    topUserMenu.classList.remove("show");
+  }
+});
+
+document.getElementById("profileMenuBtn")?.addEventListener("click", () => {
+  topUserMenu?.classList.remove("show");
+  showPage("settings");
+});
+document.getElementById("securityMenuBtn")?.addEventListener("click", () => {
+  topUserMenu?.classList.remove("show");
+  showPage("settings");
+
+  document
+    .querySelector('[data-settings-tab="security"]')
+    ?.click();
+});
+
+  
+
+document.getElementById("logoutMenuBtn")?.addEventListener("click", () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  localStorage.removeItem("medichainUser");
+
+  window.location.href = "login.html";
+});
+
 
 document.addEventListener("DOMContentLoaded", () => {
   applyRolePermissions();

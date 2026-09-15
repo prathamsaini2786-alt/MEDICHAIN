@@ -15,84 +15,416 @@
 
     body {
       min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: #f4f7fb;
+      background: #f5f8fc;
+      color: #172033;
     }
 
     .login-container {
-      width: 400px;
-      padding: 40px;
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      min-height: 100vh;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1.08fr 0.92fr;
     }
 
-    .logo {
-      text-align: center;
+    /* =========================
+       LEFT BRAND PANEL
+       ========================= */
+
+    .brand-panel {
+      position: relative;
+      overflow: hidden;
+      min-height: 100vh;
+      padding: 55px 65px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background:
+        radial-gradient(circle at 85% 18%, rgba(68, 211, 192, 0.20), transparent 28%),
+        radial-gradient(circle at 15% 85%, rgba(47, 128, 237, 0.22), transparent 32%),
+        linear-gradient(145deg, #081c2f 0%, #0d2d47 55%, #12566a 100%);
+      color: white;
+    }
+
+    .brand-panel::before {
+      content: "";
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      right: -300px;
+      top: -230px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 50%;
+    }
+
+    .brand-panel::after {
+      content: "";
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      left: -280px;
+      bottom: -250px;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 50%;
+    }
+
+    .brand-content,
+    .brand-footer {
+      position: relative;
+      z-index: 2;
+    }
+
+    /* LOGO */
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin-bottom: 85px;
+    }
+
+    .brand-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #2f80ed;
+      font-size: 25px;
+      font-weight: bold;
+      box-shadow: 0 12px 30px rgba(47,128,237,0.35);
+    }
+
+    .brand-logo h1 {
+      font-size: 27px;
+      letter-spacing: -0.7px;
+    }
+
+    .brand-logo span {
+      display: block;
+      margin-top: 3px;
+      color: #9eb5c8;
+      font-size: 12px;
+    }
+
+    /* HERO */
+
+    .brand-content h2 {
+      max-width: 600px;
+      font-size: clamp(40px, 4.2vw, 60px);
+      line-height: 1.04;
+      letter-spacing: -2.5px;
+      margin-bottom: 25px;
+    }
+
+    .brand-content h2 span {
+      color: #55d6c2;
+    }
+
+    .brand-description {
+      max-width: 530px;
+      color: #b8c9d7;
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    /* NETWORK */
+
+    .network-visual {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 590px;
+      height: 145px;
+      margin-top: 60px;
+    }
+
+    .network-line {
+      position: absolute;
+      top: 51px;
+      left: 38px;
+      right: 38px;
+      height: 2px;
+      background: rgba(255,255,255,0.16);
+    }
+
+    .network-node {
+      position: absolute;
+      top: 29px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 11px;
+      color: #a9bdcc;
+      font-size: 11px;
+    }
+
+    .network-node:nth-child(2) {
+      left: 0;
+    }
+
+    .network-node:nth-child(3) {
+      left: 31%;
+    }
+
+    .network-node:nth-child(4) {
+      left: 62%;
+    }
+
+    .network-node:nth-child(5) {
+      right: 0;
+    }
+
+    .node-dot {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      border: 7px solid rgba(85,214,194,0.13);
+      background: #55d6c2;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.10);
+    }
+
+    .network-node:nth-child(4) .node-dot {
+      background: #f1a34a;
+      border-color: rgba(241,163,74,0.13);
+    }
+
+    /* STATS */
+
+    .brand-stats {
+      display: flex;
+      gap: 35px;
+      margin-top: 20px;
+    }
+
+    .brand-stat strong {
+      display: block;
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .brand-stat span {
+      color: #8fa8ba;
+      font-size: 11px;
+    }
+
+    .brand-footer {
+      color: #8098aa;
+      font-size: 12px;
+    }
+
+    /* =========================
+       RIGHT FORM PANEL
+       ========================= */
+
+    .form-panel {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 45px;
+      background: #f7f9fc;
+    }
+
+    .form-card {
+      width: 100%;
+      max-width: 455px;
+      padding: 44px;
+      background: white;
+      border: 1px solid #e4eaf1;
+      border-radius: 22px;
+      box-shadow: 0 25px 70px rgba(18,43,70,0.10);
+    }
+
+    .form-header {
       margin-bottom: 30px;
     }
 
-    .logo h1 {
-      color: #1769aa;
-      margin-bottom: 8px;
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 12px;
+      color: #2f80ed;
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
     }
 
-    .logo p {
-      color: #777;
+    .form-header h2 {
+      font-size: 30px;
+      letter-spacing: -0.8px;
+      margin-bottom: 9px;
+    }
+
+    .form-header p {
+      color: #7c8998;
       font-size: 14px;
+      line-height: 1.5;
     }
 
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 19px;
     }
 
     label {
       display: block;
-      margin-bottom: 7px;
+      margin-bottom: 8px;
+      color: #303b4b;
+      font-size: 13px;
       font-weight: bold;
-      color: #333;
     }
 
-    input {
+    input,
+    select {
       width: 100%;
-      padding: 12px;
-      border: 1px solid #d5dce5;
-      border-radius: 8px;
-      font-size: 15px;
+      height: 48px;
+      padding: 0 14px;
+      border: 1px solid #d8e0e9;
+      border-radius: 10px;
+      background: #fbfcfe;
+      color: #172033;
+      font-size: 14px;
+      transition: 0.2s;
     }
 
-    input:focus {
+    input:focus,
+    select:focus {
       outline: none;
-      border-color: #1769aa;
+      border-color: #2f80ed;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(47,128,237,0.09);
     }
 
-    button {
+    select {
+      cursor: pointer;
+    }
+
+    button[type="submit"] {
       width: 100%;
-      padding: 13px;
+      height: 50px;
+      margin-top: 4px;
       border: none;
-      border-radius: 8px;
-      background: #1769aa;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #287bea, #1769aa);
       color: white;
-      font-size: 16px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 9px 20px rgba(47,128,237,0.22);
+      transition: 0.2s;
+    }
+
+    button[type="submit"]:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(47,128,237,0.28);
+    }
+
+    button[type="submit"]:disabled {
+      background: #9ca8b5;
+      box-shadow: none;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .switch {
+      margin-top: 23px;
+      padding-top: 20px;
+      border-top: 1px solid #edf0f4;
+      text-align: center;
+      color: #7d8997;
+      font-size: 13px;
+    }
+
+    .switch button {
+      width: auto;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: #1769aa;
+      font-size: 13px;
       font-weight: bold;
       cursor: pointer;
     }
 
-    button:hover {
-      background: #12588f;
+    .switch button:hover {
+      color: #2f80ed;
     }
 
-    button:disabled {
-      background: #999;
-      cursor: not-allowed;
-    }
-
-    #message {
+    #loginMessage,
+    #signupMessage {
       margin-top: 15px;
       text-align: center;
-      font-size: 14px;
+      font-size: 13px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* =========================
+       MOBILE
+       ========================= */
+
+    @media (max-width: 900px) {
+      .login-container {
+        grid-template-columns: 1fr;
+      }
+
+      .brand-panel {
+        min-height: 390px;
+        padding: 35px;
+      }
+
+      .brand-logo {
+        margin-bottom: 40px;
+      }
+
+      .brand-content h2 {
+        font-size: 40px;
+      }
+
+      .brand-description {
+        font-size: 14px;
+      }
+
+      .network-visual {
+        display: none;
+      }
+
+      .brand-stats {
+        margin-top: 30px;
+      }
+
+      .brand-footer {
+        margin-top: 35px;
+      }
+
+      .form-panel {
+        min-height: auto;
+        padding: 35px 20px 55px;
+      }
+
+      .form-card {
+        padding: 32px 26px;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .brand-content h2 {
+        font-size: 34px;
+      }
+
+      .brand-panel {
+        min-height: 360px;
+      }
+
+      .brand-stats {
+        gap: 20px;
+      }
+
+      .form-card {
+        padding: 28px 22px;
+      }
     }
   </style>
 </head>
@@ -101,105 +433,537 @@
 
   <div class="login-container">
 
-    <div class="logo">
-      <h1>MediChain</h1>
-      <p>Supply Network Management</p>
-    </div>
+    <!-- =========================
+         BRAND SIDE
+         ========================= -->
 
-    <form id="loginForm">
+    <section class="brand-panel">
 
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input
-          type="email"
-          id="email"
-          placeholder="Enter your email"
-          required
-        >
+      <div class="brand-content">
+
+        <div class="brand-logo">
+          <div class="brand-icon">+</div>
+
+          <div>
+            <h1>MediChain</h1>
+            <span>Supply Network Management</span>
+          </div>
+        </div>
+
+        <h2>
+          One network.<br>
+          <span>Better medicine.</span>
+        </h2>
+
+        <p class="brand-description">
+          Connect suppliers, warehouses, distributors and pharmacies
+          through one intelligent healthcare supply network.
+        </p>
+
+        <div class="network-visual">
+
+          <div class="network-line"></div>
+
+          <div class="network-node">
+            <div class="node-dot"></div>
+            <span>Suppliers</span>
+          </div>
+
+          <div class="network-node">
+            <div class="node-dot"></div>
+            <span>Warehouses</span>
+          </div>
+
+          <div class="network-node">
+            <div class="node-dot"></div>
+            <span>Transit</span>
+          </div>
+
+          <div class="network-node">
+            <div class="node-dot"></div>
+            <span>Pharmacies</span>
+          </div>
+
+        </div>
+
+        <div class="brand-stats">
+
+          <div class="brand-stat">
+            <strong>Live</strong>
+            <span>Network tracking</span>
+          </div>
+
+          <div class="brand-stat">
+            <strong>Secure</strong>
+            <span>Role-based access</span>
+          </div>
+
+          <div class="brand-stat">
+            <strong>Smart</strong>
+            <span>Automated alerts</span>
+          </div>
+
+        </div>
+
       </div>
 
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input
-          type="password"
-          id="password"
-          placeholder="Enter your password"
-          required
-        >
+      <div class="brand-footer">
+        © 2026 MediChain · Healthcare Supply Network
       </div>
 
-      <button type="submit" id="loginButton">
-        Login
-      </button>
+    </section>
 
-      <div id="message"></div>
 
-    </form>
+    <!-- =========================
+         FORM SIDE
+         ========================= -->
+
+    <section class="form-panel">
+
+      <div class="form-card">
+
+        <!-- LOGIN -->
+
+        <form id="loginForm">
+
+          <div class="form-header">
+            <span class="eyebrow">Welcome back</span>
+
+            <h2>Sign in to MediChain</h2>
+
+            <p>
+              Access your healthcare supply network workspace.
+            </p>
+          </div>
+
+          <div class="form-group">
+
+            <label for="loginEmail">
+              Email
+            </label>
+
+            <input
+              type="email"
+              id="loginEmail"
+              placeholder="Enter your email"
+              required
+            >
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="loginPassword">
+              Password
+            </label>
+
+            <input
+              type="password"
+              id="loginPassword"
+              placeholder="Enter your password"
+              required
+            >
+
+          </div>
+
+          <button type="submit" id="loginButton">
+            Login
+          </button>
+
+          <div class="switch">
+            Don't have an account?
+            <button type="button" id="showSignup">
+              Sign Up
+            </button>
+          </div>
+
+          <div id="loginMessage"></div>
+
+        </form>
+
+
+        <!-- SIGNUP -->
+
+        <form id="signupForm" class="hidden">
+
+          <div class="form-header">
+            <span class="eyebrow">Get started</span>
+
+            <h2>Create your account</h2>
+
+            <p>
+              Join the MediChain healthcare supply network.
+            </p>
+          </div>
+
+          <div class="form-group">
+
+            <label for="signupName">
+              Full Name
+            </label>
+
+            <input
+              type="text"
+              id="signupName"
+              placeholder="Enter your name"
+              required
+            >
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="signupEmail">
+              Email
+            </label>
+
+            <input
+              type="email"
+              id="signupEmail"
+              placeholder="Enter your email"
+              required
+            >
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="signupPassword">
+              Password
+            </label>
+
+            <input
+              type="password"
+              id="signupPassword"
+              placeholder="Minimum 6 characters"
+              minlength="6"
+              required
+            >
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="signupRole">
+              Role
+            </label>
+
+            <select id="signupRole" required>
+
+              <option value="">
+                Select your role
+              </option>
+
+              <option value="Admin">
+                Admin
+              </option>
+
+              <option value="Supplier">
+                Supplier
+              </option>
+
+              <option value="Distributor">
+                Distributor
+              </option>
+
+              <option value="Pharmacy">
+                Pharmacy
+              </option>
+
+            </select>
+
+          </div>
+
+          <button type="submit" id="signupButton">
+            Create Account
+          </button>
+
+          <div class="switch">
+            Already have an account?
+            <button type="button" id="showLogin">
+              Login
+            </button>
+          </div>
+
+          <div id="signupMessage"></div>
+
+        </form>
+
+      </div>
+
+    </section>
 
   </div>
 
-  <script>
-    const API_BASE_URL = "https://medichain-xizk.onrender.com/api";
 
-    const loginForm = document.getElementById("loginForm");
-    const loginButton = document.getElementById("loginButton");
-    const message = document.getElementById("message");
+  <script>
+
+    const API_BASE_URL =
+      "https://medichain-xizk.onrender.com/api";
+
+
+    const loginForm =
+      document.getElementById("loginForm");
+
+    const signupForm =
+      document.getElementById("signupForm");
+
+    const loginButton =
+      document.getElementById("loginButton");
+
+    const signupButton =
+      document.getElementById("signupButton");
+
+    const loginMessage =
+      document.getElementById("loginMessage");
+
+    const signupMessage =
+      document.getElementById("signupMessage");
+
+    const showSignup =
+      document.getElementById("showSignup");
+
+    const showLogin =
+      document.getElementById("showLogin");
+
+
+    /* =========================
+       SWITCH TO SIGNUP
+       ========================= */
+
+    showSignup.addEventListener("click", () => {
+
+      loginForm.classList.add("hidden");
+      signupForm.classList.remove("hidden");
+
+      loginMessage.textContent = "";
+      signupMessage.textContent = "";
+
+    });
+
+
+    /* =========================
+       SWITCH TO LOGIN
+       ========================= */
+
+    showLogin.addEventListener("click", () => {
+
+      signupForm.classList.add("hidden");
+      loginForm.classList.remove("hidden");
+
+      loginMessage.textContent = "";
+      signupMessage.textContent = "";
+
+    });
+
+
+    /* =========================
+       LOGIN
+       ========================= */
 
     loginForm.addEventListener("submit", async (event) => {
+
       event.preventDefault();
 
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+      const email =
+        document.getElementById("loginEmail").value;
+
+      const password =
+        document.getElementById("loginPassword").value;
 
       loginButton.disabled = true;
       loginButton.textContent = "Logging in...";
-      message.textContent = "";
+      loginMessage.textContent = "";
 
       try {
-        const response = await fetch(`${API_BASE_URL}/auth/login`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            email,
-            password
-          })
-        });
+
+        const response = await fetch(
+          `${API_BASE_URL}/auth/login`,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+              email,
+              password
+            })
+          }
+        );
 
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || "Login failed");
+          throw new Error(
+            data.message || "Login failed"
+          );
         }
 
-        // Save JWT token
-        localStorage.setItem("token", data.token);
 
-        // Save user information
+        // Save JWT
+
+        localStorage.setItem(
+          "token",
+          data.token
+        );
+
+
+        // Save user for role permissions
+
+        localStorage.setItem(
+          "user",
+          JSON.stringify(data.user)
+        );
+
+
+        // Keep existing compatibility
+
         localStorage.setItem(
           "medichainUser",
           JSON.stringify(data.user)
         );
 
-        message.textContent = "Login successful!";
 
-        // Go to dashboard
-        window.location.href = "index.html";
+        loginMessage.textContent =
+          "Login successful!";
 
-      } catch (error) {
-        console.error("Login error:", error);
 
-        message.textContent = error.message;
+        window.location.href =
+          "index.html";
 
-      } finally {
+      }
+
+      catch (error) {
+
+        console.error(
+          "Login error:",
+          error
+        );
+
+        loginMessage.textContent =
+          error.message;
+
+      }
+
+      finally {
+
         loginButton.disabled = false;
         loginButton.textContent = "Login";
+
       }
+
     });
+
+
+    /* =========================
+       SIGNUP
+       ========================= */
+
+    signupForm.addEventListener("submit", async (event) => {
+
+      event.preventDefault();
+
+      const name =
+        document.getElementById("signupName").value;
+
+      const email =
+        document.getElementById("signupEmail").value;
+
+      const password =
+        document.getElementById("signupPassword").value;
+
+      const role =
+        document.getElementById("signupRole").value;
+
+
+      signupButton.disabled = true;
+      signupButton.textContent =
+        "Creating account...";
+
+      signupMessage.textContent = "";
+
+
+      try {
+
+        const response = await fetch(
+          `${API_BASE_URL}/auth/register`,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+              name,
+              email,
+              password,
+              role
+            })
+          }
+        );
+
+
+        const data =
+          await response.json();
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            data.message ||
+            "Registration failed"
+          );
+
+        }
+
+
+        signupMessage.textContent =
+          "Account created successfully!";
+
+
+        signupForm.reset();
+
+
+        setTimeout(() => {
+
+          signupForm.classList.add("hidden");
+
+          loginForm.classList.remove("hidden");
+
+          loginMessage.textContent =
+            "Account created. You can now login.";
+
+        }, 1000);
+
+      }
+
+      catch (error) {
+
+        console.error(
+          "Signup error:",
+          error
+        );
+
+        signupMessage.textContent =
+          error.message;
+
+      }
+
+      finally {
+
+        signupButton.disabled = false;
+
+        signupButton.textContent =
+          "Create Account";
+
+      }
+
+    });
+
   </script>
 
 </body>
 </html>
-
-
