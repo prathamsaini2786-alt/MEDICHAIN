@@ -49,6 +49,22 @@ app.use("/api/alerts", alertRoutes);
 app.use("/api/suppliers", supplierRoutes);
 app.use("/api/issue-reports", issueReportRoutes);
 
+// Health check
+app.get("/health", (req, res) => {
+    res.status(200).json({
+        status: "ok",
+        service: "MediChain Backend"
+    });
+});
+
+// Test route
+app.get("/", (req, res) => {
+    res.status(200).json({
+        message: "MEDICHAIN BACKEND IS DEFINITELY RUNNING",
+        version: "TEST-001"
+    });
+});
+
 // Test route
 
 app.get("/", (req, res) => {
