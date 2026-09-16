@@ -12,6 +12,7 @@ const warehouseRoutes = require("./routes/warehouseRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const shipmentRoutes = require("./routes/shipmentRoutes");
 const supplierRoutes = require("./routes/supplierRoutes");
+const issueReportRoutes = require("./routes/issueReportRoutes");
 const alertRoutes = require("./routes/alertRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const medicineRoutes = require("./routes/medicineRoutes");
@@ -46,6 +47,7 @@ app.use("/api/analytics", analyticsRoutes);
 app.use("/api/medicines", medicineRoutes);
 app.use("/api/alerts", alertRoutes);
 app.use("/api/suppliers", supplierRoutes);
+app.use("/api/issue-reports", issueReportRoutes);
 
 // Test route
 app.get("/", (req, res) => {
