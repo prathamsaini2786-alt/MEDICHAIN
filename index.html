@@ -62,6 +62,7 @@
   <span>!</span>Alerts <em class="danger" id="alertsNavBadge">0</em>
 </button>
         <button class="nav-item" data-page="analytics"><span>◔</span>Analytics</button>
+        <button class="nav-item" data-page="reports"><span>▤</span>Reports</button>
       </nav>
 
       <div class="sidebar-bottom">
@@ -1138,6 +1139,69 @@
 </section>
 
 <!-- Shipment details drawer -->
+
+<!-- Issue report modal -->
+<div class="modal hidden" id="issueReportModal">
+  <div class="modal-card issue-report-card">
+
+    <button class="modal-close" id="issueReportClose">×</button>
+
+    <div class="issue-report-header">
+      <div class="issue-report-icon">⚠</div>
+      <div>
+        <div class="eyebrow">SHIPMENT ISSUE</div>
+        <h2>Report an issue</h2>
+        <p>Tell the operations team what happened with this shipment.</p>
+      </div>
+    </div>
+
+    <div class="issue-shipment-summary">
+      <span>SHIPMENT</span>
+      <strong id="issueReportShipmentId">—</strong>
+    </div>
+
+    <div class="issue-report-form">
+
+      <label>
+        Issue type
+        <select id="issueReportType">
+          <option value="Temperature">Temperature</option>
+          <option value="Delay">Delay</option>
+          <option value="Damaged package">Damaged package</option>
+          <option value="Incorrect quantity">Incorrect quantity</option>
+          <option value="Route issue">Route issue</option>
+          <option value="Other" selected>Other</option>
+        </select>
+      </label>
+
+      <label>
+        Personal comment
+        <textarea
+          id="issueReportComment"
+          rows="5"
+          maxlength="1000"
+          placeholder="Describe the issue in your own words..."
+        ></textarea>
+        <small>Maximum 1000 characters.</small>
+      </label>
+
+    </div>
+
+    <div class="settings-message hidden" id="issueReportMessage"></div>
+
+    <div class="setting-actions issue-report-actions">
+      <button class="ghost-btn" id="issueReportCancel">
+        Cancel
+      </button>
+
+      <button class="primary-btn" id="submitIssueReport">
+        Submit report
+      </button>
+    </div>
+
+  </div>
+</div>
+
 <div class="drawer-backdrop hidden" id="shipmentDrawerBackdrop"></div>
 
 <aside class="inventory-drawer shipment-drawer"
@@ -1640,7 +1704,67 @@
   </article>
 </section>
 
-      <section id="page-analytics" class="page">
+      
+<section id="page-reports" class="page">
+
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">OPERATIONS / REPORTS</div>
+      <h1>Issue Reports</h1>
+      <p>Review shipment issues reported by your MediChain network.</p>
+    </div>
+
+    <button class="ghost-btn" id="refreshReportsBtn">
+      ↻ Refresh
+    </button>
+  </div>
+
+  <div class="reports-summary">
+
+    <div class="report-stat">
+      <span>OPEN</span>
+      <strong id="openReportsCount">0</strong>
+      <small>Issues requiring attention</small>
+    </div>
+
+    <div class="report-stat">
+      <span>IN REVIEW</span>
+      <strong id="reviewReportsCount">0</strong>
+      <small>Currently being investigated</small>
+    </div>
+
+    <div class="report-stat">
+      <span>RESOLVED</span>
+      <strong id="resolvedReportsCount">0</strong>
+      <small>Issues already resolved</small>
+    </div>
+
+  </div>
+
+  <div class="panel reports-panel">
+
+    <div class="reports-panel-header">
+      <div>
+        <h2>Reported issues</h2>
+        <p>Personal comments submitted from shipment tracking.</p>
+      </div>
+    </div>
+
+    <div id="reportsList" class="reports-list">
+
+      <div class="reports-empty">
+        <div>✓</div>
+        <strong>No issue reports yet</strong>
+        <p>Reported shipment issues will appear here.</p>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<section id="page-analytics" class="page">
         <div class="page-head">
           <div>
             <div class="eyebrow">INSIGHTS</div>

@@ -164,6 +164,12 @@ function showPage(name) {
   if (name === "alerts") {
     generateAutomatedAlerts();
   }
+
+  // Load issue reports whenever Reports is opened
+  if (name === "reports") {
+    loadIssueReports();
+  }
+
   if (name === "medicines") {
   loadMedicines();
 }
@@ -3027,22 +3033,175 @@ document
 
 // ================= REPORT ISSUE =================
 
+const issueReportModal =
+  document.getElementById("issueReportModal");
+
+const issueReportShipmentId =
+  document.getElementById("issueReportShipmentId");
+
+const issueReportType =
+  document.getElementById("issueReportType");
+
+const issueReportComment =
+  document.getElementById("issueReportComment");
+
+const issueReportMessage =
+  document.getElementById("issueReportMessage");
+
+
+function openIssueReportModal() {
+
+  if (!selectedShipment?._id) {
+    showToast("No shipment selected.", "error");
+    return;
+  }
+
+  issueReportShipmentId.textContent =
+    selectedShipment.shipmentId || "—";
+
+  issueReportType.value = "Other";
+  issueReportComment.value = "";
+
+  issueReportMessage?.classList.add("hidden");
+
+  issueReportModal?.classList.remove("hidden");
+}
+
+
+function closeIssueReportModal() {
+  issueReportModal?.classList.add("hidden");
+}
+
+
 document
   .getElementById("shipmentAlertBtn")
   ?.addEventListener(
     "click",
-    () => {
+    openIssueReportModal
+  );
 
-      if (!selectedShipment?._id) {
-         showToast("No shipment selected.", "error");
+
+document
+  .getElementById("issueReportClose")
+  ?.addEventListener(
+    "click",
+    closeIssueReportModal
+  );
+
+
+document
+  .getElementById("issueReportCancel")
+  ?.addEventListener(
+    "click",
+    closeIssueReportModal
+  );
+
+
+issueReportModal?.addEventListener(
+  "click",
+  event => {
+    if (event.target === issueReportModal) {
+      closeIssueReportModal();
+    }
+  }
+);
+
+
+document
+  .getElementById("submitIssueReport")
+  ?.addEventListener(
+    "click",
+    async () => {
+
+      if (!selectedShipment?.shipmentId) {
+        showToast("No shipment selected.", "error");
         return;
       }
 
-      showToast(
-        `Issue report started for ${selectedShipment.shipmentId}.`,
-        "success"
-      );
+      const comment =
+        issueReportComment?.value.trim();
 
+      if (!comment) {
+        showToast(
+          "Please add a personal comment.",
+          "error"
+        );
+        issueReportComment?.focus();
+        return;
+      }
+
+      const submitButton =
+        document.getElementById(
+          "submitIssueReport"
+        );
+
+      submitButton.disabled = true;
+      submitButton.textContent =
+        "Submitting...";
+
+      try {
+
+        const response = await fetch(
+          `${API_BASE_URL}/issue-reports`,
+          {
+            method: "POST",
+
+            headers: {
+              ...getSettingsHeaders(),
+              "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+              shipmentId:
+                selectedShipment.shipmentId,
+
+              issueType:
+                issueReportType?.value || "Other",
+
+              comment
+            })
+          }
+        );
+
+
+        const data =
+          await response.json();
+
+
+        if (!response.ok) {
+          throw new Error(
+            data.message ||
+            "Unable to submit issue report"
+          );
+        }
+
+
+        closeIssueReportModal();
+
+        showToast(
+          "Issue reported successfully.",
+          "success"
+        );
+
+      } catch (error) {
+
+        console.error(
+          "Issue report error:",
+          error
+        );
+
+        showToast(
+          error.message ||
+          "Unable to submit issue report.",
+          "error"
+        );
+
+      } finally {
+
+        submitButton.disabled = false;
+        submitButton.textContent =
+          "Submit report";
+      }
     }
   );
 
@@ -7318,3 +7477,230 @@ document.addEventListener(
 
   }
 );
+/* ============================================================
+   ISSUE REPORTS
+   ============================================================ */
+
+async function loadIssueReports() {
+
+  const reportsList =
+    document.getElementById("reportsList");
+
+  if (!reportsList) return;
+
+  reportsList.innerHTML = `
+    <div class="reports-empty">
+      <div>↻</div>
+      <strong>Loading reports...</strong>
+      <p>Fetching the latest shipment issues.</p>
+    </div>
+  `;
+
+  try {
+
+    const response = await fetch(
+      `${API_BASE_URL}/issue-reports`,
+      {
+        headers: getSettingsHeaders()
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Unable to load reports"
+      );
+    }
+
+    const reports = Array.isArray(data)
+      ? data
+      : data.reports || [];
+
+    updateReportsSummary(reports);
+
+    if (!reports.length) {
+
+      reportsList.innerHTML = `
+        <div class="reports-empty">
+          <div>✓</div>
+          <strong>No issue reports yet</strong>
+          <p>Reported shipment issues will appear here.</p>
+        </div>
+      `;
+
+      return;
+    }
+
+    reportsList.innerHTML =
+      reports.map(report => {
+
+        const reporter =
+          report.reportedBy?.name ||
+          report.reporterName ||
+          "Unknown user";
+
+        const date =
+          report.createdAt
+            ? new Date(report.createdAt)
+                .toLocaleString([], {
+                  dateStyle: "medium",
+                  timeStyle: "short"
+                })
+            : "Unknown date";
+
+        const status =
+          report.status || "Open";
+
+        const statusClass =
+          status.toLowerCase()
+            .replace(/\s+/g, "-");
+
+        return `
+          <article class="report-card">
+
+            <div class="report-card-top">
+
+              <div class="report-type">
+                <span class="report-warning">!</span>
+
+                <div>
+                  <strong>
+                    ${escapeHtml(
+                      report.issueType || "Other"
+                    )}
+                  </strong>
+
+                  <small>
+                    Shipment
+                    ${escapeHtml(
+                      report.shipmentId || "—"
+                    )}
+                  </small>
+                </div>
+              </div>
+
+              <span class="report-status ${statusClass}">
+                ${escapeHtml(status)}
+              </span>
+
+            </div>
+
+            <div class="report-comment">
+              <div class="report-comment-label">
+                PERSONAL COMMENT
+              </div>
+
+              <p>
+                ${escapeHtml(
+                  report.comment || "No comment provided."
+                )}
+              </p>
+            </div>
+
+            <div class="report-card-footer">
+
+              <span>
+                Reported by
+                <strong>${escapeHtml(reporter)}</strong>
+              </span>
+
+              <span>${escapeHtml(date)}</span>
+
+            </div>
+
+          </article>
+        `;
+
+      }).join("");
+
+  } catch (error) {
+
+    console.error(
+      "Load issue reports error:",
+      error
+    );
+
+    reportsList.innerHTML = `
+      <div class="reports-empty">
+        <div>!</div>
+        <strong>Unable to load reports</strong>
+        <p>${escapeHtml(error.message)}</p>
+      </div>
+    `;
+  }
+}
+
+
+function updateReportsSummary(reports) {
+
+  const open =
+    reports.filter(
+      report => report.status === "Open"
+    ).length;
+
+  const review =
+    reports.filter(
+      report => report.status === "In Review"
+    ).length;
+
+  const resolved =
+    reports.filter(
+      report => report.status === "Resolved"
+    ).length;
+
+  const openElement =
+    document.getElementById("openReportsCount");
+
+  const reviewElement =
+    document.getElementById("reviewReportsCount");
+
+  const resolvedElement =
+    document.getElementById("resolvedReportsCount");
+
+  if (openElement)
+    openElement.textContent = open;
+
+  if (reviewElement)
+    reviewElement.textContent = review;
+
+  if (resolvedElement)
+    resolvedElement.textContent = resolved;
+}
+
+
+document
+  .getElementById("refreshReportsBtn")
+  ?.addEventListener(
+    "click",
+    loadIssueReports
+  );
+
+// ================= REAL DASHBOARD DATA =================
+
+async function loadDashboardData() {
+  try {
+    const data = await apiFetch("/dashboard");
+
+    // Dashboard stat cards
+    const statCards = document.querySelectorAll("#page-dashboard .stat-card");
+
+    if (statCards.length >= 3) {
+      statCards[0].querySelector("strong").textContent =
+        data.medicines.totalInventory.toLocaleString();
+
+      statCards[1].querySelector("strong").textContent =
+        data.medicines.total.toLocaleString();
+
+      statCards[2].querySelector("strong").textContent =
+        data.shipments.active.toLocaleString();
+    }
+
+    console.log("Dashboard data loaded:", data);
+
+  } catch (error) {
+    console.error("Dashboard API error:", error);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", loadDashboardData);
