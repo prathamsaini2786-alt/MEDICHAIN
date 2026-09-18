@@ -2424,14 +2424,6 @@ function renderShipments() {
 
 function updateShipmentOverview() {
 
-  const overview =
-    document.querySelectorAll(
-      ".shipment-overview .stat-card"
-    );
-
-  if (!overview.length) return;
-
-
   const active =
     shipments.filter(
       shipment =>
@@ -2439,13 +2431,11 @@ function updateShipmentOverview() {
         shipment.status !== "Cancelled"
     ).length;
 
-
   const inTransit =
     shipments.filter(
       shipment =>
         shipment.status === "In transit"
     ).length;
-
 
   const delayed =
     shipments.filter(
@@ -2453,26 +2443,58 @@ function updateShipmentOverview() {
         shipment.status === "Delayed"
     ).length;
 
+  const activeElement =
+    document.getElementById("shipmentsActiveCount");
 
-  if (overview[0]?.querySelector("b")) {
-    overview[0].querySelector("b").textContent =
-      active;
+  const transitElement =
+    document.getElementById("shipmentsTransitCount");
+
+  const delayedElement =
+    document.getElementById("shipmentsDelayedCount");
+
+  const activeDetail =
+    document.getElementById("shipmentsActiveDetail");
+
+  const transitDetail =
+    document.getElementById("shipmentsTransitDetail");
+
+  const delayedDetail =
+    document.getElementById("shipmentsDelayedDetail");
+
+
+  if (activeElement) {
+    activeElement.textContent = active;
+  }
+
+  if (transitElement) {
+    transitElement.textContent = inTransit;
+  }
+
+  if (delayedElement) {
+    delayedElement.textContent = delayed;
   }
 
 
-  if (overview[1]?.querySelector("b")) {
-    overview[1].querySelector("b").textContent =
-      inTransit;
+  if (activeDetail) {
+    activeDetail.textContent =
+      `${active} active shipment${active === 1 ? "" : "s"}`;
   }
 
+  if (transitDetail) {
+    transitDetail.textContent =
+      active > 0
+        ? `${Math.round((inTransit / active) * 100)}% of active shipments`
+        : "0% of active shipments";
+  }
 
-  if (overview[2]?.querySelector("b")) {
-    overview[2].querySelector("b").textContent =
-      delayed;
+  if (delayedDetail) {
+    delayedDetail.textContent =
+      delayed > 0
+        ? "Requires attention"
+        : "No delayed shipments";
   }
 
 }
-
 
 // ================= MAP =================
 
