@@ -3,950 +3,967 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MediChain — Login</title>
+  <title>MediChain - Login</title>
 
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-    }
-
-    :root {
-      --blue: #2d82e8;
-      --blue-dark: #1768c2;
-      --teal: #50d5c5;
-      --navy: #08243b;
-      --navy-2: #0e3c57;
-      --text: #17243a;
-      --muted: #728198;
-      --border: #d9e2ec;
-      --bg: #f5f8fc;
-      --danger: #c73545;
-      --success: #16865c;
+      font-family: Arial, sans-serif;
     }
 
     body {
       min-height: 100vh;
-      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      background: #f5f8fc;
+      color: #172033;
     }
 
-    .page {
+    .login-container {
       min-height: 100vh;
+      width: 100%;
       display: grid;
-      grid-template-columns: 36.5% 63.5%;
+      grid-template-columns: 1.08fr 0.92fr;
     }
 
-    /* LEFT BRAND PANEL */
+    /* =========================
+       LEFT BRAND PANEL
+       ========================= */
+
     .brand-panel {
       position: relative;
       overflow: hidden;
       min-height: 100vh;
-      padding: 58px;
-      color: white;
-      background:
-        radial-gradient(circle at 100% 8%, rgba(73, 207, 218, .18), transparent 30%),
-        linear-gradient(145deg, #061f35 0%, #0b314c 52%, #104f69 100%);
+      padding: 55px 65px;
       display: flex;
       flex-direction: column;
-    }
-
-    .brand-panel::before,
-    .brand-panel::after {
-      content: "";
-      position: absolute;
-      border: 1px solid rgba(125, 204, 225, .13);
-      border-radius: 50%;
-      pointer-events: none;
+      justify-content: space-between;
+      background:
+        radial-gradient(circle at 85% 18%, rgba(68, 211, 192, 0.20), transparent 28%),
+        radial-gradient(circle at 15% 85%, rgba(47, 128, 237, 0.22), transparent 32%),
+        linear-gradient(145deg, #081c2f 0%, #0d2d47 55%, #12566a 100%);
+      color: white;
     }
 
     .brand-panel::before {
-      width: 520px;
-      height: 520px;
-      top: -260px;
-      right: -270px;
+      content: "";
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      right: -300px;
+      top: -230px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 50%;
     }
 
     .brand-panel::after {
-      width: 450px;
-      height: 450px;
-      bottom: -275px;
-      left: -270px;
+      content: "";
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      left: -280px;
+      bottom: -250px;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 50%;
     }
 
-    .brand {
+    .brand-content,
+    .brand-footer {
       position: relative;
-      z-index: 1;
+      z-index: 2;
+    }
+
+    /* LOGO */
+
+    .brand-logo {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 13px;
+      margin-bottom: 85px;
     }
 
-    .brand-mark {
-      width: 42px;
-      height: 42px;
-      border-radius: 11px;
-      background: linear-gradient(135deg, #388ef6, #2674d9);
-      display: grid;
-      place-items: center;
+    .brand-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #2f80ed;
+      font-size: 25px;
+      font-weight: bold;
+      box-shadow: 0 12px 30px rgba(47,128,237,0.35);
+    }
+
+    .brand-logo h1 {
       font-size: 27px;
-      font-weight: 800;
-      box-shadow: 0 10px 28px rgba(20, 105, 205, .32);
+      letter-spacing: -0.7px;
     }
 
-    .brand-name {
-      font-size: 22px;
-      font-weight: 800;
-      letter-spacing: -.5px;
+    .brand-logo span {
+      display: block;
+      margin-top: 3px;
+      color: #9eb5c8;
+      font-size: 12px;
     }
 
-    .brand-subtitle {
-      margin-top: 2px;
-      font-size: 11px;
-      color: #9eb3c6;
-      letter-spacing: .2px;
-    }
+    /* HERO */
 
-    .brand-content {
-      position: relative;
-      z-index: 1;
-      margin-top: 82px;
+    .brand-content h2 {
       max-width: 600px;
+      font-size: clamp(40px, 4.2vw, 60px);
+      line-height: 1.04;
+      letter-spacing: -2.5px;
+      margin-bottom: 25px;
     }
 
-    .brand-content h1 {
-      font-size: clamp(42px, 4.2vw, 62px);
-      line-height: .98;
-      letter-spacing: -2.7px;
-      font-weight: 800;
+    .brand-content h2 span {
+      color: #55d6c2;
     }
 
-    .brand-content h1 span {
-      color: var(--teal);
+    .brand-description {
+      max-width: 530px;
+      color: #b8c9d7;
+      font-size: 16px;
+      line-height: 1.7;
     }
 
-    .brand-content p {
-      margin-top: 27px;
-      max-width: 560px;
-      color: #c2d2df;
-      font-size: 15px;
-      line-height: 1.75;
-    }
+    /* NETWORK */
 
-    .network {
+    .network-visual {
       position: relative;
-      margin-top: 72px;
-      max-width: 560px;
+      z-index: 2;
+      width: 100%;
+      max-width: 590px;
+      height: 145px;
+      margin-top: 60px;
     }
 
     .network-line {
       position: absolute;
-      left: 23px;
-      right: 23px;
-      top: 18px;
+      top: 51px;
+      left: 38px;
+      right: 38px;
       height: 2px;
-      background: rgba(164, 206, 223, .3);
+      background: rgba(255,255,255,0.16);
     }
 
-    .network-nodes {
-      position: relative;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
+    .network-node {
+      position: absolute;
+      top: 29px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 11px;
+      color: #a9bdcc;
+      font-size: 11px;
     }
 
-    .node {
-      text-align: center;
-      font-size: 10px;
-      color: #a9bdcb;
+    .network-node:nth-child(2) {
+      left: 0;
+    }
+
+    .network-node:nth-child(3) {
+      left: 31%;
+    }
+
+    .network-node:nth-child(4) {
+      left: 62%;
+    }
+
+    .network-node:nth-child(5) {
+      right: 0;
     }
 
     .node-dot {
-      width: 39px;
-      height: 39px;
-      margin: 0 auto 12px;
+      width: 45px;
+      height: 45px;
       border-radius: 50%;
-      background: var(--teal);
-      box-shadow: 0 0 0 8px rgba(80, 213, 197, .06);
+      border: 7px solid rgba(85,214,194,0.13);
+      background: #55d6c2;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.10);
     }
 
-    .node:nth-child(3) .node-dot {
-      background: #f4a73d;
-      box-shadow: 0 0 0 8px rgba(244, 167, 61, .06);
+    .network-node:nth-child(4) .node-dot {
+      background: #f1a34a;
+      border-color: rgba(241,163,74,0.13);
     }
 
-    .features {
+    /* STATS */
+
+    .brand-stats {
       display: flex;
-      gap: 48px;
-      margin-top: 58px;
+      gap: 35px;
+      margin-top: 20px;
     }
 
-    .feature strong {
+    .brand-stat strong {
       display: block;
-      font-size: 18px;
-      margin-bottom: 7px;
+      font-size: 20px;
+      margin-bottom: 4px;
     }
 
-    .feature span {
-      color: #8fa9bb;
-      font-size: 10px;
+    .brand-stat span {
+      color: #8fa8ba;
+      font-size: 11px;
     }
 
-    .copyright {
-      position: relative;
-      z-index: 1;
-      margin-top: auto;
-      padding-top: 50px;
+    .brand-footer {
       color: #8098aa;
-      font-size: 10px;
+      font-size: 12px;
     }
 
-    /* RIGHT PANEL */
+    /* =========================
+       RIGHT FORM PANEL
+       ========================= */
+
     .form-panel {
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 50px;
+      padding: 45px;
       background: #f7f9fc;
     }
 
-    .auth-card {
-      width: min(100%, 480px);
-      padding: 44px 42px 39px;
-      border: 1px solid #e1e8f0;
-      border-radius: 20px;
+    .form-card {
+      width: 100%;
+      max-width: 455px;
+      padding: 44px;
       background: white;
-      box-shadow: 0 22px 60px rgba(20, 45, 70, .08);
+      border: 1px solid #e4eaf1;
+      border-radius: 22px;
+      box-shadow: 0 25px 70px rgba(18,43,70,0.10);
+    }
+
+    .form-header {
+      margin-bottom: 30px;
     }
 
     .eyebrow {
-      color: #2b82e8;
-      font-size: 10px;
-      font-weight: 800;
+      display: inline-block;
+      margin-bottom: 12px;
+      color: #2f80ed;
+      font-size: 11px;
+      font-weight: bold;
       letter-spacing: 1.5px;
-      margin-bottom: 13px;
+      text-transform: uppercase;
     }
 
-    .auth-card h2 {
-      font-size: 27px;
-      letter-spacing: -.8px;
-      margin-bottom: 10px;
+    .form-header h2 {
+      font-size: 30px;
+      letter-spacing: -0.8px;
+      margin-bottom: 9px;
     }
 
-    .intro {
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.6;
-      margin-bottom: 29px;
+    .form-header p {
+      color: #7c8998;
+      font-size: 14px;
+      line-height: 1.5;
     }
 
-    .form-view {
-      display: none;
-    }
-
-    .form-view.active {
-      display: block;
-    }
-
-    .field {
-      margin-bottom: 18px;
+    .form-group {
+      margin-bottom: 19px;
     }
 
     label {
       display: block;
       margin-bottom: 8px;
-      color: #314158;
-      font-size: 12px;
-      font-weight: 700;
+      color: #303b4b;
+      font-size: 13px;
+      font-weight: bold;
     }
 
     input,
     select {
       width: 100%;
-      height: 45px;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      padding: 0 13px;
-      outline: none;
-      color: #1b293d;
-      background: #fff;
-      font: 500 13px inherit;
-      transition: border-color .15s, box-shadow .15s;
+      height: 48px;
+      padding: 0 14px;
+      border: 1px solid #d8e0e9;
+      border-radius: 10px;
+      background: #fbfcfe;
+      color: #172033;
+      font-size: 14px;
+      transition: 0.2s;
     }
 
     input:focus,
     select:focus {
-      border-color: #70aef0;
-      box-shadow: 0 0 0 3px rgba(45, 130, 232, .1);
+      outline: none;
+      border-color: #2f80ed;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(47,128,237,0.09);
     }
 
-    .password-wrap {
-      position: relative;
-    }
-
-    .password-wrap input {
-      padding-right: 48px;
-    }
-
-    .password-toggle {
-      position: absolute;
-      right: 7px;
-      top: 6px;
-      width: 34px;
-      height: 33px;
-      border: 0;
-      border-radius: 7px;
-      background: transparent;
-      color: #738197;
+    select {
       cursor: pointer;
-      font-size: 15px;
     }
 
-    .password-toggle:hover {
-      background: #f1f5f9;
-    }
-
-    .submit-btn {
+    button[type="submit"] {
       width: 100%;
-      height: 46px;
-      border: 0;
-      border-radius: 9px;
-      background: linear-gradient(90deg, #2d82e8, #1f72c5);
+      height: 50px;
+      margin-top: 4px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #287bea, #1769aa);
       color: white;
-      font: 800 13px inherit;
+      font-size: 15px;
+      font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 9px 22px rgba(45, 130, 232, .2);
-      transition: transform .1s, filter .15s;
+      box-shadow: 0 9px 20px rgba(47,128,237,0.22);
+      transition: 0.2s;
     }
 
-    .submit-btn:hover {
-      filter: brightness(.97);
+    button[type="submit"]:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(47,128,237,0.28);
     }
 
-    .submit-btn:active {
-      transform: translateY(1px);
-    }
-
-    .submit-btn:disabled {
-      opacity: .65;
-      cursor: wait;
-    }
-
-    .message {
-      display: none;
-      margin: 0 0 18px;
-      padding: 11px 12px;
-      border-radius: 8px;
-      font-size: 12px;
-      line-height: 1.45;
-    }
-
-    .message.show {
-      display: block;
-    }
-
-    .message.error {
-      color: var(--danger);
-      background: #fff0f2;
-      border: 1px solid #ffd3d8;
-    }
-
-    .message.success {
-      color: var(--success);
-      background: #edf9f4;
-      border: 1px solid #c7eddd;
+    button[type="submit"]:disabled {
+      background: #9ca8b5;
+      box-shadow: none;
+      cursor: not-allowed;
+      transform: none;
     }
 
     .switch {
-      margin-top: 20px;
+      margin-top: 23px;
       padding-top: 20px;
-      border-top: 1px solid #edf1f5;
+      border-top: 1px solid #edf0f4;
       text-align: center;
-      color: #758398;
-      font-size: 12px;
+      color: #7d8997;
+      font-size: 13px;
     }
 
     .switch button {
-      border: 0;
+      width: auto;
       padding: 0;
-      background: none;
-      color: #1168bc;
-      font: 800 12px inherit;
+      border: none;
+      background: transparent;
+      color: #1769aa;
+      font-size: 13px;
+      font-weight: bold;
       cursor: pointer;
     }
 
     .switch button:hover {
-      text-decoration: underline;
+      color: #2f80ed;
     }
 
-    .signup-note {
-      margin-top: 11px;
+    #loginMessage,
+    #signupMessage {
+      margin-top: 15px;
       text-align: center;
-      color: #9aa7b6;
-      font-size: 10px;
-      line-height: 1.5;
+      font-size: 13px;
     }
+
+    .hidden {
+      display: none;
+    }
+
+    /* =========================
+       MOBILE
+       ========================= */
 
     @media (max-width: 900px) {
-      .page {
+      .login-container {
         grid-template-columns: 1fr;
       }
 
       .brand-panel {
+        min-height: 390px;
+        padding: 35px;
+      }
+
+      .brand-logo {
+        margin-bottom: 40px;
+      }
+
+      .brand-content h2 {
+        font-size: 40px;
+      }
+
+      .brand-description {
+        font-size: 14px;
+      }
+
+      .network-visual {
         display: none;
       }
 
-      .form-panel {
-        min-height: 100vh;
-        padding: 25px 18px;
+      .brand-stats {
+        margin-top: 30px;
       }
 
-      .auth-card {
-        padding: 34px 25px 30px;
+      .brand-footer {
+        margin-top: 35px;
+      }
+
+      .form-panel {
+        min-height: auto;
+        padding: 35px 20px 55px;
+      }
+
+      .form-card {
+        padding: 32px 26px;
       }
     }
 
-    @media (max-width: 480px) {
-      .auth-card {
-        border: 0;
-        box-shadow: none;
-        background: transparent;
-        padding: 20px 5px;
+    @media (max-width: 500px) {
+      .brand-content h2 {
+        font-size: 34px;
       }
 
-      .form-panel {
-        background: white;
+      .brand-panel {
+        min-height: 360px;
+      }
+
+      .brand-stats {
+        gap: 20px;
+      }
+
+      .form-card {
+        padding: 28px 22px;
       }
     }
   </style>
 </head>
 
 <body>
-  <main class="page">
 
-    <!-- LEFT -->
+  <div class="login-container">
+
+    <!-- =========================
+         BRAND SIDE
+         ========================= -->
+
     <section class="brand-panel">
-      <div class="brand">
-        <div class="brand-mark">+</div>
-        <div>
-          <div class="brand-name">MediChain</div>
-          <div class="brand-subtitle">Supply Network Management</div>
-        </div>
-      </div>
 
       <div class="brand-content">
-        <h1>
+
+        <div class="brand-logo">
+          <div class="brand-icon">+</div>
+
+          <div>
+            <h1>MediChain</h1>
+            <span>Supply Network Management</span>
+          </div>
+        </div>
+
+        <h2>
           One network.<br>
           <span>Better medicine.</span>
-        </h1>
+        </h2>
 
-        <p>
+        <p class="brand-description">
           Connect suppliers, warehouses, distributors and pharmacies
           through one intelligent healthcare supply network.
         </p>
 
-        <div class="network">
+        <div class="network-visual">
+
           <div class="network-line"></div>
-          <div class="network-nodes">
-            <div class="node">
-              <div class="node-dot"></div>
-              Suppliers
-            </div>
-            <div class="node">
-              <div class="node-dot"></div>
-              Warehouses
-            </div>
-            <div class="node">
-              <div class="node-dot"></div>
-              Transit
-            </div>
-            <div class="node">
-              <div class="node-dot"></div>
-              Pharmacies
-            </div>
+
+          <div class="network-node">
+            <div class="node-dot"></div>
+            <span>Suppliers</span>
           </div>
+
+          <div class="network-node">
+            <div class="node-dot"></div>
+            <span>Warehouses</span>
+          </div>
+
+          <div class="network-node">
+            <div class="node-dot"></div>
+            <span>Transit</span>
+          </div>
+
+          <div class="network-node">
+            <div class="node-dot"></div>
+            <span>Pharmacies</span>
+          </div>
+
         </div>
 
-        <div class="features">
-          <div class="feature">
+        <div class="brand-stats">
+
+          <div class="brand-stat">
             <strong>Live</strong>
             <span>Network tracking</span>
           </div>
-          <div class="feature">
+
+          <div class="brand-stat">
             <strong>Secure</strong>
             <span>Role-based access</span>
           </div>
-          <div class="feature">
+
+          <div class="brand-stat">
             <strong>Smart</strong>
             <span>Automated alerts</span>
           </div>
+
         </div>
+
       </div>
 
-      <div class="copyright">
+      <div class="brand-footer">
         © 2026 MediChain · Healthcare Supply Network
       </div>
+
     </section>
 
-    <!-- RIGHT -->
+
+    <!-- =========================
+         FORM SIDE
+         ========================= -->
+
     <section class="form-panel">
-      <div class="auth-card">
 
-        <!-- LOGIN: ALWAYS THE DEFAULT VIEW -->
-        <div id="loginView" class="form-view active">
-          <div class="eyebrow">WELCOME BACK</div>
-          <h2>Sign in to MediChain</h2>
-          <p class="intro">
-            Access your healthcare supply network workspace.
-          </p>
+      <div class="form-card">
 
-          <div id="loginMessage" class="message"></div>
+        <!-- LOGIN -->
 
-          <form id="loginForm" novalidate>
-            <div class="field">
-              <label for="loginEmail">Email</label>
-              <input
-                id="loginEmail"
-                name="email"
-                type="email"
-                autocomplete="username"
-                placeholder="you@example.com"
-                required
-              >
-            </div>
+        <form id="loginForm">
 
-            <div class="field">
-              <label for="loginPassword">Password</label>
-              <div class="password-wrap">
-                <input
-                  id="loginPassword"
-                  name="password"
-                  type="password"
-                  autocomplete="current-password"
-                  placeholder="Enter your password"
-                  required
-                >
-                <button
-                  type="button"
-                  class="password-toggle"
-                  data-target="loginPassword"
-                  aria-label="Show password"
-                >◉</button>
-              </div>
-            </div>
+          <div class="form-header">
+            <span class="eyebrow">Welcome back</span>
 
-            <button id="loginButton" class="submit-btn" type="submit">
-              Login
-            </button>
-          </form>
+            <h2>Sign in to MediChain</h2>
+
+            <p>
+              Access your healthcare supply network workspace.
+            </p>
+          </div>
+
+          <div class="form-group">
+
+            <label for="loginEmail">
+              Email
+            </label>
+
+            <input
+              type="email"
+              id="loginEmail"
+              placeholder="Enter your email"
+              required
+            >
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="loginPassword">
+              Password
+            </label>
+
+            <input
+              type="password"
+              id="loginPassword"
+              placeholder="Enter your password"
+              required
+            >
+
+          </div>
+
+          <button type="submit" id="loginButton">
+            Login
+          </button>
 
           <div class="switch">
             Don't have an account?
-            <button type="button" id="showSignup">Sign Up</button>
-          </div>
-        </div>
-
-        <!-- SIGNUP: ONLY SHOWN AFTER CLICKING SIGN UP -->
-        <div id="signupView" class="form-view">
-          <div class="eyebrow">CREATE ACCOUNT</div>
-          <h2>Create your MediChain account</h2>
-          <p class="intro">
-            Register once. Your account is saved securely in the MediChain database and can be used for future logins.
-          </p>
-
-          <div id="signupMessage" class="message"></div>
-
-          <form id="signupForm" novalidate>
-            <div class="field">
-              <label for="signupName">Full name</label>
-              <input
-                id="signupName"
-                name="name"
-                type="text"
-                autocomplete="name"
-                placeholder="Your full name"
-                required
-              >
-            </div>
-
-            <div class="field">
-              <label for="signupEmail">Email</label>
-              <input
-                id="signupEmail"
-                name="email"
-                type="email"
-                autocomplete="email"
-                placeholder="you@example.com"
-                required
-              >
-            </div>
-
-            <div class="field">
-              <label for="signupRole">Role</label>
-              <select id="signupRole" name="role" required>
-                <option value="Pharmacy">Pharmacy</option>
-                <option value="Supplier">Supplier</option>
-                <option value="Distributor">Distributor</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="signupPassword">Password</label>
-              <div class="password-wrap">
-                <input
-                  id="signupPassword"
-                  name="password"
-                  type="password"
-                  autocomplete="new-password"
-                  placeholder="Minimum 6 characters"
-                  minlength="6"
-                  required
-                >
-                <button
-                  type="button"
-                  class="password-toggle"
-                  data-target="signupPassword"
-                  aria-label="Show password"
-                >◉</button>
-              </div>
-            </div>
-
-            <div class="field">
-              <label for="signupConfirm">Confirm password</label>
-              <div class="password-wrap">
-                <input
-                  id="signupConfirm"
-                  name="confirmPassword"
-                  type="password"
-                  autocomplete="new-password"
-                  placeholder="Re-enter your password"
-                  required
-                >
-                <button
-                  type="button"
-                  class="password-toggle"
-                  data-target="signupConfirm"
-                  aria-label="Show password"
-                >◉</button>
-              </div>
-            </div>
-
-            <button id="signupButton" class="submit-btn" type="submit">
-              Create account
+            <button type="button" id="showSignup">
+              Sign Up
             </button>
-          </form>
+          </div>
+
+          <div id="loginMessage"></div>
+
+        </form>
+
+
+        <!-- SIGNUP -->
+
+        <form id="signupForm" class="hidden">
+
+          <div class="form-header">
+            <span class="eyebrow">Get started</span>
+
+            <h2>Create your account</h2>
+
+            <p>
+              Join the MediChain healthcare supply network.
+            </p>
+          </div>
+
+          <div class="form-group">
+
+            <label for="signupName">
+              Full Name
+            </label>
+
+            <input
+              type="text"
+              id="signupName"
+              placeholder="Enter your name"
+              required
+            >
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="signupEmail">
+              Email
+            </label>
+
+            <input
+              type="email"
+              id="signupEmail"
+              placeholder="Enter your email"
+              required
+            >
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="signupPassword">
+              Password
+            </label>
+
+            <input
+              type="password"
+              id="signupPassword"
+              placeholder="Minimum 6 characters"
+              minlength="6"
+              required
+            >
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="signupRole">
+              Role
+            </label>
+
+            <select id="signupRole" required>
+
+              <option value="">
+                Select your role
+              </option>
+
+              <option value="Admin">
+                Admin
+              </option>
+
+              <option value="Supplier">
+                Supplier
+              </option>
+
+              <option value="Distributor">
+                Distributor
+              </option>
+
+              <option value="Pharmacy">
+                Pharmacy
+              </option>
+
+            </select>
+
+          </div>
+
+          <button type="submit" id="signupButton">
+            Create Account
+          </button>
 
           <div class="switch">
             Already have an account?
-            <button type="button" id="showLogin">Back to Login</button>
+            <button type="button" id="showLogin">
+              Login
+            </button>
           </div>
 
-          <div class="signup-note">
-            Your password is sent to the backend over HTTPS and is not stored in this page.
-          </div>
-        </div>
+          <div id="signupMessage"></div>
+
+        </form>
 
       </div>
+
     </section>
-  </main>
+
+  </div>
+
 
   <script>
-    /*
-      IMPORTANT:
-      This is the live MediChain backend that was just verified.
-    */
-    const API_BASE_URL = "https://mediback-vz2n.onrender.com/api";
 
-    const loginView = document.getElementById("loginView");
-    const signupView = document.getElementById("signupView");
+    const API_BASE_URL =
+      "https://medichain-xizk.onrender.com/api";
 
-    const loginForm = document.getElementById("loginForm");
-    const signupForm = document.getElementById("signupForm");
 
-    const loginEmail = document.getElementById("loginEmail");
-    const loginPassword = document.getElementById("loginPassword");
+    const loginForm =
+      document.getElementById("loginForm");
 
-    const signupName = document.getElementById("signupName");
-    const signupEmail = document.getElementById("signupEmail");
-    const signupRole = document.getElementById("signupRole");
-    const signupPassword = document.getElementById("signupPassword");
-    const signupConfirm = document.getElementById("signupConfirm");
+    const signupForm =
+      document.getElementById("signupForm");
 
-    const loginButton = document.getElementById("loginButton");
-    const signupButton = document.getElementById("signupButton");
+    const loginButton =
+      document.getElementById("loginButton");
 
-    const loginMessage = document.getElementById("loginMessage");
-    const signupMessage = document.getElementById("signupMessage");
+    const signupButton =
+      document.getElementById("signupButton");
 
-    function showView(view) {
-      loginView.classList.toggle("active", view === "login");
-      signupView.classList.toggle("active", view === "signup");
+    const loginMessage =
+      document.getElementById("loginMessage");
 
-      clearMessage(loginMessage);
-      clearMessage(signupMessage);
+    const signupMessage =
+      document.getElementById("signupMessage");
 
-      if (view === "login") {
-        setTimeout(() => loginEmail.focus(), 50);
-      } else {
-        setTimeout(() => signupName.focus(), 50);
-      }
-    }
+    const showSignup =
+      document.getElementById("showSignup");
 
-    function showMessage(element, text, type = "error") {
-      element.textContent = text;
-      element.className = "message show " + type;
-    }
+    const showLogin =
+      document.getElementById("showLogin");
 
-    function clearMessage(element) {
-      element.textContent = "";
-      element.className = "message";
-    }
 
-    async function readResponse(response) {
-      const text = await response.text();
+    /* =========================
+       SWITCH TO SIGNUP
+       ========================= */
 
-      if (!text) return {};
+    showSignup.addEventListener("click", () => {
 
-      try {
-        return JSON.parse(text);
-      } catch {
-        return {
-          message: text
-        };
-      }
-    }
+      loginForm.classList.add("hidden");
+      signupForm.classList.remove("hidden");
 
-    // -----------------------------
-    // LOGIN
-    // -----------------------------
+      loginMessage.textContent = "";
+      signupMessage.textContent = "";
+
+    });
+
+
+    /* =========================
+       SWITCH TO LOGIN
+       ========================= */
+
+    showLogin.addEventListener("click", () => {
+
+      signupForm.classList.add("hidden");
+      loginForm.classList.remove("hidden");
+
+      loginMessage.textContent = "";
+      signupMessage.textContent = "";
+
+    });
+
+
+    /* =========================
+       LOGIN
+       ========================= */
+
     loginForm.addEventListener("submit", async (event) => {
+
       event.preventDefault();
 
-      const email = loginEmail.value.trim().toLowerCase();
-      const password = loginPassword.value;
+      const email =
+        document.getElementById("loginEmail").value;
 
-      if (!email || !password) {
-        showMessage(
-          loginMessage,
-          "Please enter your email and password."
-        );
-        return;
-      }
+      const password =
+        document.getElementById("loginPassword").value;
 
-      if (!loginForm.checkValidity()) {
-        showMessage(loginMessage, "Please enter a valid email.");
-        return;
-      }
-
-      clearMessage(loginMessage);
       loginButton.disabled = true;
-      loginButton.textContent = "Signing in...";
+      loginButton.textContent = "Logging in...";
+      loginMessage.textContent = "";
 
       try {
-        const response = await fetch(`${API_BASE_URL}/auth/login`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            email,
-            password
-          })
-        });
 
-        const data = await readResponse(response);
+        const response = await fetch(
+          `${API_BASE_URL}/auth/login`,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+              email,
+              password
+            })
+          }
+        );
+
+        const data = await response.json();
 
         if (!response.ok) {
           throw new Error(
-            data.message ||
-            data.error ||
-            "Invalid email or password."
+            data.message || "Login failed"
           );
         }
 
-        if (!data.token) {
-          throw new Error("Login succeeded but no authentication token was returned.");
-        }
 
-        // Persist the authenticated user for the rest of the app.
-        localStorage.setItem("token", data.token);
+        // Save JWT
 
-        if (data.user) {
-          localStorage.setItem("user", JSON.stringify(data.user));
-        }
-
-        // Keep compatibility with any older MediChain code.
-        localStorage.removeItem("medichainUser");
-
-        showMessage(
-          loginMessage,
-          "Login successful. Opening MediChain...",
-          "success"
+        localStorage.setItem(
+          "token",
+          data.token
         );
 
-        setTimeout(() => {
-          window.location.href = "index.html";
-        }, 350);
 
-      } catch (error) {
-        console.error("MediChain login error:", error);
+        // Save user for role permissions
 
-        showMessage(
-          loginMessage,
-          error.message || "Unable to sign in. Please try again."
+        localStorage.setItem(
+          "user",
+          JSON.stringify(data.user)
         );
 
-      } finally {
+
+        // Keep existing compatibility
+
+        localStorage.setItem(
+          "medichainUser",
+          JSON.stringify(data.user)
+        );
+
+
+        loginMessage.textContent =
+          "Login successful!";
+
+
+        window.location.href =
+          "index.html";
+
+      }
+
+      catch (error) {
+
+        console.error(
+          "Login error:",
+          error
+        );
+
+        loginMessage.textContent =
+          error.message;
+
+      }
+
+      finally {
+
         loginButton.disabled = false;
         loginButton.textContent = "Login";
+
       }
+
     });
 
-    // -----------------------------
-    // SIGN UP
-    // -----------------------------
+
+    /* =========================
+       SIGNUP
+       ========================= */
+
     signupForm.addEventListener("submit", async (event) => {
+
       event.preventDefault();
 
-      const name = signupName.value.trim();
-      const email = signupEmail.value.trim().toLowerCase();
-      const role = signupRole.value;
-      const password = signupPassword.value;
-      const confirmPassword = signupConfirm.value;
+      const name =
+        document.getElementById("signupName").value;
 
-      if (!name || !email || !role || !password || !confirmPassword) {
-        showMessage(
-          signupMessage,
-          "Please complete all fields."
-        );
-        return;
-      }
+      const email =
+        document.getElementById("signupEmail").value;
 
-      if (!signupForm.checkValidity()) {
-        showMessage(
-          signupMessage,
-          "Please enter a valid email and a password of at least 6 characters."
-        );
-        return;
-      }
+      const password =
+        document.getElementById("signupPassword").value;
 
-      if (password !== confirmPassword) {
-        showMessage(
-          signupMessage,
-          "Passwords do not match."
-        );
-        return;
-      }
+      const role =
+        document.getElementById("signupRole").value;
 
-      clearMessage(signupMessage);
+
       signupButton.disabled = true;
-      signupButton.textContent = "Creating account...";
+      signupButton.textContent =
+        "Creating account...";
+
+      signupMessage.textContent = "";
+
 
       try {
-        const response = await fetch(`${API_BASE_URL}/auth/register`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            name,
-            email,
-            password,
-            role
-          })
-        });
 
-        const data = await readResponse(response);
+        const response = await fetch(
+          `${API_BASE_URL}/auth/register`,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+              name,
+              email,
+              password,
+              role
+            })
+          }
+        );
+
+
+        const data =
+          await response.json();
+
 
         if (!response.ok) {
+
           throw new Error(
             data.message ||
-            data.error ||
-            "Unable to create account."
+            "Registration failed"
           );
+
         }
 
-        /*
-          IMPORTANT:
-          Registration does NOT automatically create a local login session.
-          The new account is stored in MongoDB by the backend.
-          We return the user to the LOGIN screen.
-        */
+
+        signupMessage.textContent =
+          "Account created successfully!";
+
+
         signupForm.reset();
 
-        loginEmail.value = email;
-        loginPassword.value = "";
 
-        showView("login");
+        setTimeout(() => {
 
-        showMessage(
-          loginMessage,
-          data.message ||
-          "Account created successfully. Please log in.",
-          "success"
-        );
+          signupForm.classList.add("hidden");
 
-        loginPassword.focus();
+          loginForm.classList.remove("hidden");
 
-      } catch (error) {
-        console.error("MediChain signup error:", error);
+          loginMessage.textContent =
+            "Account created. You can now login.";
 
-        showMessage(
-          signupMessage,
-          error.message || "Unable to create account. Please try again."
-        );
+        }, 1000);
 
-      } finally {
-        signupButton.disabled = false;
-        signupButton.textContent = "Create account";
       }
-    });
 
-    // -----------------------------
-    // SWITCH BETWEEN LOGIN/SIGNUP
-    // -----------------------------
-    document.getElementById("showSignup").addEventListener("click", () => {
-      showView("signup");
-    });
+      catch (error) {
 
-    document.getElementById("showLogin").addEventListener("click", () => {
-      showView("login");
-    });
-
-    // -----------------------------
-    // SHOW/HIDE PASSWORD
-    // -----------------------------
-    document.querySelectorAll(".password-toggle").forEach((button) => {
-      button.addEventListener("click", () => {
-        const target = document.getElementById(button.dataset.target);
-
-        if (!target) return;
-
-        const showing = target.type === "text";
-        target.type = showing ? "password" : "text";
-        button.textContent = showing ? "◉" : "○";
-        button.setAttribute(
-          "aria-label",
-          showing ? "Show password" : "Hide password"
+        console.error(
+          "Signup error:",
+          error
         );
-      });
+
+        signupMessage.textContent =
+          error.message;
+
+      }
+
+      finally {
+
+        signupButton.disabled = false;
+
+        signupButton.textContent =
+          "Create Account";
+
+      }
+
     });
 
-    /*
-      If there is already a valid local session, the dashboard should open.
-      We do NOT store passwords or fake accounts in localStorage.
-      Actual accounts live in MongoDB through the backend.
-    */
-    const existingToken = localStorage.getItem("token");
-
-    if (existingToken) {
-      window.location.replace("index.html");
-    } else {
-      showView("login");
-    }
   </script>
+
 </body>
 </html>
