@@ -1,0 +1,3233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediChain — Supply Chain Control Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <button class="brand brand-button" id="brandDashboardBtn" type="button">
+  <div class="brand-mark"><span>+</span></div>
+  <div>
+    <strong>MediChain</strong>
+    <small>Supply Network</small>
+  </div>
+</button>
+
+      <button class="workspace workspace-button" id="workspaceBtn" type="button">
+  <span class="workspace-dot"></span>
+  <div>
+    <b>North Region</b>
+    <small>Operations workspace</small>
+  </div>
+  <span class="chevron">⌄</span>
+</button>
+
+<div class="workspace-menu" id="workspaceMenu">
+  <div class="workspace-menu-title">CURRENT WORKSPACE</div>
+  <strong>North Region</strong>
+  <p>Operations workspace</p>
+
+  <div class="workspace-status">
+    <span class="workspace-dot"></span>
+    Active
+  </div>
+</div>
+
+      <nav class="nav">
+        <div class="nav-label">OVERVIEW</div>
+        <button class="nav-item active" data-page="dashboard"><span>⌂</span>Dashboard</button>
+
+        <div class="nav-label">OPERATIONS</div>
+       <button class="nav-item" data-page="medicines" data-roles="Admin">
+  <span>⚕</span>Medicines
+</button>
+
+<button class="nav-item" data-page="inventory">
+  <span>▣</span>Inventory <em>27</em>
+</button>
+        <button class="nav-item" data-page="orders"><span>▤</span>Orders <em>12</em></button>
+        <button class="nav-item" data-page="shipments"><span>↗</span>Shipments</button>
+        <button class="nav-item" data-page="suppliers" data-roles="Admin"><span>◇</span>Suppliers</button>
+        <button class="nav-item" data-page="facilities" data-roles="Admin,Distributor"><span>▤</span>Facilities</button>
+
+        <div class="nav-label">INSIGHTS</div>
+       <button class="nav-item" data-page="alerts">
+  <span>!</span>Alerts <em class="danger" id="alertsNavBadge">0</em>
+</button>
+        <button class="nav-item" data-page="analytics"><span>◔</span>Analytics</button>
+        <button class="nav-item" data-page="reports"><span>▤</span>Reports</button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <button class="nav-item" data-page="settings"><span>⚙</span>Settings</button>
+       <button class="user-card user-card-button" id="bottomUserCard" type="button">
+  <div class="avatar" id="bottomUserAvatar">--</div>
+  <div>
+    <b id="bottomUserName">User</b>
+    <small id="bottomUserRole">Role</small>
+  </div>
+  <span>•••</span>
+</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="mobile-brand"><div class="brand-mark"><span>+</span></div><b>MediChain</b></div>
+        <div class="breadcrumbs"><span>Operations</span><b>/</b><strong id="breadcrumb">Dashboard</strong></div>
+        <div class="top-actions">
+        <button class="icon-btn" id="globalSearchBtn" title="Search">⌕</button>
+          <button class="icon-btn notification" title="Notifications">♢<i></i></button>
+        <div class="top-user-wrap">
+  <button class="top-user" id="topUserBtn" type="button">
+    <div class="avatar small" id="topUserAvatar">--</div>
+    <span id="topUserName">User</span>
+    <b>⌄</b>
+  </button>
+
+  <div class="top-user-menu" id="topUserMenu">
+    <div class="top-user-menu-header">
+      <div class="avatar" id="menuUserAvatar">--</div>
+      <div>
+        <strong id="menuUserName">User</strong>
+        <small id="menuUserRole">Role</small>
+      </div>
+    </div>
+
+    <button type="button" id="profileMenuBtn">Profile & Settings</button>
+    <button type="button" id="securityMenuBtn">Security</button>
+
+    <div class="top-user-divider"></div>
+
+    <button type="button" id="logoutMenuBtn" class="logout-menu-btn">
+      Logout
+    </button>
+  </div>
+</div>
+        </div>
+      </header>
+
+      <section id="page-dashboard" class="page active-page">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow"><span class="live-dot"></span> LIVE NETWORK STATUS</div>
+      <h1>Good morning, Rahul.</h1>
+      <p>Here's what needs your attention across the supply network today.</p>
+    </div>
+    <button class="primary-btn" id="quickAction">＋ Quick action</button>
+  </div>
+
+  <div class="control-hero">
+    <div class="hero-copy">
+      <div class="eyebrow"><span class="pulse-ring"></span> NETWORK CONTROL CENTER</div>
+      <h2>Supply network is <span>stable</span></h2>
+      <p id="dashboardNetworkSummary">Loading live network data...</p>
+
+      <div class="hero-actions">
+        <button class="primary-btn" data-page-link="alerts">Review critical risks</button>
+        <button class="hero-ghost" data-page-link="shipments">Open live tracking →</button>
+      </div>
+    </div>
+
+    <div class="network-score">
+      <div class="score-ring">
+        <div>
+          <strong id="dashboardNetworkScore">—</strong>
+          <small>/100</small>
+        </div>
+      </div>
+      <span>Network health</span>
+      <small id="dashboardNetworkScoreText">Loading...</small>
+    </div>
+
+    <div class="hero-route">
+      <div class="route-caption">
+        <span>NETWORK FLOW</span>
+        <b>Live</b>
+      </div>
+
+      <div class="flow-line">
+        <span class="flow-node active"></span>
+        <i></i>
+        <span class="flow-node active"></span>
+        <i></i>
+        <span class="flow-node warning"></span>
+        <i></i>
+        <span class="flow-node"></span>
+      </div>
+
+      <div class="flow-labels">
+        <span>Suppliers</span>
+        <span>Warehouses</span>
+        <span>Transit</span>
+        <span>Pharmacies</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIVE METRICS -->
+
+  <div class="stat-grid">
+
+    <article class="stat-card">
+      <div class="stat-top">
+        <span>Inventory units</span>
+        <span class="stat-icon blue">▣</span>
+      </div>
+
+      <strong id="dashboardInventoryUnits">—</strong>
+
+      <div class="stat-foot neutral">
+        <span id="dashboardInventoryDetail">Loading...</span>
+      </div>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-top">
+        <span>Orders in pipeline</span>
+        <span class="stat-icon violet">▤</span>
+      </div>
+
+      <strong id="dashboardOrdersPipeline">—</strong>
+
+      <div class="stat-foot neutral">
+        <span id="dashboardOrdersDetail">Loading...</span>
+      </div>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-top">
+        <span>Active shipments</span>
+        <span class="stat-icon teal">↗</span>
+      </div>
+
+      <strong id="dashboardActiveShipments">—</strong>
+
+      <div class="stat-foot neutral">
+        <span id="dashboardShipmentsDetail">Loading...</span>
+      </div>
+    </article>
+
+    <article class="stat-card alert-card">
+      <div class="stat-top">
+        <span>At-risk items</span>
+        <span class="stat-icon red">!</span>
+      </div>
+
+      <strong id="dashboardRiskCount">—</strong>
+
+      <div class="stat-foot negative">
+        <span id="dashboardRiskDetail">Loading...</span>
+      </div>
+    </article>
+
+  </div>
+
+
+  <!-- ACTION QUEUE + INVENTORY HEALTH -->
+
+  <div class="mission-grid">
+
+    <article class="panel risk-panel">
+
+      <div class="panel-head">
+        <div>
+          <div class="eyebrow">ACTION QUEUE</div>
+          <h2>What needs attention</h2>
+          <p>Prioritized by operational impact</p>
+        </div>
+
+        <button class="ghost-btn" data-page-link="alerts">
+          View all →
+        </button>
+      </div>
+
+      <div class="risk-main">
+        <span class="severity critical-bg">!</span>
+
+        <div>
+          <span class="risk-label" id="dashboardPrimaryRiskLabel">
+            SYSTEM STATUS
+          </span>
+
+          <h3 id="dashboardPrimaryRisk">
+            Loading operational risks...
+          </h3>
+
+          <p id="dashboardPrimaryRiskDescription">
+            Checking current alerts and inventory conditions.
+          </p>
+
+          <div class="risk-recommendation">
+            <b>Recommended response</b>
+            <span id="dashboardRiskRecommendation">
+              Review the Alerts center.
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <button
+        class="risk-button"
+        data-page-link="alerts"
+      >
+        Review risk center
+        <span>→</span>
+      </button>
+
+      <div class="risk-secondary" id="dashboardSecondaryRisks">
+        <div>
+          <span class="severity warning-bg">!</span>
+          <div>
+            <b>Loading...</b>
+            <small>Checking alerts</small>
+          </div>
+        </div>
+
+        <div>
+          <span class="severity info-bg">i</span>
+          <div>
+            <b>Loading...</b>
+            <small>Checking inventory</small>
+          </div>
+        </div>
+      </div>
+
+    </article>
+
+
+    <!-- INVENTORY HEALTH -->
+
+    <article class="panel inventory-health">
+
+      <div class="panel-head">
+
+        <div>
+          <div class="eyebrow">STOCK POSITION</div>
+          <h2>Inventory health</h2>
+          <p id="dashboardInventoryFacilities">
+            Across current facilities
+          </p>
+        </div>
+
+        <button
+          class="ghost-btn"
+          data-page-link="inventory"
+        >
+          Open →
+        </button>
+
+      </div>
+
+      <div class="health-layout">
+
+        <div class="donut-wrap">
+          <div class="donut">
+            <div>
+              <strong id="dashboardHealthyPercent">—</strong>
+              <span>Healthy</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="health-list">
+
+          <div>
+            <span class="legend healthy"></span>
+
+            <div>
+              <b>Healthy stock</b>
+              <small id="dashboardHealthyUnits">—</small>
+            </div>
+
+            <strong id="dashboardHealthyPercentList">—</strong>
+          </div>
+
+          <div>
+            <span class="legend warning"></span>
+
+            <div>
+              <b>Low stock</b>
+              <small id="dashboardLowStockUnits">—</small>
+            </div>
+
+            <strong id="dashboardLowStockPercent">—</strong>
+          </div>
+
+          <div>
+            <span class="legend critical"></span>
+
+            <div>
+              <b>Expired</b>
+              <small id="dashboardExpiredUnits">—</small>
+            </div>
+
+            <strong id="dashboardExpiredPercent">—</strong>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="facility-row">
+
+        <span>Facility distribution</span>
+
+        <div
+          class="facility-bars"
+          id="dashboardFacilityBars"
+        >
+          <i style="width:20%"></i>
+          <i style="width:20%"></i>
+          <i style="width:20%"></i>
+          <i style="width:20%"></i>
+        </div>
+
+      </div>
+
+    </article>
+
+  </div>
+
+
+  <!-- LIVE SHIPMENTS + DEMAND -->
+
+  <div class="bottom-grid">
+
+    <article class="panel shipments-panel">
+
+      <div class="panel-head">
+
+        <div>
+          <div class="eyebrow">TRANSPORT</div>
+          <h2>Live shipments</h2>
+          <p>Currently moving through the network</p>
+        </div>
+
+        <span class="live-pill">
+          <i></i> Live
+        </span>
+
+      </div>
+
+      <div id="dashboardShipmentsList">
+        <div class="shipment">
+          <div class="shipment-line">
+            <span class="route-dot"></span>
+
+            <div>
+              <b>Loading shipments...</b>
+              <small>Fetching live transport data</small>
+            </div>
+
+            <span class="route-progress">—</span>
+          </div>
+
+          <div class="progress">
+            <i style="width:0%"></i>
+          </div>
+
+          <div class="shipment-meta">
+            <span>Temperature data loading</span>
+            <b>ETA —</b>
+          </div>
+        </div>
+      </div>
+
+      <button
+        class="full-ghost"
+        data-page-link="shipments"
+      >
+        Open network tracking
+      </button>
+
+    </article>
+
+
+    <article class="panel demand-panel">
+
+      <div class="panel-head">
+
+        <div>
+          <div class="eyebrow">NETWORK SNAPSHOT</div>
+          <h2>Supply activity</h2>
+          <p>Current operational distribution</p>
+        </div>
+
+        <span class="select-like">
+          Live ⌄
+        </span>
+
+      </div>
+
+      <div class="chart" id="dashboardSupplyChart">
+
+        <div class="y-labels">
+          <span>100%</span>
+          <span>75%</span>
+          <span>50%</span>
+          <span>25%</span>
+          <span>0%</span>
+        </div>
+
+        <div class="chart-area">
+
+          <div class="gridline"></div>
+          <div class="gridline"></div>
+          <div class="gridline"></div>
+          <div class="gridline"></div>
+          <div class="gridline"></div>
+
+          <div
+            id="dashboardActivityBars"
+            style="
+              height:100%;
+              display:flex;
+              align-items:flex-end;
+              justify-content:space-around;
+              gap:12px;
+              padding:0 12px;
+            "
+          >
+          </div>
+
+          <div class="x-labels">
+            <span>Inventory</span>
+            <span>Orders</span>
+            <span>Shipments</span>
+            <span>Suppliers</span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </article>
+
+  </div>
+
+</section>
+
+<section id="page-medicines" class="page">
+
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">MEDICINE MASTER</div>
+      <h1>Medicines</h1>
+      <p>Reference medicines available across the MediChain network.</p>
+    </div>
+
+    <button class="ghost-btn" id="refreshMedicinesBtn">
+      ↻ Refresh
+    </button>
+  </div>
+
+  <div class="stat-grid compact">
+
+    <article class="stat-card">
+      <span>Total medicines</span>
+      <strong id="medicineTotalCount">—</strong>
+      <small>Active reference records</small>
+    </article>
+
+    <article class="stat-card">
+      <span>Essential medicines</span>
+      <strong id="essentialMedicineCount">—</strong>
+      <small>Listed as essential</small>
+    </article>
+
+    <article class="stat-card">
+      <span>Prescription</span>
+      <strong id="prescriptionMedicineCount">—</strong>
+      <small>Prescription required</small>
+    </article>
+
+    <article class="stat-card">
+      <span>Categories</span>
+      <strong id="medicineCategoryCount">—</strong>
+      <small>Medicine categories</small>
+    </article>
+
+  </div>
+
+  <article class="panel table-panel">
+
+    <div class="panel-head">
+      <div>
+        <h2>Medicine catalog</h2>
+        <p>Search and review the medicine master.</p>
+      </div>
+    </div>
+
+    <div class="inventory-toolbar">
+
+      <input
+        type="search"
+        id="medicineSearchInput"
+        placeholder="Search medicine, brand or manufacturer..."
+      >
+
+      <select id="medicineCategoryFilter">
+        <option value="">All categories</option>
+      </select>
+
+      <select id="medicinePrescriptionFilter">
+        <option value="">All medicines</option>
+        <option value="yes">Prescription required</option>
+        <option value="no">No prescription</option>
+      </select>
+
+    </div>
+
+    <div class="table-scroll">
+
+      <table id="medicinesTable">
+
+        <thead>
+          <tr>
+            <th>Medicine</th>
+            <th>Brand</th>
+            <th>Manufacturer</th>
+            <th>Strength</th>
+            <th>Dosage form</th>
+            <th>Category</th>
+            <th>Essential</th>
+            <th>Prescription</th>
+          </tr>
+        </thead>
+
+        <tbody id="medicinesTableBody">
+          <tr>
+            <td colspan="8">Loading medicines...</td>
+          </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </article>
+
+</section>
+
+      <section id="page-inventory" class="page">
+        <div class="page-head">
+          <div><div class="eyebrow">OPERATIONS</div><h1>Inventory</h1><p>Track medicine stock, batches and expiry across facilities.</p></div>
+          <button class="primary-btn" id="addInventoryBtn" data-roles="Admin,Supplier">＋ Add inventory</button>
+        </div>
+
+        <div class="stat-grid compact">
+          <article class="stat-card"><span>Total units</span><strong>12,480</strong><small>Across 8 facilities</small></article>
+          <article class="stat-card"><span>Healthy</span><strong>11,365</strong><small class="positive">91% of stock</small></article>
+          <article class="stat-card"><span>Low stock</span><strong>1,088</strong><small class="negative">8.7% of stock</small></article>
+          <article class="stat-card"><span>Expiring soon</span><strong>14</strong><small>Within 30 days</small></article>
+        </div>
+
+        <article class="panel inventory-control-panel">
+          <div class="inventory-toolbar">
+            <div class="search inventory-search">⌕ <input id="inventorySearch" placeholder="Search medicine, batch or SKU"></div>
+            <select class="filter-select" id="inventoryStatus">
+              <option value="all">All status</option><option value="healthy">Healthy</option><option value="warning">Low stock</option><option value="critical">Critical</option>
+            </select>
+            <select class="filter-select" id="inventoryFacility">
+              <option value="all">All facilities</option><option>Delhi Warehouse</option><option>Mohali Store</option><option>Chandigarh DC</option><option>Jaipur Hub</option>
+            </select>
+            <select class="filter-select" id="inventoryExpiryFilter">
+              <option value="all">All expiry</option><option value="soon">Within 30 days</option><option value="normal">Normal</option>
+            </select>
+          </div>
+          <div class="inventory-toolbar-foot">
+            <span id="inventoryResultCount">5 medicines shown</span>
+            <div class="inventory-legend"><span><i class="legend healthy"></i>Healthy</span><span><i class="legend warning"></i>Low stock</span><span><i class="legend critical"></i>Critical</span></div>
+          </div>
+        </article>
+
+        <article class="panel table-panel inventory-table-panel">
+          <div class="panel-head">
+            <div><h2>Medicine stock</h2><p>Select a row to inspect batch details and stock movement.</p></div>
+            <button class="ghost-btn" id="inventoryExport">Export ↓</button>
+          </div>
+          <div class="table-scroll">
+        
+            <table id="inventoryTable">
+  <thead>
+    <tr>
+      <th>Medicine</th>
+      <th>Batch / SKU</th>
+      <th>Quantity</th>
+      <th>Facility</th>
+      <th>Expiry</th>
+      <th>Status</th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody id="inventoryTableBody">
+    <tr>
+      <td colspan="7" style="text-align:center; padding:30px;">
+        Loading inventory...
+      </td>
+    </tr>
+  </tbody>
+</table>
+            
+          </tbody></table>
+          </div>
+        </article>
+
+        <!-- Stock Movements -->
+        <article class="panel table-panel stock-movements-panel">
+          <div class="panel-head">
+            <div>
+              <h2>Stock movements</h2>
+              <p>Track transfers and update their operational status.</p>
+            </div>
+            <button class="ghost-btn" id="refreshMovementsBtn">↻ Refresh</button>
+          </div>
+
+          <div class="table-scroll">
+            <table id="movementsTable">
+              <thead>
+                <tr>
+                  <th>Medicine</th>
+                  <th>Batch</th>
+                  <th>Route</th>
+                  <th>Quantity</th>
+                  <th>Created</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="movementsTableBody">
+                <tr>
+                  <td colspan="7">Loading stock movements...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section id="page-orders" class="page">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">OPERATIONS</div>
+      <h1>Orders</h1>
+      <p>Manage replenishment and medicine purchase requests.</p>
+    </div>
+    <button class="primary-btn" id="createOrderBtn" data-roles="Admin,Pharmacy">＋ Create order</button>
+  </div>
+
+  <div class="stat-grid compact">
+    <article class="stat-card">
+      <span>Pending</span>
+      <strong id="pendingOrderCount">12</strong>
+      <small>Awaiting approval</small>
+    </article>
+
+    <article class="stat-card">
+      <span>Processing</span>
+      <strong>8</strong>
+      <small>Being fulfilled</small>
+    </article>
+
+    <article class="stat-card">
+      <span>Shipped</span>
+      <strong>24</strong>
+      <small>In transit</small>
+    </article>
+
+    <article class="stat-card">
+      <span>Delivered</span>
+      <strong>183</strong>
+      <small class="positive">This month</small>
+    </article>
+  </div>
+
+  <article class="panel table-panel">
+    <div class="panel-head">
+      <div>
+        <h2>Recent orders</h2>
+        <p>Latest procurement activity</p>
+      </div>
+      <button class="ghost-btn" id="exportOrdersBtn">Export ↓</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Requested by</th>
+          <th>Items</th>
+          <th>Supplier</th>
+          <th>Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody id="ordersTableBody">
+
+        <tr class="order-row"
+    data-order-id="ORD-10482"
+    data-facility="Mohali Store"
+    data-items="14"
+    data-supplier="MedSupply India"
+    data-date="Aug 29"
+    data-status="Pending">
+
+  <td><b>#ORD-10482</b></td>
+  <td>Mohali Store</td>
+  <td>14</td>
+  <td>MedSupply India</td>
+  <td>Aug 29</td>
+  <td><span class="status warning">Pending</span></td>
+</tr>
+
+<tr class="order-row"
+    data-order-id="ORD-10481"
+    data-facility="Chandigarh DC"
+    data-items="28"
+    data-supplier="PharmaLink"
+    data-date="Aug 29"
+    data-status="Processing">
+
+  <td><b>#ORD-10481</b></td>
+  <td>Chandigarh DC</td>
+  <td>28</td>
+  <td>PharmaLink</td>
+  <td>Aug 29</td>
+  <td><span class="status info">Processing</span></td>
+</tr>
+
+<tr class="order-row"
+    data-order-id="ORD-10477"
+    data-facility="Delhi Warehouse"
+    data-items="9"
+    data-supplier="HealthRoute"
+    data-date="Aug 28"
+    data-status="Shipped">
+
+  <td><b>#ORD-10477</b></td>
+  <td>Delhi Warehouse</td>
+  <td>9</td>
+  <td>HealthRoute</td>
+  <td>Aug 28</td>
+  <td><span class="status healthy">Shipped</span></td>
+</tr>
+
+      </tbody>
+    </table>
+  </article>
+</section>
+
+</section>
+
+<!-- Order details drawer -->
+<div class="drawer-backdrop hidden" id="orderDrawerBackdrop"></div>
+
+<aside class="inventory-drawer order-drawer" id="orderDrawer" aria-hidden="true">
+
+  <div class="drawer-head">
+    <div>
+      <div class="eyebrow">ORDER DETAILS</div>
+      <h2 id="orderDrawerId">#ORD-10482</h2>
+      <p id="orderDrawerStatus">Pending</p>
+    </div>
+
+    <button class="modal-close" id="orderDrawerClose">×</button>
+  </div>
+
+  <div class="drawer-status" id="orderDrawerStatusBadge">
+    Pending
+  </div>
+
+  <div class="drawer-grid">
+
+    <div>
+      <span>Requested by</span>
+      <b id="orderDrawerFacility">Mohali Store</b>
+    </div>
+
+    <div>
+      <span>Items</span>
+      <b id="orderDrawerItems">14</b>
+    </div>
+
+    <div>
+      <span>Supplier</span>
+      <b id="orderDrawerSupplier">MedSupply India</b>
+    </div>
+    <div>
+      <span>Order date</span>
+      <b id="orderDrawerDate">Aug 29</b>
+    </div>
+  </div>
+  <div class="drawer-section">
+    <div class="drawer-section-title">
+      <b>Order timeline</b>
+      <span>Current status</span>
+    </div>
+    <div class="movement">
+      <span class="movement-dot in"></span>
+      <div>
+        <b>Order created</b>
+        <small id="orderTimelineDate">Aug 29</small>
+      </div>
+      <strong>✓</strong>
+    </div>
+    <div class="movement">
+      <span class="movement-dot in"></span>
+
+      <div>
+        <b>Supplier review</b>
+        <small>Awaiting confirmation</small>
+      </div>
+
+      <strong>→</strong>
+    </div>
+
+    <div class="movement">
+      <span class="movement-dot out"></span>
+
+      <div>
+        <b>Fulfillment</b>
+        <small>Will begin after approval</small>
+      </div>
+
+      <strong>—</strong>
+    </div>
+
+  </div>
+
+  <div class="drawer-actions">
+
+    <button class="ghost-btn" id="orderDrawerCloseAction">
+  Done
+</button>
+
+<button class="ghost-btn" id="orderCreateShipmentBtn">
+  Create shipment
+</button>
+
+<button class="primary-btn" id="orderApproveBtn">
+  Approve order
+</button>
+
+  </div>
+
+</aside>
+
+<!-- Create Order Modal -->
+<div class="modal hidden" id="createOrderModal">
+
+    <div class="modal-card">
+
+        <button class="modal-close" id="createOrderClose">×</button>
+
+        <div class="eyebrow">OPERATIONS</div>
+
+        <h2>Create order</h2>
+
+        <p class="modal-subtitle">
+            Create a new medicine replenishment request.
+        </p>
+
+        <label class="form-label">
+            Medicine
+            <select id="orderMedicine">
+                <option>Insulin Glargine</option>
+                <option>Amoxicillin 500mg</option>
+                <option>Paracetamol </option>
+                <option>Morphine Sulfate</option>
+                <option>Azithromycin 250mg</option>
+            </select>
+        </label>
+
+        <label class="form-label">
+            Destination facility
+            <select id="orderFacility">
+                <option>Mohali Store</option>
+                <option>Chandigarh DC</option>
+                <option>Delhi Warehouse</option>
+                <option>Jaipur Hub</option>
+            </select>
+        </label>
+
+        <label class="form-label">
+            Supplier
+            <select id="orderSupplier">
+                <option>MedSupply India</option>
+                <option>PharmaLink</option>
+                <option>HealthRoute</option>
+            </select>
+        </label>
+
+        <label class="form-label">
+            Quantity
+            <input
+                id="orderQuantity"
+                type="number"
+                min="1"
+                value="20"
+            >
+        </label>
+
+        <label class="form-label">
+            Priority
+            <select id="orderPriority">
+                <option>Normal</option>
+                <option>High</option>
+                <option>Critical</option>
+            </select>
+        </label>
+
+        <div class="modal-actions">
+
+            <button class="ghost-btn" id="createOrderCancel">
+                Cancel
+            </button>
+
+            <button class="primary-btn" id="confirmCreateOrder">
+                Create order
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<section id="page-shipments" class="page">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">OPERATIONS</div>
+      <h1>Shipments</h1>
+      <p>Monitor active transportation and delivery conditions.</p>
+    </div>
+    <button class="primary-btn" id="newShipmentBtn" data-roles="Admin,Distributor">＋ New shipment</button>
+  </div>
+
+  <div class="shipment-overview">
+    <article class="stat-card">
+      <span>Active shipments</span>
+      <b>27</b>
+      <small>8 arriving today</small>
+    </article>
+
+    <article class="stat-card">
+      <span>In transit</span>
+      <b>19</b>
+      <small>70% of active shipments</small>
+    </article>
+
+    <article class="stat-card">
+      <span>Delayed</span>
+      <b>3</b>
+      <small>Requires attention</small>
+    </article>
+
+    <article class="stat-card">
+      <span>On-time rate</span>
+      <b>94.8%</b>
+      <small>↑ 2.1% this week</small>
+    </article>
+  </div>
+
+  <div class="shipment-cards">
+
+    <article class="route-card shipment-clickable"
+  data-shipment-id="MC-28491"
+  data-status="In transit"
+  data-origin="Delhi Warehouse"
+  data-destination="Mohali Store"
+  data-progress="78"
+  data-eta="2h 18m"
+  data-temperature="4.2°C"
+  data-driver="Rajesh Kumar"
+  data-vehicle="MH-12-TR-4821">
+
+      <div class="route-head">
+        <span class="status healthy">In transit</span>
+        <b>MC-28491</b>
+      </div>
+
+      <h3>Delhi Warehouse <span>→</span> Mohali Store</h3>
+
+      <div class="route-bar">
+        <i style="width:78%"></i>
+      </div>
+
+      <div class="route-info">
+        <span>78% complete</span>
+        <b>ETA 2h 18m</b>
+      </div>
+
+      <div class="temp">
+        ❄ Temperature
+        <b>4.2°C</b>
+        <span>✓ Within range</span>
+      </div>
+
+      <button class="track-btn">View live tracking →</button>
+    </article>
+
+
+    <article class="route-card shipment-clickable"
+  data-shipment-id="MC-28488"
+  data-status="Delayed"
+  data-origin="Jaipur Hub"
+  data-destination="Chandigarh DC"
+  data-progress="46"
+  data-eta="5h 42m"
+  data-temperature="5.1°C"
+  data-driver="Amit Singh"
+  data-vehicle="RJ-14-TR-2848">
+
+      <div class="route-head">
+        <span class="status warning">Delayed</span>
+        <b>MC-28488</b>
+      </div>
+
+      <h3>Jaipur Hub <span>→</span> Chandigarh DC</h3>
+
+      <div class="route-bar">
+        <i style="width:46%"></i>
+      </div>
+
+      <div class="route-info">
+        <span>46% complete</span>
+        <b>ETA 5h 42m</b>
+      </div>
+
+      <div class="temp">
+        ❄ Temperature
+        <b>5.1°C</b>
+        <span>✓ Within range</span>
+      </div>
+
+      <button class="track-btn">View live tracking →</button>
+    </article>
+
+  </div>
+
+  <article class="panel map-placeholder shipment-map">
+    <div class="map-grid"></div>
+
+    <div class="map-route">
+      <span class="map-node start">Delhi</span>
+      <div class="map-line">
+        <i style="width:78%"></i>
+      </div>
+      <span class="map-node end">Mohali</span>
+    </div>
+
+    <div class="map-center">
+      <span>⌖</span>
+      <b>Live network map</b>
+      <small>Shipment locations and routes update in real time</small>
+    </div>
+  </article>
+</section>
+
+<!-- Shipment details drawer -->
+
+<!-- Issue report modal -->
+<div class="modal hidden" id="issueReportModal">
+  <div class="modal-card issue-report-card">
+
+    <button class="modal-close" id="issueReportClose">×</button>
+
+    <div class="issue-report-header">
+      <div class="issue-report-icon">⚠</div>
+      <div>
+        <div class="eyebrow">SHIPMENT ISSUE</div>
+        <h2>Report an issue</h2>
+        <p>Tell the operations team what happened with this shipment.</p>
+      </div>
+    </div>
+
+    <div class="issue-shipment-summary">
+      <span>SHIPMENT</span>
+      <strong id="issueReportShipmentId">—</strong>
+    </div>
+
+    <div class="issue-report-form">
+
+      <label>
+        Issue type
+        <select id="issueReportType">
+          <option value="Temperature">Temperature</option>
+          <option value="Delay">Delay</option>
+          <option value="Damaged package">Damaged package</option>
+          <option value="Incorrect quantity">Incorrect quantity</option>
+          <option value="Route issue">Route issue</option>
+          <option value="Other" selected>Other</option>
+        </select>
+      </label>
+
+      <label>
+        Personal comment
+        <textarea
+          id="issueReportComment"
+          rows="5"
+          maxlength="1000"
+          placeholder="Describe the issue in your own words..."
+        ></textarea>
+        <small>Maximum 1000 characters.</small>
+      </label>
+
+    </div>
+
+    <div class="settings-message hidden" id="issueReportMessage"></div>
+
+    <div class="setting-actions issue-report-actions">
+      <button class="ghost-btn" id="issueReportCancel">
+        Cancel
+      </button>
+
+      <button class="primary-btn" id="submitIssueReport">
+        Submit report
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<div class="drawer-backdrop hidden" id="shipmentDrawerBackdrop"></div>
+
+<aside class="inventory-drawer shipment-drawer"
+       id="shipmentDrawer"
+       aria-hidden="true">
+
+  <div class="drawer-head">
+    <div>
+      <div class="eyebrow">SHIPMENT DETAILS</div>
+      <h2 id="shipmentDrawerId">MC-28491</h2>
+      <p id="shipmentDrawerStatus">In transit</p>
+    </div>
+
+    <button class="modal-close" id="shipmentDrawerClose">×</button>
+  </div>
+
+  <div class="drawer-status" id="shipmentDrawerStatusBadge">
+    In transit
+  </div>
+
+  <div class="drawer-grid">
+
+    <div>
+      <span>Origin</span>
+      <b id="shipmentOrigin">Delhi Warehouse</b>
+    </div>
+
+    <div>
+      <span>Destination</span>
+      <b id="shipmentDestination">Mohali Store</b>
+    </div>
+
+    <div>
+      <span>Progress</span>
+      <b id="shipmentProgress">78%</b>
+    </div>
+
+    <div>
+      <span>ETA</span>
+      <b id="shipmentEta">2h 18m</b>
+    </div>
+
+  </div>
+
+  <div class="drawer-section">
+
+    <div class="drawer-section-title">
+      <b>Route progress</b>
+      <span id="shipmentProgressText">78% complete</span>
+    </div>
+
+    <div class="route-bar large">
+      <i id="shipmentProgressBar" style="width:78%"></i>
+    </div>
+
+    <div class="shipment-route-labels">
+      <span id="shipmentRouteOrigin">Delhi Warehouse</span>
+      <span id="shipmentRouteDestination">Mohali Store</span>
+    </div>
+
+  </div>
+
+  <div class="drawer-section">
+
+    <div class="drawer-section-title">
+      <b>Transport conditions</b>
+      <span>Live</span>
+    </div>
+
+    <div class="movement">
+      <span class="movement-dot in"></span>
+      <div>
+        <b>Temperature</b>
+        <small>Cold-chain range</small>
+      </div>
+      <strong id="shipmentTemperature">4.2°C</strong>
+    </div>
+
+    <div class="movement">
+      <span class="movement-dot in"></span>
+      <div>
+        <b>Driver</b>
+        <small>Assigned operator</small>
+      </div>
+      <strong id="shipmentDriver">Rajesh Kumar</strong>
+    </div>
+
+    <div class="movement">
+      <span class="movement-dot in"></span>
+      <div>
+        <b>Vehicle</b>
+        <small>Transport ID</small>
+      </div>
+      <strong id="shipmentVehicle">MH-12-TR-4821</strong>
+    </div>
+
+  </div>
+
+  <div style="margin-top:20px;">
+    <label
+      for="shipmentStatusSelect"
+      style="display:block; margin-bottom:8px; font-size:12px; font-weight:600;"
+    >
+      Update status
+    </label>
+
+    <div style="display:flex; gap:8px;">
+      <select
+        id="shipmentStatusSelect"
+        style="flex:1; padding:10px; border:1px solid #d9e1ea; border-radius:8px;"
+      >
+        <option value="Pending">Pending</option>
+        <option value="In transit">In transit</option>
+        <option value="Delayed">Delayed</option>
+        <option value="Delivered">Delivered</option>
+        <option value="Cancelled">Cancelled</option>
+      </select>
+
+      <button
+        class="primary-btn"
+        id="updateShipmentStatusBtn"
+      >
+        Update
+      </button>
+    </div>
+
+    <div
+      style="margin-top:10px;"
+    >
+      <label
+        for="shipmentProgressInput"
+        style="display:block; margin-bottom:6px; font-size:12px; font-weight:600;"
+      >
+        Progress (%)
+      </label>
+
+      <input
+        id="shipmentProgressInput"
+        type="number"
+        min="0"
+        max="100"
+        step="1"
+        placeholder="0"
+        style="width:100%; box-sizing:border-box; padding:10px; border:1px solid #d9e1ea; border-radius:8px;"
+      >
+    </div>
+  </div>
+
+  <div class="drawer-actions">
+    <button class="ghost-btn" id="shipmentAlertBtn">
+      ⚠ Report issue
+    </button>
+
+    <button class="primary-btn" id="shipmentDrawerDone">
+      Done
+    </button>
+  </div>
+
+</aside>
+
+
+      
+
+
+
+      
+<!-- Create Shipment Modal -->
+<div class="modal hidden" id="shipmentModal">
+
+  <div class="modal-card">
+
+    <div class="modal-head">
+      <div>
+        <div class="eyebrow">LOGISTICS</div>
+        <h2>Create shipment</h2>
+        <p>Register a new medicine shipment.</p>
+      </div>
+
+      <button class="modal-close" id="shipmentModalClose">
+        ×
+      </button>
+    </div>
+
+    <div class="form-grid" id="shipmentCreateForm">
+
+      <div class="form-group">
+        <label>Origin</label>
+        <input
+          id="shipmentOriginInput"
+          type="text"
+          placeholder="Delhi Warehouse"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Destination</label>
+        <input
+          id="shipmentDestinationInput"
+          type="text"
+          placeholder="Mohali Store"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Quantity</label>
+        <input
+          id="shipmentQuantity"
+          type="number"
+          min="1"
+          placeholder="100"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>ETA</label>
+        <input
+          id="shipmentEtaInput"
+          type="text"
+          placeholder="2h 30m"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Temperature °C</label>
+        <input
+          id="shipmentTemperatureInput"
+          type="number"
+          step="0.1"
+          placeholder="4.2"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Driver</label>
+        <input
+          id="shipmentDriverInput"
+          type="text"
+          placeholder="Rajesh Kumar"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Vehicle</label>
+        <input
+          id="shipmentVehicleInput"
+          type="text"
+          placeholder="MH-12-TR-4821"
+        >
+      </div>
+
+    </div>
+
+    <div class="drawer-actions">
+
+      <button
+        class="ghost-btn"
+        id="shipmentCancel"
+      >
+        Cancel
+      </button>
+
+      <button
+        class="primary-btn"
+        id="confirmShipment"
+      >
+        Create shipment
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<section id="page-suppliers" class="page">
+
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">NETWORK</div>
+      <h1>Suppliers</h1>
+      <p>Manage trusted suppliers and monitor fulfillment performance.</p>
+    </div>
+
+    <button class="primary-btn" id="addSupplierBtn">
+      ＋ Add supplier
+    </button>
+  </div>
+
+  <div class="supplier-grid" id="supplierGrid">
+    <div class="panel">
+      <p>Loading suppliers...</p>
+    </div>
+  </div>
+
+</section>
+
+<!-- Create Supplier Modal -->
+<div class="modal hidden" id="supplierModal">
+
+  <div class="modal-card">
+
+    <div class="modal-head">
+      <div>
+        <div class="eyebrow">NETWORK</div>
+        <h2>Add supplier</h2>
+        <p>Register a trusted medicine supplier.</p>
+      </div>
+
+      <button class="modal-close" id="supplierModalClose">
+        ×
+      </button>
+    </div>
+
+    <div class="form-grid">
+
+      <label>
+        Supplier name
+        <input
+          type="text"
+          id="supplierName"
+          placeholder="MedSupply India"
+        >
+      </label>
+
+      <label>
+        Supplier code
+        <input
+          type="text"
+          id="supplierCode"
+          placeholder="MSI001"
+        >
+      </label>
+
+      <label>
+        Category
+        <input
+          type="text"
+          id="supplierCategory"
+          placeholder="General medicines"
+        >
+      </label>
+
+    </div>
+
+    <div class="modal-actions">
+
+      <button class="ghost-btn" id="supplierCancel">
+        Cancel
+      </button>
+
+      <button class="primary-btn" id="confirmSupplier">
+        Add supplier
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<section id="page-facilities" class="page">
+
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">OPERATIONS</div>
+      <h1>Facilities</h1>
+      <p>Monitor warehouse capacity, stock levels and operating conditions.</p>
+    </div>
+
+    <button class="primary-btn" id="addFacilityBtn">
+      ＋ Add facility
+    </button>
+  </div>
+
+
+  <!-- FACILITY SUMMARY -->
+
+  <div class="stat-grid compact">
+
+    <article class="stat-card">
+      <span>Total facilities</span>
+      <strong id="facilityTotalCount">—</strong>
+      <small>Across the network</small>
+    </article>
+
+    <article class="stat-card">
+      <span>Operational</span>
+      <strong id="facilityOperationalCount">—</strong>
+      <small class="positive">Currently active</small>
+    </article>
+
+    <article class="stat-card">
+      <span>Network capacity</span>
+      <strong id="facilityCapacity">—</strong>
+      <small>Total storage capacity</small>
+    </article>
+
+    <article class="stat-card">
+      <span>Current stock</span>
+      <strong id="facilityStock">—</strong>
+      <small>Across all facilities</small>
+    </article>
+
+  </div>
+
+
+  <!-- FACILITY TABLE -->
+
+  <article class="panel table-panel">
+
+    <div class="panel-head">
+
+      <div>
+        <h2>Facility network</h2>
+        <p>Live warehouse status and capacity.</p>
+      </div>
+
+      <button class="ghost-btn" id="refreshFacilitiesBtn">
+        ↻ Refresh
+      </button>
+
+    </div>
+
+    <div class="table-scroll">
+
+      <table id="facilitiesTable">
+
+        <thead>
+          <tr>
+            <th>Facility</th>
+            <th>Code</th>
+            <th>Location</th>
+            <th>Capacity</th>
+            <th>Current stock</th>
+            <th>Utilization</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+
+        <tbody id="facilitiesTableBody">
+
+          <tr>
+            <td colspan="7">
+              Loading facilities...
+            </td>
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </article>
+
+</section>
+
+
+     <section id="page-alerts" class="page">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">RISK CENTER</div>
+      <h1>Alerts</h1>
+      <p>Prioritized disruptions, stock risks and compliance events.</p>
+    </div>
+
+   <div class="page-actions">
+  <button class="ghost-btn" id="generateAlertsBtn">
+    ↻ Generate alerts
+  </button>
+
+  <button class="ghost-btn" id="markAllAlertsReviewed">
+    Mark all reviewed
+  </button>
+</div>
+  </div>
+
+  <div class="alert-summary">
+    <div>
+      <span class="severity critical-bg">!</span>
+      <b id="criticalAlertCount">0</b>
+      <small>Critical</small>
+    </div>
+
+    <div>
+      <span class="severity warning-bg">!</span>
+      <b id="warningAlertCount">0</b>
+      <small>Warnings</small>
+    </div>
+
+    <div>
+      <span class="severity info-bg">i</span>
+      <b id="infoAlertCount">0</b>
+      <small>For review</small>
+    </div>
+  </div>
+
+  <article class="panel" id="alertsList">
+    <p>Loading alerts...</p>
+  </article>
+</section>
+
+      
+<section id="page-reports" class="page">
+
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">OPERATIONS / REPORTS</div>
+      <h1>Issue Reports</h1>
+      <p>Review shipment issues reported by your MediChain network.</p>
+    </div>
+
+    <button class="ghost-btn" id="refreshReportsBtn">
+      ↻ Refresh
+    </button>
+  </div>
+
+  <div class="reports-summary">
+
+    <div class="report-stat">
+      <span>OPEN</span>
+      <strong id="openReportsCount">0</strong>
+      <small>Issues requiring attention</small>
+    </div>
+
+    <div class="report-stat">
+      <span>IN REVIEW</span>
+      <strong id="reviewReportsCount">0</strong>
+      <small>Currently being investigated</small>
+    </div>
+
+    <div class="report-stat">
+      <span>RESOLVED</span>
+      <strong id="resolvedReportsCount">0</strong>
+      <small>Issues already resolved</small>
+    </div>
+
+  </div>
+
+  <div class="panel reports-panel">
+
+    <div class="reports-panel-header">
+      <div>
+        <h2>Reported issues</h2>
+        <p>Personal comments submitted from shipment tracking.</p>
+      </div>
+    </div>
+
+    <div id="reportsList" class="reports-list">
+
+      <div class="reports-empty">
+        <div>✓</div>
+        <strong>No issue reports yet</strong>
+        <p>Reported shipment issues will appear here.</p>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<section id="page-analytics" class="page">
+        <div class="page-head">
+          <div>
+            <div class="eyebrow">INSIGHTS</div>
+            <h1>Analytics</h1>
+            <p>Understand demand, stock efficiency and network performance.</p>
+          </div>
+          <span class="select-like">Live data</span>
+        </div>
+
+        <div class="analytics-metrics">
+          <article class="panel">
+            <span>Order fulfillment</span>
+            <strong id="analyticsOrderFulfillment">0%</strong>
+            <small>Completed orders</small>
+          </article>
+
+          <article class="panel">
+            <span>On-time delivery</span>
+            <strong id="analyticsOnTimeDelivery">0%</strong>
+            <small>Delivered vs delayed</small>
+          </article>
+
+          <article class="panel">
+            <span>Stock health</span>
+            <strong id="analyticsStockHealth">0%</strong>
+            <small>Available inventory</small>
+          </article>
+
+          <article class="panel">
+            <span>Expiry prevention</span>
+            <strong id="analyticsExpiryPrevention">0%</strong>
+            <small>Non-expired medicines</small>
+          </article>
+        </div>
+
+        <div class="analytics-grid">
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Demand vs supply</h2>
+                <p>Units across the last four weeks.</p>
+              </div>
+            </div>
+
+            <div class="analytics-chart" id="analyticsTrendChart">
+              <p>Loading analytics...</p>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Network performance</h2>
+                <p>Current operating metrics.</p>
+              </div>
+            </div>
+
+            <div class="analytics-detail">
+              <div>
+                <span>Total inventory</span>
+                <b id="analyticsInventory">0</b>
+              </div>
+
+              <div>
+                <span>Medicine records</span>
+                <b id="analyticsMedicines">0</b>
+              </div>
+
+              <div>
+                <span>Suppliers</span>
+                <b id="analyticsSuppliers">0</b>
+              </div>
+
+              <div>
+                <span>Active suppliers</span>
+                <b id="analyticsActiveSuppliers">0</b>
+              </div>
+
+              <div>
+                <span>Total shipments</span>
+                <b id="analyticsShipments">0</b>
+              </div>
+
+              <div>
+                <span>Expired medicines</span>
+                <b id="analyticsExpired">0</b>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="page-settings" class="page">
+
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">ACCOUNT</div>
+      <h1>Settings</h1>
+      <p>Manage your profile, workspace and notifications.</p>
+    </div>
+  </div>
+
+  <div class="settings-layout">
+
+    <div class="settings-nav">
+
+      <button
+        class="selected"
+        data-settings-tab="profile"
+      >
+        Profile
+      </button>
+
+      <button
+        data-settings-tab="notifications"
+      >
+        Notifications
+      </button>
+
+      <button
+        data-settings-tab="workspace"
+      >
+        Workspace
+      </button>
+
+      <button
+        data-settings-tab="security"
+      >
+        Security
+      </button>
+
+    </div>
+
+
+    <!-- PROFILE -->
+<!-- PROFILE -->
+
+<article
+  class="panel settings-content settings-panel active profile-settings-panel"
+  data-settings-panel="profile"
+>
+
+  <div class="profile-hero">
+
+    <div class="profile-avatar" id="settingsAvatar">
+      P
+    </div>
+
+    <div class="profile-hero-info">
+      <div class="profile-name-row">
+        <h2 id="profileDisplayName">Pratham</h2>
+        <span class="profile-status">
+          <i></i> Active
+        </span>
+      </div>
+
+      <p id="profileDisplayEmail">
+        Your MediChain account
+      </p>
+
+      <span class="profile-role" id="profileDisplayRole">
+        Administrator
+      </span>
+    </div>
+
+  </div>
+
+
+  <div class="settings-section-heading">
+    <span>ACCOUNT INFORMATION</span>
+    <p>Manage the information associated with your MediChain account.</p>
+  </div>
+
+
+  <div class="profile-form-grid">
+
+    <label>
+      Full name
+      <input
+        type="text"
+        id="settingsName"
+        placeholder="Your name"
+      >
+    </label>
+
+    <label>
+      Email address
+      <input
+        type="email"
+        id="settingsEmail"
+        placeholder="you@example.com"
+      >
+    </label>
+
+    <label>
+      Role
+      <input
+        type="text"
+        id="settingsRole"
+        disabled
+      >
+    </label>
+
+    <div class="profile-info-card">
+      <span>ACCOUNT STATUS</span>
+      <strong><i></i> Active</strong>
+      <small>Your account is currently enabled.</small>
+    </div>
+
+  </div>
+
+
+  <div
+    class="settings-message hidden"
+    id="profileMessage"
+  ></div>
+
+
+  <div class="setting-actions profile-actions">
+
+    <div>
+      <strong>Profile changes</strong>
+      <small>Updates are saved to your MediChain account.</small>
+    </div>
+
+    <button
+      class="primary-btn"
+      id="saveProfileBtn"
+    >
+      Save changes
+    </button>
+
+  </div>
+
+</article>
+
+
+    <!-- NOTIFICATIONS -->
+
+    <article
+      class="panel settings-content settings-panel notifications-settings-panel"
+      data-settings-panel="notifications"
+    >
+
+      <div class="notifications-header">
+
+        <div class="notifications-icon">♢</div>
+
+        <div>
+          <h2>Notifications</h2>
+          <p>
+            Control which operational events reach your MediChain account.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="notification-summary">
+
+        <div class="notification-summary-icon">✓</div>
+
+        <div>
+          <strong>Notification preferences</strong>
+          <p>Choose the alerts that matter most to your operations.</p>
+        </div>
+
+        <span id="notificationStatus">Configured</span>
+
+      </div>
+
+
+      <div class="notification-section-heading">
+        <span>OPERATIONAL ALERTS</span>
+        <h3>What would you like to be notified about?</h3>
+        <p>
+          You can change these preferences at any time.
+        </p>
+      </div>
+
+
+      <div class="notification-options">
+
+        <label class="notification-card">
+          <div class="notification-card-icon stock-icon">▣</div>
+
+          <div class="notification-card-content">
+            <b>Low-stock alerts</b>
+            <small>
+              Get notified when inventory reaches critical or low levels.
+            </small>
+          </div>
+
+          <div class="notification-control">
+            <input
+              type="checkbox"
+              id="notifyLowStock"
+            >
+            <span class="notification-switch"></span>
+          </div>
+        </label>
+
+
+        <label class="notification-card">
+          <div class="notification-card-icon expiry-icon">◷</div>
+
+          <div class="notification-card-content">
+            <b>Expiry alerts</b>
+            <small>
+              Receive warnings when medicines are approaching their expiry date.
+            </small>
+          </div>
+
+          <div class="notification-control">
+            <input
+              type="checkbox"
+              id="notifyExpiry"
+            >
+            <span class="notification-switch"></span>
+          </div>
+        </label>
+
+
+        <label class="notification-card">
+          <div class="notification-card-icon order-icon">≡</div>
+
+          <div class="notification-card-content">
+            <b>Order updates</b>
+            <small>
+              Stay informed when order status or processing stages change.
+            </small>
+          </div>
+
+          <div class="notification-control">
+            <input
+              type="checkbox"
+              id="notifyOrders"
+            >
+            <span class="notification-switch"></span>
+          </div>
+        </label>
+
+
+        <label class="notification-card">
+          <div class="notification-card-icon shipment-icon">↗</div>
+
+          <div class="notification-card-content">
+            <b>Shipment updates</b>
+            <small>
+              Get updates about shipment progress, delivery and delays.
+            </small>
+          </div>
+
+          <div class="notification-control">
+            <input
+              type="checkbox"
+              id="notifyShipments"
+            >
+            <span class="notification-switch"></span>
+          </div>
+        </label>
+
+      </div>
+
+
+      <div
+        class="settings-message hidden"
+        id="notificationMessage"
+      ></div>
+
+
+      <div class="setting-actions notification-actions">
+
+        <div>
+          <strong>Notification preferences</strong>
+          <small>Your choices are saved to your MediChain account.</small>
+        </div>
+
+        <button
+          class="primary-btn"
+          id="saveNotificationsBtn"
+        >
+          Save preferences
+        </button>
+
+      </div>
+
+    </article>
+
+
+    <!-- WORKSPACE -->
+
+    <article
+      class="panel settings-content settings-panel workspace-settings-panel"
+      data-settings-panel="workspace"
+    >
+
+      <div class="workspace-settings-header">
+
+        <div class="workspace-settings-icon">⌂</div>
+
+        <div>
+          <div class="workspace-title-row">
+            <h2>Workspace</h2>
+
+            <span class="workspace-active-badge">
+              <i></i> Active
+            </span>
+          </div>
+
+          <p>
+            Manage the operating workspace connected to your MediChain network.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="workspace-identity-card">
+
+        <div class="workspace-large-icon">
+          N
+        </div>
+
+        <div class="workspace-identity-info">
+          <span>OPERATIONS WORKSPACE</span>
+          <h3 id="workspaceDisplayName">North Region</h3>
+          <p id="workspaceDisplayRegion">Regional operations network</p>
+        </div>
+
+        <div class="workspace-connected">
+          <i></i>
+          Connected
+        </div>
+
+      </div>
+
+
+      <div class="workspace-section-heading">
+        <span>WORKSPACE INFORMATION</span>
+        <h3>Operating configuration</h3>
+        <p>
+          These details identify your current MediChain operating environment.
+        </p>
+      </div>
+
+
+      <div class="workspace-form-grid">
+
+        <label>
+          Workspace name
+          <input
+            type="text"
+            id="workspaceName"
+            placeholder="Workspace name"
+          >
+        </label>
+
+        <label>
+          Region
+          <input
+            type="text"
+            id="workspaceRegion"
+            placeholder="Region"
+          >
+        </label>
+
+      </div>
+
+
+      <div class="workspace-network-grid">
+
+        <div class="workspace-network-card">
+          <div class="workspace-network-icon">▣</div>
+          <div>
+            <span>NETWORK</span>
+            <strong>MediChain Supply Network</strong>
+            <small>Connected to operational facilities</small>
+          </div>
+        </div>
+
+        <div class="workspace-network-card">
+          <div class="workspace-network-icon">●</div>
+          <div>
+            <span>STATUS</span>
+            <strong>Operational</strong>
+            <small>Workspace is available</small>
+          </div>
+        </div>
+
+      </div>
+
+
+      <div
+        class="settings-message hidden"
+        id="workspaceMessage"
+      ></div>
+
+
+      <div class="setting-actions workspace-actions">
+
+        <div>
+          <strong>Workspace configuration</strong>
+          <small>
+            Changes apply to your MediChain workspace.
+          </small>
+        </div>
+
+        <button
+          class="primary-btn"
+          id="saveWorkspaceBtn"
+        >
+          Save workspace
+        </button>
+
+      </div>
+
+    </article>
+
+
+    <!-- SECURITY -->
+
+    <article
+      class="panel settings-content settings-panel security-settings-panel"
+      data-settings-panel="security"
+    >
+
+      <div class="security-header">
+        <div class="security-icon">🔐</div>
+
+        <div>
+          <div class="security-title-row">
+            <h2>Security</h2>
+            <span class="security-protected">
+              <i></i> Protected
+            </span>
+          </div>
+
+          <p>
+            Keep your MediChain account secure and manage your password.
+          </p>
+        </div>
+      </div>
+
+
+      <div class="security-status-card">
+
+        <div class="security-status-icon">✓</div>
+
+        <div>
+          <strong>Your account is secure</strong>
+          <p>
+            Your account is protected by authenticated access.
+          </p>
+        </div>
+
+        <span class="security-status-label">
+          Active
+        </span>
+
+      </div>
+
+
+      <div class="security-section-heading">
+        <span>PASSWORD</span>
+        <h3>Change your password</h3>
+        <p>
+          Use a strong password that you don't use anywhere else.
+        </p>
+      </div>
+
+
+      <div class="security-password-grid">
+
+        <label>
+          Current password
+          <input
+            type="password"
+            id="currentPassword"
+            autocomplete="current-password"
+            placeholder="Enter current password"
+          >
+        </label>
+
+        <div></div>
+
+        <label>
+          New password
+          <input
+            type="password"
+            id="newPassword"
+            autocomplete="new-password"
+            placeholder="Enter new password"
+          >
+        </label>
+
+        <label>
+          Confirm new password
+          <input
+            type="password"
+            id="confirmPassword"
+            autocomplete="new-password"
+            placeholder="Confirm new password"
+          >
+        </label>
+
+      </div>
+
+
+      <div class="password-tips">
+
+        <strong>Password tips</strong>
+
+        <div>
+          <span>✓</span>
+          Use at least 8 characters
+        </div>
+
+        <div>
+          <span>✓</span>
+          Mix uppercase, lowercase and numbers
+        </div>
+
+        <div>
+          <span>✓</span>
+          Avoid using easily guessed information
+        </div>
+
+      </div>
+
+
+      <div
+        class="settings-message hidden"
+        id="securityMessage"
+      ></div>
+
+
+      <div class="setting-actions security-actions">
+
+        <div>
+          <strong>Password & session</strong>
+          <small>
+            Changing your password helps protect your account.
+          </small>
+        </div>
+
+        <div class="security-action-buttons">
+
+          <button
+            class="ghost-btn"
+            id="logoutBtn"
+          >
+            Log out
+          </button>
+
+          <button
+            class="primary-btn"
+            id="changePasswordBtn"
+          >
+            Change password
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="session-card">
+
+        <div class="session-device">
+          <div class="session-device-icon">▣</div>
+
+          <div>
+            <strong>Current session</strong>
+            <small>This browser · Active now</small>
+          </div>
+        </div>
+
+        <span class="session-active">
+          ● Active
+        </span>
+
+      </div>
+
+    </article>
+
+  </div>
+
+</section>
+
+
+  <!-- GLOBAL SEARCH MODAL -->
+<div class="modal hidden" id="globalSearchModal">
+  <div class="modal-card search-modal-card">
+    <button class="modal-close" id="globalSearchClose">×</button>
+
+    <div class="eyebrow">SEARCH</div>
+    <h2>Search MediChain</h2>
+    <p>Find medicines, orders and warehouses across the network.</p>
+
+    <div class="search-modal-input">
+      <span>⌕</span>
+      <input
+        type="text"
+        id="globalSearchInput"
+        placeholder="Search medicine, order or warehouse..."
+        autocomplete="off"
+      >
+    </div>
+
+    <div id="globalSearchResults" class="search-results">
+      <div class="search-empty">
+        Start typing to search MediChain.
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <div class="drawer-backdrop hidden" id="inventoryDrawerBackdrop"></div>
+  <aside class="inventory-drawer" id="inventoryDrawer" aria-hidden="true">
+    <div class="drawer-head">
+      <div><div class="eyebrow">BATCH DETAILS</div><h2 id="drawerMedicine">Medicine</h2><p id="drawerCategory">Category</p></div>
+      <button class="modal-close drawer-close" id="drawerClose">×</button>
+    </div>
+    <div class="drawer-status" id="drawerStatus"></div>
+    <div class="drawer-grid">
+      <div><span>Batch / SKU</span><b id="drawerBatch">—</b></div>
+      <div><span>Available</span><b id="drawerQuantity">—</b></div>
+      <div><span>Facility</span><b id="drawerFacility">—</b></div>
+      <div><span>Expiry</span><b id="drawerExpiry">—</b></div>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-title"><b>Stock movement</b><span>Last 7 days</span></div>
+      <div class="movement"><span class="movement-dot in"></span><div><b>Received from supplier</b><small>Aug 27 · +80 units</small></div><strong>+80</strong></div>
+      <div class="movement"><span class="movement-dot out"></span><div><b>Issued to pharmacy</b><small>Aug 28 · -24 units</small></div><strong>-24</strong></div>
+      <div class="movement"><span class="movement-dot out"></span><div><b>Order fulfillment</b><small>Aug 29 · -16 units</small></div><strong>-16</strong></div>
+    </div>
+    <div class="qr-card"><div class="fake-qr" id="drawerQr">▦</div><div><b>Traceable inventory ID</b><small id="drawerQrText">MC-—</small><button class="text-btn" id="generateQrBtn">Generate QR</button></div></div>
+    <div class="drawer-actions">
+  <button class="ghost-btn" id="drawerTransferBtn" data-roles="Admin,Distributor">Transfer stock</button>
+  <button class="ghost-btn" id="drawerEditBtn">Edit</button>
+  <button class="ghost-btn" id="drawerDeleteBtn">Delete</button>
+  <button class="primary-btn" id="drawerCloseAction">Done</button>
+</div>
+  </aside>
+
+  <!-- ADD INVENTORY MODAL -->
+<div class="modal hidden" id="addInventoryModal">
+  <div class="modal-card">
+    <button class="modal-close" id="addInventoryClose">×</button>
+
+    <div class="eyebrow">INVENTORY</div>
+    <h2>Add Inventory</h2>
+    <p>Add a new medicine batch to the supply network.</p>
+
+    <form id="addInventoryForm">
+
+      <label>
+        Medicine name
+        <input
+          type="text"
+          id="inventoryName"
+          placeholder="e.g. Insulin Glargine"
+          readonly
+          required
+        >
+      </label>
+
+      <label>
+        Batch / SKU
+        <input
+          type="text"
+          id="inventoryBatch"
+          placeholder="e.g. INS-24031"
+          required
+        >
+      </label>
+
+      <label>
+        Manufacturer
+        <input
+          type="text"
+          id="inventoryManufacturer"
+          placeholder="e.g. Novo Nordisk"
+          required
+          readonly
+        >
+      </label>
+
+      <label>
+        Quantity
+        <input
+          type="number"
+          id="inventoryQuantity"
+          min="0"
+          placeholder="e.g. 240"
+          required
+        >
+      </label>
+
+      <label>
+        Reorder level
+        <input
+          type="number"
+          id="inventoryReorderLevel"
+          min="0"
+          value="10"
+          required
+        >
+      </label>
+
+      <label>
+        Expiry date
+        <input
+          type="date"
+          id="inventoryExpiry"
+          required
+        >
+      </label>
+
+      <label>
+        Facility
+       <select id="inventoryLocation" required>
+  <option value="">Loading facilities...</option>
+</select>
+      </label>
+
+      <label>
+        Status
+        <select id="inventoryStatus">
+          <option value="Available">Available</option>
+          <option value="Low Stock">Low Stock</option>
+          <option value="Out of Stock">Out of Stock</option>
+          <option value="Expired">Expired</option>
+        </select>
+      </label>
+
+      <div class="modal-actions">
+        <button type="button" class="ghost-btn" id="addInventoryCancel">
+          Cancel
+        </button>
+
+        <button type="submit" class="primary-btn">
+          Add inventory
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+  <div class="modal hidden" id="transferModal">
+    <div class="modal-card transfer-card">
+      <button class="modal-close" id="transferClose">×</button>
+      <div class="eyebrow">STOCK REDISTRIBUTION</div>
+      <h2>Transfer stock</h2>
+      <p class="modal-subtitle" id="transferMedicine">Select a medicine from inventory.</p>
+      <label class="form-label">Destination facility
+        <select id="transferDestination">
+  <option value="">Loading warehouses...</option>
+</select>
+      </label>
+      <label class="form-label">Units to transfer
+        <input id="transferUnits" type="number" min="1" value="20">
+      </label>
+      <div class="transfer-note">The transfer will be added to the operational action queue for approval.</div>
+      <div class="modal-actions"><button class="ghost-btn" id="transferCancel">Cancel</button><button class="primary-btn" id="confirmTransfer">Create transfer plan</button></div>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="orderModal">
+
+  <div class="modal-card">
+
+    <button class="modal-close" id="orderModalClose">×</button>
+
+    <div class="eyebrow">PROCUREMENT</div>
+
+    <h2>Create order</h2>
+
+    <p class="modal-subtitle">
+      Create a medicine replenishment request.
+    </p>
+
+    <label class="form-label">
+      Medicine
+      <select id="orderMedicine">
+        <option>Insulin Glargine</option>
+        <option>Paracetamol</option>
+        <option>Azithromycin 250mg</option>
+        <option>Morphine Sulfate</option>
+      </select>
+    </label>
+
+    <label class="form-label">
+      Quantity
+      <input id="orderQuantity" type="number" min="1" value="50">
+    </label>
+
+    <label class="form-label">
+      Supplier
+      <select id="orderSupplier">
+        <option>MedSupply India</option>
+        <option>PharmaLink</option>
+        <option>HealthRoute</option>
+      </select>
+    </label>
+
+    <label class="form-label">
+      Destination facility
+      <select id="orderFacility">
+        <option>Mohali Store</option>
+        <option>Chandigarh DC</option>
+        <option>Delhi Warehouse</option>
+        <option>Jaipur Hub</option>
+      </select>
+    </label>
+
+    <div class="modal-actions">
+      <button class="ghost-btn" id="orderCancel">Cancel</button>
+      <button class="primary-btn" id="confirmOrder">
+        Create order
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+ <div class="modal hidden" id="quickModal">
+
+  <div class="modal-card">
+
+    <button class="modal-close" id="quickModalClose">×</button>
+
+    <div class="eyebrow">QUICK ACTION</div>
+
+    <h2>What do you want to do?</h2>
+
+    <button class="action-choice" id="quickAddInventory">
+      <span>＋</span>
+      <div>
+        <b>Add inventory</b>
+        <small>Record new medicine stock</small>
+      </div>
+    </button>
+
+    <button class="action-choice" id="quickCreateShipment">
+      <span>↗</span>
+      <div>
+        <b>Create shipment</b>
+        <small>Start a new delivery</small>
+      </div>
+    </button>
+
+    <button class="action-choice" id="quickReviewAlerts">
+      <span>!</span>
+      <div>
+        <b>Review alerts</b>
+        <small>See critical network issues</small>
+      </div>
+    </button>
+
+  </div>
+
+</div>
+
+<!-- Authentication Overlay -->
+<div id="authOverlay" class="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="auth-logo">M</div>
+      <div>
+        <h1>MediChain</h1>
+        <p>Pharmaceutical Supply Chain</p>
+      </div>
+    </div>
+
+    <div class="auth-content">
+      <span class="eyebrow">SECURE ACCESS</span>
+      <h2>Welcome back</h2>
+      <p class="auth-subtitle">
+        Sign in to access your MediChain control center.
+      </p>
+
+      <form id="loginForm">
+        <label for="loginEmail">Email</label>
+        <input
+          type="email"
+          id="loginEmail"
+          placeholder="Enter your email"
+          autocomplete="email"
+          required
+        />
+
+        <label for="loginPassword">Password</label>
+        <input
+          type="password"
+          id="loginPassword"
+          placeholder="Enter your password"
+          autocomplete="current-password"
+          required
+        />
+
+        <button type="submit" class="primary-btn" id="loginButton">
+          Sign in
+        </button>
+
+        <p id="loginError" class="login-error hidden"></p>
+      </form>
+    </div>
+
+    <div class="auth-footer">
+      MediChain • Secure pharmaceutical logistics
+    </div>
+  </div>
+</div>
+  
+ 
+
+  <!-- ADD FACILITY MODAL -->
+<div class="modal hidden" id="facilityModal">
+
+  <div class="modal-card">
+
+    <button class="modal-close" id="facilityClose">×</button>
+
+    <h2>Add facility</h2>
+
+    <p class="modal-subtitle">
+      Add a warehouse or distribution facility to the network.
+    </p>
+
+    <div class="form-grid">
+
+      <label class="form-label">
+        Facility name
+        <input
+          type="text"
+          id="facilityName"
+          placeholder="e.g. Pune Medical Warehouse"
+        >
+      </label>
+
+      <label class="form-label">
+        Facility code
+        <input
+          type="text"
+          id="facilityCode"
+          placeholder="e.g. WH-PUN-006"
+        >
+      </label>
+
+      <label class="form-label">
+        Location
+        <input
+          type="text"
+          id="facilityLocation"
+          placeholder="e.g. Pune, Maharashtra"
+        >
+      </label>
+
+      <label class="form-label">
+        Capacity
+        <input
+          type="number"
+          id="facilityCapacityInput"
+          min="0"
+          placeholder="10000"
+        >
+      </label>
+
+      <label class="form-label">
+        Current stock
+        <input
+          type="number"
+          id="facilityStockInput"
+          min="0"
+          placeholder="0"
+        >
+      </label>
+
+      <label class="form-label">
+        Storage conditions
+        <input
+          type="text"
+          id="facilityStorage"
+          placeholder="Store at room temperature"
+        >
+      </label>
+
+      <label class="form-label">
+        Status
+        <select id="facilityStatus">
+          <option value="Operational">Operational</option>
+          <option value="Full">Full</option>
+          <option value="Maintenance">Maintenance</option>
+        </select>
+      </label>
+
+    </div>
+
+    <div class="modal-actions">
+
+      <button
+        class="ghost-btn"
+        id="facilityCancel"
+      >
+        Cancel
+      </button>
+
+      <button
+        class="primary-btn"
+        id="confirmFacility"
+      >
+        Add facility
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- MEDICINE DETAILS DRAWER -->
+<div
+  class="drawer-backdrop hidden"
+  id="medicineDrawerBackdrop"
+></div>
+
+<aside
+  class="inventory-drawer"
+  id="medicineDrawer"
+  aria-hidden="true"
+>
+
+  <div class="drawer-head">
+
+    <div>
+      <div class="eyebrow">MEDICINE MASTER</div>
+
+      <h2 id="medicineDrawerName">
+        Medicine
+      </h2>
+
+      <p id="medicineDrawerBrand">
+        —
+      </p>
+    </div>
+
+    <button
+      class="icon-btn"
+      id="medicineDrawerClose"
+      type="button"
+      aria-label="Close"
+    >
+      ×
+    </button>
+
+  </div>
+
+
+  <div class="drawer-body">
+
+    <div class="drawer-status-row">
+
+      <span
+        class="status-badge healthy"
+        id="medicineDrawerEssential"
+      >
+        Essential
+      </span>
+
+      <span
+        class="status-badge"
+        id="medicineDrawerPrescription"
+      >
+        —
+      </span>
+
+    </div>
+
+
+    <div class="drawer-section">
+
+      <h3>Medicine information</h3>
+
+      <div class="detail-grid">
+
+        <div>
+          <span>Manufacturer</span>
+          <strong id="medicineDrawerManufacturer">—</strong>
+        </div>
+
+        <div>
+          <span>Strength</span>
+          <strong id="medicineDrawerStrength">—</strong>
+        </div>
+
+        <div>
+          <span>Dosage form</span>
+          <strong id="medicineDrawerDosage">—</strong>
+        </div>
+
+        <div>
+          <span>Category</span>
+          <strong id="medicineDrawerCategory">—</strong>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="drawer-section">
+
+      <h3>Storage conditions</h3>
+
+      <div class="drawer-info-box">
+        <span id="medicineDrawerStorage">
+          —
+        </span>
+      </div>
+
+    </div>
+
+
+    <div class="drawer-section">
+
+      <h3>Reference source</h3>
+
+      <div class="detail-grid">
+
+        <div>
+          <span>Source</span>
+          <strong id="medicineDrawerSource">—</strong>
+        </div>
+
+        <div>
+          <span>Reference</span>
+          <strong id="medicineDrawerReference">—</strong>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="drawer-actions">
+
+      <button
+        class="primary-btn"
+        id="medicineAddInventoryBtn"
+        type="button"
+      >
+        ＋ Add to inventory
+      </button>
+
+    </div>
+
+  </div>
+
+</aside>
+
+  <script src="app.js"></script>
+
+  <!-- FACILITY DETAILS DRAWER -->
+
+<div
+  class="drawer-backdrop hidden"
+  id="facilityDrawerBackdrop"
+></div>
+
+<aside
+  class="inventory-drawer facility-drawer"
+  id="facilityDrawer"
+  aria-hidden="true"
+>
+
+  <div class="drawer-head">
+
+    <div>
+      <div class="eyebrow">FACILITY DETAILS</div>
+
+      <h2 id="facilityDrawerName">
+        Facility
+      </h2>
+
+      <p id="facilityDrawerLocation">
+        Location
+      </p>
+    </div>
+
+    <button
+      class="modal-close drawer-close"
+      id="facilityDrawerClose"
+      type="button"
+
+    >
+      ×
+    </button>
+
+  </div>
+
+
+  <div
+    class="drawer-status"
+    id="facilityDrawerStatus"
+  >
+    Operational
+  </div>
+
+
+  <div class="drawer-grid">
+
+    <div>
+      <span>Facility code</span>
+      <b id="facilityDrawerCode">—</b>
+    </div>
+
+    <div>
+      <span>Capacity</span>
+      <b id="facilityDrawerCapacity">—</b>
+    </div>
+
+    <div>
+      <span>Current stock</span>
+      <b id="facilityDrawerStock">—</b>
+    </div>
+
+    <div>
+      <span>Utilization</span>
+      <b id="facilityDrawerUtilization">—</b>
+    </div>
+
+  </div>
+
+
+  <div class="drawer-section">
+
+    <div class="drawer-section-title">
+      <b>Storage conditions</b>
+    </div>
+
+    <div class="mini-alert">
+      <span>❄</span>
+
+      <div>
+        <b id="facilityDrawerStorage">
+          Standard storage
+        </b>
+
+        <small>
+          Facility storage requirements
+        </small>
+      </div>
+    </div>
+
+  </div>
+
+
+  <div class="drawer-section">
+
+    <div class="drawer-section-title">
+      <b>Facility operations</b>
+    </div>
+
+    <div class="movement">
+
+      <span class="movement-dot in"></span>
+
+      <div>
+        <b>Inventory capacity</b>
+        <small id="facilityDrawerCapacityText">
+          Loading...
+        </small>
+      </div>
+
+      <strong>✓</strong>
+
+    </div>
+
+    <div class="movement">
+
+      <span class="movement-dot in"></span>
+
+      <div>
+        <b>Network status</b>
+        <small id="facilityDrawerStatusText">
+          Loading...
+        </small>
+      </div>
+
+      <strong>✓</strong>
+
+    </div>
+
+  </div>
+
+
+  <div class="drawer-actions">
+
+    <button
+      class="ghost-btn"
+      id="facilityDrawerCloseAction"
+    >
+      Done
+    </button>
+
+   <button
+  type="button"
+  class="primary-btn"
+  id="facilityEditBtn"
+>
+  Edit facility
+</button>
+
+  </div>
+
+</aside>
+
+<!-- GLOBAL SEARCH -->
+<div class="modal hidden" id="globalSearchModal">
+  <div class="modal-card global-search-card">
+
+    <button
+      class="modal-close"
+      id="globalSearchClose"
+      type="button"
+    >
+      ×
+    </button>
+
+    <div class="eyebrow">MEDICHAIN SEARCH</div>
+
+    <h2>Search network</h2>
+
+    <p class="modal-subtitle">
+      Search medicines, facilities, orders, shipments and suppliers.
+    </p>
+
+    <div class="global-search-input-wrap">
+      <span>⌕</span>
+      <input
+        type="text"
+        id="globalSearchInput"
+        placeholder="Search by name, code, batch, location..."
+        autocomplete="off"
+      />
+    </div>
+
+    <div id="globalSearchResults" class="global-search-results">
+      <div class="global-search-empty">
+        <strong>Search across MEDICHAIN</strong>
+        <small>
+          Start typing to find records across your supply network.
+        </small>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
