@@ -11,7 +11,7 @@ The platform provides real-time inventory visibility, medicine tracking, order a
 ## 🌐 Live Demo
 
 **MediChain:**  
-https://medichain-nuaz.onrender.com
+https://medichain-1-obe8.onrender.com
 
 > The live application may require an account to access the MediChain dashboard.
 
